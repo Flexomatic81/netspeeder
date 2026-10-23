@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
-// Smoke scene for NetworkProvider with the real data sources, in seven phases:
+// Smoke scene for NetworkProvider with the real data sources, in eight phases:
 //   1  auto mode takes data from ksystemstats
 //   2  the same instance switched to /proc: no old values, virtual interfaces
 //      stay out of the sum
@@ -15,6 +15,9 @@
 //      /proc and keeps the reason "no-interfaces"
 //   7  a fixed sensor source that cannot be loaded, switched to auto mode,
 //      falls back to /proc although the loader has no new error to report
+//   8  steady data: `interfaces` changes once per sample and not on the
+//      provider's own clock tick (a popup list bound to it must not be rebuilt
+//      between samples), and `stale` still follows the clock
 // The phases run one after another; each waits for settled data, at most
 // 12 seconds.
 
@@ -36,6 +39,14 @@ Item {
     property string lastProblem: ""
     property bool interfaceAdded: false
     property bool modeSwitched: false
+    // Phase 8: 0 find the test double, 1 wait for settled data, 2 count
+    // emissions of `interfaces`, 3 wait for `stale` after the data stopped.
+    property int steadyStep: 0
+    property bool counting: false
+    property int interfaceChanges: 0
+    property int emittedAtStart: 0
+    property double stepStart: 0
+    property var steadySource: null
     property double interfaceAddedAt: 0
     property bool done: false
 
@@ -185,6 +196,11 @@ Item {
             scene.modeSwitched = false;
             scene.replaceProvider(missingSensorsComponent);
             break;
+        case 8:
+            scene.steadyStep = 0;
+            scene.counting = false;
+            scene.replaceProvider(steadyComponent);
+            break;
         }
     }
 
@@ -233,6 +249,9 @@ Item {
         case 7:
             scene.tickModeSwitch(now);
             break;
+        case 8:
+            scene.tickSteady(now);
+            break;
         }
     }
 
@@ -247,7 +266,61 @@ Item {
                 scene.fail("errorCode is '" + p.errorCode + "' after 2 s (" + scene.describe() + ")");
             }
         } else if (scene.settled("proc", () => scene.fallbackProblem("sensors-unavailable"))) {
-            scene.finish(true, "SMOKE OK provider");
+            scene.enter(8);
+        }
+    }
+
+    // Phase 8. The test double emits one sample per interval, so a provider
+    // that recomputes only on samples changes `interfaces` once per sample;
+    // one that also recomputes on its clock tick changes it about twice as
+    // often.
+    function tickSteady(now) {
+        const p = scene.provider;
+        switch (scene.steadyStep) {
+        case 0:
+            scene.steadySource = scene.findSource();
+            if (scene.steadySource !== null) {
+                scene.steadySource.addInterface();
+                scene.steadyStep = 1;
+            } else if (now - scene.phaseStart > 2000) {
+                scene.fail("test double not found in the provider");
+            }
+            break;
+        case 1:
+            if (scene.settled("sensors", () => "")) {
+                scene.interfaceChanges = 0;
+                scene.emittedAtStart = scene.steadySource.emitted;
+                scene.counting = true;
+                scene.stepStart = now;
+                scene.steadyStep = 2;
+            }
+            break;
+        case 2:
+            if (p.stale) {
+                scene.fail("stale although samples keep coming (" + scene.describe() + ")");
+            } else if (now - scene.stepStart >= 3000) {
+                scene.counting = false;
+                const samples = scene.steadySource.emitted - scene.emittedAtStart;
+                if (scene.interfaceChanges < 1 || scene.interfaceChanges > samples) {
+                    scene.fail(scene.interfaceChanges + " changes of `interfaces` for " + samples
+                        + " samples in 3 s, expected between 1 and " + samples);
+                    return;
+                }
+                console.log("provider: " + scene.interfaceChanges + " changes of `interfaces` for "
+                    + samples + " samples");
+                // Without samples only the clock can make the data stale.
+                scene.steadySource.running = false;
+                scene.stepStart = now;
+                scene.steadyStep = 3;
+            }
+            break;
+        case 3:
+            if (p.stale) {
+                scene.finish(true, "SMOKE OK provider");
+            } else if (now - scene.stepStart > 3500) {
+                scene.fail("not stale 3.5 s after the last sample (" + scene.describe() + ")");
+            }
+            break;
         }
     }
 
@@ -319,6 +392,27 @@ Item {
             updateInterval: 0.5
             fallbackDelayMs: 1500
             sensorSourceUrl: Qt.resolvedUrl("EmptySource.qml")
+        }
+    }
+
+    Component {
+        id: steadyComponent
+
+        NetworkProvider {
+            dataSource: "sensors"
+            updateInterval: 0.5
+            sensorSourceUrl: Qt.resolvedUrl("EmptySource.qml")
+        }
+    }
+
+    // Counts the changes of `interfaces` of whichever provider is current.
+    Connections {
+        target: scene.provider
+
+        function onInterfacesChanged() {
+            if (scene.counting) {
+                scene.interfaceChanges += 1;
+            }
         }
     }
 

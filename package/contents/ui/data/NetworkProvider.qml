@@ -34,7 +34,7 @@ Item {
     readonly property real down: internals.view.down
     readonly property real up: internals.view.up
     readonly property bool online: internals.view.online
-    readonly property bool stale: internals.view.stale
+    readonly property bool stale: internals.stale
     // "sensors", "proc", or "" while there is no data.
     readonly property string activeSource: internals.view.activeSource
     // Rows for the popup: the sample fields plus name and included.
@@ -68,12 +68,27 @@ Item {
 
         property var state: ProviderState.initialState()
         property real now: Date.now()
+        // Everything the views show except `stale`. This binding must not
+        // read the clock: derive() builds new objects on every call, so a
+        // re-derive on each clock tick would hand views (a popup list, say) a
+        // new `interfaces` array between two samples and have them rebuild
+        // it. With `now` fixed at the time of the last sample, view.stale is
+        // always false; it is not used.
         readonly property var view: ProviderState.derive(internals.state, {
             mode: root.interfaceSelection,
             selected: root.selectedInterfaces,
+            now: internals.state.lastSampleAt,
+            intervalMs: 1
+        })
+        // The only output that follows the clock. derive() stays the one
+        // place that knows the staleness rule; the selection does not matter
+        // for it and is left out.
+        readonly property bool stale: ProviderState.derive(internals.state, {
+            mode: "auto",
+            selected: [],
             now: internals.now,
             intervalMs: internals.intervalMs
-        })
+        }).stale
 
         property bool ready: false
         // "auto", "sensors" or "proc" as last applied, and the mode plus the

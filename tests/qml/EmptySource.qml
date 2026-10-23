@@ -15,6 +15,9 @@ Item {
     property int interval: 1000
     property bool running: true
     readonly property bool available: internals.hasInterface
+    // Number of samples emitted so far, for tests that compare it with what
+    // the provider made of them.
+    property int emitted: 0
 
     signal sampleReady(var sample)
     // Part of the source interface; never emitted by this double.
@@ -51,6 +54,7 @@ Item {
                     signal: null
                 };
             }
+            root.emitted += 1;
             root.sampleReady({ timestamp: Date.now(), source: "sensors", interfaces: interfaces });
         }
     }
