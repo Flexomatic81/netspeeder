@@ -1,0 +1,68 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# SPDX-FileCopyrightText: 2026 Flexomatic81
+
+# test:    the Node unit tests of the logic modules.
+# lint:    qmllint over every QML file, in an Arch Linux container because
+#          that is where the Plasma QML modules are packaged in current versions.
+# package: only for tags v*; builds the .plasmoid and attaches it to the
+#          GitHub release. The upload to the KDE Store stays manual.
+# The QML smoke scenes (scripts/smoke.sh) are not part of CI: they need
+# ksystemstats and a desktop session.
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # 22 is the minimum version: node --test only takes glob patterns
+        # from Node 21 on, and Node 20 is out of support.
+        node-version: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm test
+
+  lint:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install the Qt and Plasma QML modules
+        run: >
+          pacman -Syu --noconfirm
+          qt6-declarative libplasma kirigami kcmutils libksysguard
+          kquickcharts plasma5support knotifications
+      - uses: actions/checkout@v4
+      - name: Lint the QML files
+        run: QMLLINT=/usr/lib/qt6/bin/qmllint scripts/lint.sh
+
+  package:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test, lint]
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    permissions:
+      # Attaching the file to the release needs write access.
+      contents: write
+    steps:
+      - name: Install the build tools
+        run: pacman -Syu --noconfirm gettext libarchive
+      - uses: actions/checkout@v4
+      - name: Build the .plasmoid
+        # Refuses a tag whose version differs from package/metadata.json.
+        run: scripts/build-plasmoid.sh "${GITHUB_REF_NAME#v}"
+      - name: Attach the .plasmoid to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/netspeeder-*.plasmoid
