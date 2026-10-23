@@ -287,7 +287,7 @@ Item {
         // Centered, but never pushed out at the left when the view is narrower
         // than the content.
         x: Math.max(0, Math.round((root.width - grid.implicitWidth) / 2))
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenter: root.verticalCenter
         columns: root.resolvedLayout === "columns" ? 2 : 1
         columnSpacing: 0.6 * root.pixelSize
         // A little air between the directions of a vertical panel, whose four

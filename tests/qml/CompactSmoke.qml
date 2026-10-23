@@ -88,6 +88,7 @@ Item {
                     x: pos.x,
                     y: pos.y,
                     width: child.width,
+                    content: child.contentWidth,
                     height: child.height,
                     right: pos.x + child.width,
                     bottom: pos.y + child.height
@@ -107,6 +108,11 @@ Item {
     function placementProblem(where, view, texts, vertical, limit) {
         const tolerance = 1.5;
         for (const t of texts) {
+            // A text must fit its slot. Text reports up to one pixel more than the
+            // advance it is measured with, at 6 and 7 px (a glyph reaching out).
+            if (t.content > t.width + 1.05) {
+                return where + ": '" + t.text + "' needs " + t.content.toFixed(2) + " px but its slot is " + t.width.toFixed(2) + " px wide: " + scene.describe(texts);
+            }
             if (vertical ? (t.x < -0.01 || t.right > limit + 0.01) : (t.x < -tolerance || t.right > view.width + tolerance)) {
                 return where + ": '" + t.text + "' sticks out horizontally: " + scene.describe(texts);
             }
@@ -306,13 +312,21 @@ Item {
             for (const entry of scene.cases) {
                 scene.sizesWithData[entry.name] = [entry.view.implicitWidth, entry.view.implicitHeight];
             }
-            // The widest values: a fixed width must not change.
-            stub.down = 888.8 * 1024 * 1024;
-            stub.up = 888.8 * 1024 * 1024;
+            // The widest values that automatic decimals can show: "99.9" (one
+            // decimal below 100) and "999" (none from 100). A fixed width must
+            // not change, and the slot must hold them without waste.
+            stub.down = 99.9 * 1024 * 1024;
+            stub.up = 999 * 1024;
             return problem;
         },
         () => {
             const problem = scene.checkAll(true) || scene.sizeProblem("with the values");
+            // The value slot of the horizontal view is as wide as "99.9", the
+            // widest of the two (three digits and the point).
+            const widest = scene.textAt(wide44, "99.9");
+            if (!widest || Math.abs(widest.width - widest.content) > 1) {
+                return "horizontal 44px: the value slot is " + (widest ? widest.width.toFixed(2) : "missing") + " px for a text of " + (widest ? widest.content.toFixed(2) : "?") + " px";
+            }
             // Before the first data.
             stub.hasData = false;
             return problem;
@@ -331,6 +345,8 @@ Item {
                 }
             }
             stub.stale = false;
+            stub.down = 1.5 * 1024 * 1024;
+            stub.up = 130 * 1024;
             wide44.uploadFirst = true;
             narrow32.uploadFirst = true;
             return "";
@@ -350,8 +366,8 @@ Item {
         },
         () => {
             // Combined: one label with both arrows and the sum of both rates,
-            // 2 x 888.8 MiB/s = 1.7 GiB/s (a vertical panel may show it as 2).
-            for (const [name, view, vertical, sum] of [["horizontal", wide44, false, /^1\.7$/], ["vertical", narrow32, true, /^(1\.7|2)$/]]) {
+            // 1.5 MiB/s + 130 KiB/s = 1.6 MiB/s (a vertical panel may show it as 2).
+            for (const [name, view, vertical, sum] of [["horizontal", wide44, false, /^1\.6$/], ["vertical", narrow32, true, /^(1\.6|2)$/]]) {
                 const where = "combined " + name;
                 const texts = scene.shownTexts(view, view, []);
                 if (view.resolvedLayout !== "single" || !scene.textAt(view, "↓↑") || texts.some(t => t.text === "↑" || t.text === "↓")) {

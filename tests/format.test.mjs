@@ -54,7 +54,11 @@ test("speedUnits", () => {
 });
 
 test("widestValue", () => {
-  assert.equal(widestValue({}), "888.8");
+  // Auto decimals never show more than "99.9" (one decimal below 100) or "999",
+  // so "88.8" is the widest string with tabular digits.
+  assert.equal(widestValue({}), "88.8");
+  assert.equal(widestValue({ decimals: -1, decimalPoint: "," }), "88,8");
   assert.equal(widestValue({ decimals: 0 }), "888");
+  assert.equal(widestValue({ decimals: 1 }), "888.8");
   assert.equal(widestValue({ decimals: 2, decimalPoint: "," }), "888,88");
 });

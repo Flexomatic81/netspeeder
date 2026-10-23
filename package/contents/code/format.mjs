@@ -124,9 +124,12 @@ export function formatTotal(bytes, opts) {
 }
 
 // Widest value the display can show; used to size the text slot so the layout
-// does not jump while the numbers change. "-1" (auto) shows one decimal at most.
+// does not jump while the numbers change. With auto decimals (-1) a value is
+// either "99.9" at most (one decimal below 100) or "999" (no decimals from 100),
+// so the widest string is one digit shorter than the fixed-decimals pattern:
+// three digits and the point, "88.8".
 export function widestValue(opts) {
   const o = normalize(opts);
-  const count = o.decimals === -1 ? 1 : o.decimals;
-  return count === 0 ? "888" : "888" + o.decimalPoint + "8".repeat(count);
+  if (o.decimals === -1) return "88" + o.decimalPoint + "8";
+  return o.decimals === 0 ? "888" : "888" + o.decimalPoint + "8".repeat(o.decimals);
 }
