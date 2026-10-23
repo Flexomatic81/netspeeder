@@ -1,0 +1,306 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-FileCopyrightText: 2026 Flexomatic81
+
+// Settings page "Data": data source, which interfaces make up the total, and a
+// live list of all interfaces. The page runs its own NetworkProvider on the
+// settings that are being edited, so a change shows at once, before it is
+// applied. Plasma opens the page with the saved values in the cfg_ properties
+// and writes the changed ones back when the user applies.
+
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Controls as QQC2
+import QtQuick.Layouts
+import org.kde.kirigami as Kirigami
+import org.kde.kcmutils as KCM
+import "../data"
+import "../../code/format.mjs" as Format
+import "../../code/selection.mjs" as Selection
+
+KCM.SimpleKCM {
+    id: root
+
+    property string cfg_dataSource
+    property string cfg_interfaceSelection
+    property var cfg_selectedInterfaces: []
+
+    readonly property bool manual: root.cfg_interfaceSelection === "manual"
+
+    // The selected interface names as a plain array. The saved value arrives
+    // as an array-like list object of the configuration.
+    readonly property var selectedNames: {
+        const names = [];
+        const saved = root.cfg_selectedInterfaces;
+        if (saved !== null && saved !== undefined && typeof saved !== "string" && typeof saved.length === "number") {
+            for (let i = 0; i < saved.length; i++) {
+                names.push(String(saved[i]));
+            }
+        }
+        return names;
+    }
+
+    // The current sample of every interface, by name. The provider hands out
+    // a new list with every sample; the rows below look their values up here
+    // and so stay alive between samples.
+    readonly property var entryByName: {
+        const map = Object.create(null);
+        for (const entry of provider.interfaces) {
+            map[entry.name] = entry;
+        }
+        return map;
+    }
+
+    // The names that get a row: every interface the provider knows. In manual
+    // mode also the selected ones that are gone (a VPN that is down), so that
+    // they can be taken out of the selection.
+    readonly property var listedNames: {
+        const names = [];
+        for (const entry of provider.interfaces) {
+            names.push(entry.name);
+        }
+        if (root.manual) {
+            for (const name of root.selectedNames) {
+                if (names.indexOf(name) < 0) {
+                    names.push(name);
+                }
+            }
+        }
+        return names;
+    }
+
+    // Brings the rows in line with listedNames by removing and inserting single
+    // rows, at the place that keeps the list sorted by name. A rebuild with
+    // every sample (about once a second) would lose clicks and focus; the
+    // order does not depend on the interface state either, so a row does not
+    // jump when it is checked.
+    function syncRows() {
+        const wanted = root.listedNames;
+        for (let row = rowModel.count - 1; row >= 0; row--) {
+            if (wanted.indexOf(rowModel.get(row).interfaceName) < 0) {
+                rowModel.remove(row);
+            }
+        }
+        for (const name of wanted) {
+            let at = 0;
+            let present = false;
+            for (; at < rowModel.count; at++) {
+                const existing = rowModel.get(at).interfaceName;
+                if (existing === name) {
+                    present = true;
+                    break;
+                }
+                if (Selection.compareNames(existing, name) > 0) {
+                    break;
+                }
+            }
+            if (!present) {
+                rowModel.insert(at, { "interfaceName": name });
+            }
+        }
+    }
+
+    // Writes the selection with `name` switched on or off. Always a new array,
+    // so that Plasma notices the change; names that are not listed stay.
+    function setSelected(name: string, selected: bool) {
+        const names = root.selectedNames.filter(entry => entry !== name);
+        if (selected) {
+            names.push(name);
+        }
+        names.sort(Selection.compareNames);
+        root.cfg_selectedInterfaces = names;
+    }
+
+    // A speed as shown in the list: always in the default unit system, and
+    // small values are not hidden.
+    function speedText(bytesPerSecond: real): string {
+        const speed = Format.formatSpeed(bytesPerSecond, {
+            lowSpeedThreshold: 0,
+            decimalPoint: Qt.locale().decimalPoint
+        });
+        return speed.value + " " + speed.unit;
+    }
+
+    function sourceText(source: string): string {
+        switch (source) {
+        case "sensors":
+            return i18n("System sensors");
+        case "proc":
+            return i18n("Kernel counters");
+        default:
+            return "–";
+        }
+    }
+
+    // The explanation for a provider error, "" when there is none. The detail
+    // is the output of a failed command: cut it, and keep it to one line.
+    function errorText(code: string, detail: string): string {
+        switch (code) {
+        case "sensors-unavailable":
+            return i18n("System sensors are not available.");
+        case "no-interfaces":
+            return i18n("System sensors report no network interfaces.");
+        case "source-failed":
+            return i18n("Reading network data failed: %1", detail.replace(/[\r\n]+/g, " ").slice(0, 200));
+        default:
+            return "";
+        }
+    }
+
+    onListedNamesChanged: root.syncRows()
+    Component.onCompleted: root.syncRows()
+
+    ListModel {
+        id: rowModel
+    }
+
+    NetworkProvider {
+        id: provider
+
+        visible: false
+        dataSource: root.cfg_dataSource
+        interfaceSelection: root.cfg_interfaceSelection
+        selectedInterfaces: root.selectedNames
+        updateInterval: 1
+    }
+
+    QQC2.ButtonGroup {
+        id: selectionGroup
+    }
+
+    Kirigami.FormLayout {
+        ConfigComboBox {
+            id: sourceBox
+
+            Kirigami.FormData.label: i18n("Data source:")
+            options: [
+                { text: i18n("Automatic (recommended)"), value: "auto" },
+                { text: i18n("System sensors (ksystemstats)"), value: "sensors" },
+                { text: i18n("Kernel counters (/proc/net/dev)"), value: "proc" }
+            ]
+            configValue: root.cfg_dataSource
+            onPicked: value => root.cfg_dataSource = value
+        }
+
+        QQC2.Label {
+            Layout.fillWidth: true
+            Layout.maximumWidth: Kirigami.Units.gridUnit * 25
+            text: i18n("Kernel counters also show VPN and container interfaces, but start a small process at every update.")
+            wrapMode: Text.WordWrap
+            font: Kirigami.Theme.smallFont
+            opacity: 0.7
+        }
+
+        Item {
+            Kirigami.FormData.isSection: true
+        }
+
+        QQC2.RadioButton {
+            id: automaticButton
+
+            Kirigami.FormData.label: i18n("Interfaces counted in the total:")
+            QQC2.ButtonGroup.group: selectionGroup
+            text: i18n("Automatic (physical network devices)")
+            checked: root.cfg_interfaceSelection !== "manual"
+            onToggled: {
+                if (automaticButton.checked) {
+                    root.cfg_interfaceSelection = "auto";
+                }
+            }
+        }
+
+        QQC2.RadioButton {
+            id: manualButton
+
+            QQC2.ButtonGroup.group: selectionGroup
+            text: i18n("Selected interfaces only")
+            checked: root.manual
+            onToggled: {
+                if (manualButton.checked) {
+                    root.cfg_interfaceSelection = "manual";
+                }
+            }
+        }
+
+        // A Column, not a ColumnLayout: with a ColumnLayout in the FormLayout,
+        // removing a row crashed the process (measured on 2026-10-24, Qt 6.12,
+        // in the size hint of the layout, which the FormLayout reads).
+        Column {
+            id: rowColumn
+
+            Layout.fillWidth: true
+
+            QQC2.Label {
+                visible: rowModel.count === 0
+                text: provider.hasData ? i18n("No network interfaces found.") : i18n("Waiting for network data…")
+                opacity: 0.7
+            }
+
+            Repeater {
+                model: rowModel
+
+                // Two lines per interface: the check box with the name, and below
+                // it, in line with the name, kind and speeds. One line would not
+                // fit in the narrow column of the form.
+                delegate: ColumnLayout {
+                    id: row
+
+                    required property string interfaceName
+                    // The current sample of this interface; undefined while
+                    // the provider does not know it.
+                    readonly property var entry: root.entryByName[row.interfaceName]
+                    readonly property bool known: row.entry !== undefined
+                    readonly property bool hasLabel: row.known && typeof row.entry.label === "string" && row.entry.label !== "" && row.entry.label !== row.interfaceName
+                    readonly property string kindText: {
+                        if (row.known) {
+                            return row.entry.kind === "physical" ? i18nc("@info interface kind", "physical") : i18nc("@info interface kind", "virtual");
+                        }
+                        // Before the first sample nothing is known yet.
+                        return provider.hasData ? i18nc("@info interface kind", "not available") : "";
+                    }
+
+                    width: rowColumn.width
+                    spacing: 0
+
+                    QQC2.CheckBox {
+                        id: check
+
+                        Layout.fillWidth: true
+                        text: row.hasLabel ? row.entry.label + " (" + row.interfaceName + ")" : row.interfaceName
+                        enabled: root.manual
+                        checked: root.selectedNames.indexOf(row.interfaceName) >= 0
+                        onToggled: root.setSelected(row.interfaceName, check.checked)
+                    }
+
+                    QQC2.Label {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: check.leftPadding + check.indicator.width + check.spacing
+                        text: row.known ? i18nc("@info interface kind, download and upload speed", "%1 – ↓ %2   ↑ %3", row.kindText, root.speedText(row.entry.down), root.speedText(row.entry.up)) : row.kindText
+                        elide: Text.ElideRight
+                        font.features: { "tnum": 1 }
+                        opacity: 0.7
+                    }
+                }
+            }
+        }
+
+        Item {
+            Kirigami.FormData.isSection: true
+        }
+
+        QQC2.Label {
+            Layout.fillWidth: true
+            text: i18n("Active source: %1", root.sourceText(provider.activeSource))
+        }
+
+        QQC2.Label {
+            Layout.fillWidth: true
+            Layout.maximumWidth: Kirigami.Units.gridUnit * 25
+            visible: text !== ""
+            text: root.errorText(provider.errorCode, provider.errorDetail)
+            textFormat: Text.PlainText
+            wrapMode: Text.WordWrap
+            color: Kirigami.Theme.neutralTextColor
+        }
+    }
+}
