@@ -1,0 +1,265 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# SPDX-FileCopyrightText: 2026 Flexomatic81
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: netspeeder\n"
+"Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
+"POT-Creation-Date: 2026-10-24 01:44+0200\n"
+"PO-Revision-Date: 2026-10-24 01:44+0200\n"
+"Last-Translator: Flexomatic81\n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: package/contents/config/config.qml:11
+msgid "Display"
+msgstr "Anzeige"
+
+#: package/contents/config/config.qml:16
+msgid "Data"
+msgstr "Daten"
+
+#: package/contents/ui/compact/CompactRepresentation.qml:85
+msgctxt "@info accessible"
+msgid "Download %1, upload %2"
+msgstr "Download %1, Upload %2"
+
+#: package/contents/ui/config/ConfigData.qml:127
+msgid "System sensors"
+msgstr "Systemsensoren"
+
+#: package/contents/ui/config/ConfigData.qml:129
+msgid "Kernel counters"
+msgstr "Kernel-Zähler"
+
+#: package/contents/ui/config/ConfigData.qml:140
+msgid "System sensors are not available."
+msgstr "Systemsensoren sind nicht verfügbar."
+
+#: package/contents/ui/config/ConfigData.qml:142
+#: package/contents/ui/main.qml:75
+msgid "System sensors report no network interfaces."
+msgstr "Die Systemsensoren melden keine Netzwerkschnittstellen."
+
+#: package/contents/ui/config/ConfigData.qml:144
+#: package/contents/ui/main.qml:78
+msgid "Reading network data failed: %1"
+msgstr "Lesen der Netzwerkdaten fehlgeschlagen: %1"
+
+#: package/contents/ui/config/ConfigData.qml:175
+msgid "Data source:"
+msgstr "Datenquelle:"
+
+#: package/contents/ui/config/ConfigData.qml:177
+msgid "Automatic (recommended)"
+msgstr "Automatisch (empfohlen)"
+
+#: package/contents/ui/config/ConfigData.qml:178
+msgid "System sensors (ksystemstats)"
+msgstr "Systemsensoren (ksystemstats)"
+
+#: package/contents/ui/config/ConfigData.qml:179
+msgid "Kernel counters (/proc/net/dev)"
+msgstr "Kernel-Zähler (/proc/net/dev)"
+
+#: package/contents/ui/config/ConfigData.qml:188
+msgid ""
+"Kernel counters also show VPN and container interfaces, but start a small "
+"process at every update."
+msgstr ""
+"Kernel-Zähler zeigen auch VPN- und Container-Schnittstellen, starten aber "
+"bei jeder Aktualisierung einen kleinen Prozess."
+
+#: package/contents/ui/config/ConfigData.qml:201
+msgid "Interfaces counted in the total:"
+msgstr "In der Summe berücksichtigte Schnittstellen:"
+
+#: package/contents/ui/config/ConfigData.qml:203
+msgid "Automatic (physical network devices)"
+msgstr "Automatisch (physische Netzwerkgeräte)"
+
+#: package/contents/ui/config/ConfigData.qml:216
+msgid "Selected interfaces only"
+msgstr "Nur ausgewählte Schnittstellen"
+
+#: package/contents/ui/config/ConfigData.qml:235
+msgid "No network interfaces found."
+msgstr "Keine Netzwerkschnittstellen gefunden."
+
+#: package/contents/ui/config/ConfigData.qml:235
+#: package/contents/ui/main.qml:48
+msgid "Waiting for network data…"
+msgstr "Warten auf Netzwerkdaten …"
+
+#: package/contents/ui/config/ConfigData.qml:256
+msgctxt "@info interface kind"
+msgid "physical"
+msgstr "physisch"
+
+#: package/contents/ui/config/ConfigData.qml:256
+msgctxt "@info interface kind"
+msgid "virtual"
+msgstr "virtuell"
+
+#: package/contents/ui/config/ConfigData.qml:259
+msgctxt "@info interface kind"
+msgid "not available"
+msgstr "nicht verfügbar"
+
+#: package/contents/ui/config/ConfigData.qml:278
+msgctxt "@info interface kind, download and upload speed"
+msgid "%1 – ↓ %2   ↑ %3"
+msgstr "%1 – ↓ %2   ↑ %3"
+
+#: package/contents/ui/config/ConfigData.qml:293
+msgid "Active source: %1"
+msgstr "Aktive Quelle: %1"
+
+#: package/contents/ui/config/ConfigDisplay.qml:50
+msgid "Layout:"
+msgstr "Anordnung:"
+
+#: package/contents/ui/config/ConfigDisplay.qml:52
+#: package/contents/ui/config/ConfigDisplay.qml:106
+msgid "Automatic"
+msgstr "Automatisch"
+
+#: package/contents/ui/config/ConfigDisplay.qml:53
+msgid "Two rows"
+msgstr "Zwei Zeilen"
+
+#: package/contents/ui/config/ConfigDisplay.qml:54
+msgid "Side by side"
+msgstr "Nebeneinander"
+
+#: package/contents/ui/config/ConfigDisplay.qml:63
+msgid "Order:"
+msgstr "Reihenfolge:"
+
+#: package/contents/ui/config/ConfigDisplay.qml:65
+msgid "Download first"
+msgstr "Download zuerst"
+
+#: package/contents/ui/config/ConfigDisplay.qml:66
+msgid "Upload first"
+msgstr "Upload zuerst"
+
+#: package/contents/ui/config/ConfigDisplay.qml:75
+msgid "Show only the combined speed"
+msgstr "Nur die Gesamtgeschwindigkeit anzeigen"
+
+#: package/contents/ui/config/ConfigDisplay.qml:83
+msgid "Units:"
+msgstr "Einheiten:"
+
+#: package/contents/ui/config/ConfigDisplay.qml:85
+msgid "Bytes, binary (KiB/s)"
+msgstr "Bytes, binär (KiB/s)"
+
+#: package/contents/ui/config/ConfigDisplay.qml:86
+msgid "Bytes, decimal (kB/s)"
+msgstr "Bytes, dezimal (kB/s)"
+
+#: package/contents/ui/config/ConfigDisplay.qml:87
+msgid "Bits (Mbit/s)"
+msgstr "Bits (Mbit/s)"
+
+#: package/contents/ui/config/ConfigDisplay.qml:96
+msgid "Use short unit names"
+msgstr "Kurze Einheitennamen verwenden"
+
+#: package/contents/ui/config/ConfigDisplay.qml:104
+msgid "Decimal places:"
+msgstr "Nachkommastellen:"
+
+#: package/contents/ui/config/ConfigDisplay.qml:119
+msgid "Show as 0 below:"
+msgstr "Als 0 anzeigen unter:"
+
+#: package/contents/ui/config/ConfigDisplay.qml:121
+msgid "Off"
+msgstr "Aus"
+
+#: package/contents/ui/config/ConfigDisplay.qml:122
+msgid "512 B/s"
+msgstr "512 B/s"
+
+#: package/contents/ui/config/ConfigDisplay.qml:123
+msgid "1 KiB/s"
+msgstr "1 KiB/s"
+
+#: package/contents/ui/config/ConfigDisplay.qml:124
+msgid "10 KiB/s"
+msgstr "10 KiB/s"
+
+#: package/contents/ui/config/ConfigDisplay.qml:125
+msgid "100 KiB/s"
+msgstr "100 KiB/s"
+
+#: package/contents/ui/config/ConfigDisplay.qml:135
+msgid "Update interval:"
+msgstr "Aktualisierungsintervall:"
+
+#: package/contents/ui/config/ConfigDisplay.qml:140
+msgctxt "@item:valuesuffix %1 is a number of seconds"
+msgid "%1 s"
+msgstr "%1 s"
+
+#: package/contents/ui/config/ConfigDisplay.qml:149
+msgid "Preview:"
+msgstr "Vorschau:"
+
+#: package/contents/ui/main.qml:51
+msgid "No current data"
+msgstr "Keine aktuellen Daten"
+
+#: package/contents/ui/main.qml:54
+msgid "No selected network interface available"
+msgstr "Keine ausgewählte Netzwerkschnittstelle verfügbar"
+
+#: package/contents/ui/main.qml:57
+msgid "Offline"
+msgstr "Offline"
+
+#: package/contents/ui/main.qml:59
+msgctxt "@info:tooltip"
+msgid "Download: %1"
+msgstr "Download: %1"
+
+#: package/contents/ui/main.qml:59
+msgctxt "@info:tooltip"
+msgid "Upload: %1"
+msgstr "Upload: %1"
+
+#: package/contents/ui/main.qml:61
+msgctxt "@info:tooltip"
+msgid "IP address: %1"
+msgstr "IP-Adresse: %1"
+
+#: package/contents/ui/main.qml:73
+msgid "Using kernel counters because system sensors are not available."
+msgstr ""
+"Es werden Kernel-Zähler verwendet, da die Systemsensoren nicht verfügbar "
+"sind."
+
+#: package/contents/ui/main.qml:73
+msgid ""
+"System sensors are not available. Choose another data source in the settings."
+msgstr ""
+"Systemsensoren sind nicht verfügbar. In den Einstellungen kann eine andere "
+"Datenquelle gewählt werden."
+
+#: package/contents/ui/main.qml:75
+msgid ""
+"Using kernel counters because system sensors report no network interfaces."
+msgstr ""
+"Es werden Kernel-Zähler verwendet, da die Systemsensoren keine "
+"Netzwerkschnittstellen melden."
+
+#: package/contents/ui/main.qml:98
+msgid "Network"
+msgstr "Netzwerk"

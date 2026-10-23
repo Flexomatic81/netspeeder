@@ -1,0 +1,256 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# SPDX-FileCopyrightText: 2026 Flexomatic81
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: netspeeder\n"
+"Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
+"POT-Creation-Date: 2026-10-24 01:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: package/contents/config/config.qml:11
+msgid "Display"
+msgstr ""
+
+#: package/contents/config/config.qml:16
+msgid "Data"
+msgstr ""
+
+#: package/contents/ui/compact/CompactRepresentation.qml:85
+msgctxt "@info accessible"
+msgid "Download %1, upload %2"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:127
+msgid "System sensors"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:129
+msgid "Kernel counters"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:140
+msgid "System sensors are not available."
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:142
+#: package/contents/ui/main.qml:75
+msgid "System sensors report no network interfaces."
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:144
+#: package/contents/ui/main.qml:78
+msgid "Reading network data failed: %1"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:175
+msgid "Data source:"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:177
+msgid "Automatic (recommended)"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:178
+msgid "System sensors (ksystemstats)"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:179
+msgid "Kernel counters (/proc/net/dev)"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:188
+msgid ""
+"Kernel counters also show VPN and container interfaces, but start a small "
+"process at every update."
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:201
+msgid "Interfaces counted in the total:"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:203
+msgid "Automatic (physical network devices)"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:216
+msgid "Selected interfaces only"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:235
+msgid "No network interfaces found."
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:235
+#: package/contents/ui/main.qml:48
+msgid "Waiting for network data…"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:256
+msgctxt "@info interface kind"
+msgid "physical"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:256
+msgctxt "@info interface kind"
+msgid "virtual"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:259
+msgctxt "@info interface kind"
+msgid "not available"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:278
+msgctxt "@info interface kind, download and upload speed"
+msgid "%1 – ↓ %2   ↑ %3"
+msgstr ""
+
+#: package/contents/ui/config/ConfigData.qml:293
+msgid "Active source: %1"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:50
+msgid "Layout:"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:52
+#: package/contents/ui/config/ConfigDisplay.qml:106
+msgid "Automatic"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:53
+msgid "Two rows"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:54
+msgid "Side by side"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:63
+msgid "Order:"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:65
+msgid "Download first"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:66
+msgid "Upload first"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:75
+msgid "Show only the combined speed"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:83
+msgid "Units:"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:85
+msgid "Bytes, binary (KiB/s)"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:86
+msgid "Bytes, decimal (kB/s)"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:87
+msgid "Bits (Mbit/s)"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:96
+msgid "Use short unit names"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:104
+msgid "Decimal places:"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:119
+msgid "Show as 0 below:"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:121
+msgid "Off"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:122
+msgid "512 B/s"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:123
+msgid "1 KiB/s"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:124
+msgid "10 KiB/s"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:125
+msgid "100 KiB/s"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:135
+msgid "Update interval:"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:140
+msgctxt "@item:valuesuffix %1 is a number of seconds"
+msgid "%1 s"
+msgstr ""
+
+#: package/contents/ui/config/ConfigDisplay.qml:149
+msgid "Preview:"
+msgstr ""
+
+#: package/contents/ui/main.qml:51
+msgid "No current data"
+msgstr ""
+
+#: package/contents/ui/main.qml:54
+msgid "No selected network interface available"
+msgstr ""
+
+#: package/contents/ui/main.qml:57
+msgid "Offline"
+msgstr ""
+
+#: package/contents/ui/main.qml:59
+msgctxt "@info:tooltip"
+msgid "Download: %1"
+msgstr ""
+
+#: package/contents/ui/main.qml:59
+msgctxt "@info:tooltip"
+msgid "Upload: %1"
+msgstr ""
+
+#: package/contents/ui/main.qml:61
+msgctxt "@info:tooltip"
+msgid "IP address: %1"
+msgstr ""
+
+#: package/contents/ui/main.qml:73
+msgid "Using kernel counters because system sensors are not available."
+msgstr ""
+
+#: package/contents/ui/main.qml:73
+msgid ""
+"System sensors are not available. Choose another data source in the settings."
+msgstr ""
+
+#: package/contents/ui/main.qml:75
+msgid ""
+"Using kernel counters because system sensors report no network interfaces."
+msgstr ""
+
+#: package/contents/ui/main.qml:98
+msgid "Network"
+msgstr ""
