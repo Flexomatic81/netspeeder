@@ -1,0 +1,17 @@
+{
+    "KPlugin": {
+        "Authors": [{ "Name": "Flexomatic81" }],
+        "Category": "System Information",
+        "Description": "Shows the current network download and upload speed",
+        "Description[de]": "Zeigt die aktuelle Download- und Upload-Geschwindigkeit des Netzwerks",
+        "Icon": "network-connect",
+        "Id": "io.github.flexomatic81.netspeeder",
+        "License": "GPL-2.0-or-later",
+        "Name": "Netspeeder",
+        "Name[de]": "Netspeeder",
+        "Version": "0.1.0",
+        "Website": "https://github.com/Flexomatic81/netspeeder"
+    },
+    "KPackageStructure": "Plasma/Applet",
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

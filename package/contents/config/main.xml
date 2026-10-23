@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SPDX-License-Identifier: GPL-2.0-or-later
+  SPDX-FileCopyrightText: 2026 Flexomatic81
+
+  Configuration keys of version 0.1; the table in section 11.2 of the design
+  spec is the reference. Later releases add keys for the other groups.
+-->
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+  <group name="General">
+    <!-- Schema version of the stored settings; not shown in the settings dialog. -->
+    <entry name="configVersion" type="Int">
+      <default>1</default>
+    </entry>
+  </group>
+
+  <group name="Display">
+    <entry name="layout" type="String">
+      <default>auto</default>
+    </entry>
+    <entry name="uploadFirst" type="Bool">
+      <default>false</default>
+    </entry>
+    <entry name="combined" type="Bool">
+      <default>false</default>
+    </entry>
+    <entry name="unitSystem" type="String">
+      <default>iec</default>
+    </entry>
+    <entry name="shortUnits" type="Bool">
+      <default>false</default>
+    </entry>
+    <entry name="decimals" type="Int">
+      <default>-1</default>
+    </entry>
+    <entry name="lowSpeedThreshold" type="Int">
+      <default>1024</default>
+    </entry>
+    <!-- Seconds between two updates. -->
+    <entry name="updateInterval" type="Double">
+      <default>1.0</default>
+      <min>0.5</min>
+      <max>10</max>
+    </entry>
+  </group>
+
+  <group name="Appearance">
+    <entry name="fixedWidth" type="Bool">
+      <default>true</default>
+    </entry>
+  </group>
+
+  <group name="Data">
+    <entry name="dataSource" type="String">
+      <default>auto</default>
+    </entry>
+    <entry name="interfaceSelection" type="String">
+      <default>auto</default>
+    </entry>
+    <entry name="selectedInterfaces" type="StringList">
+      <default></default>
+    </entry>
+  </group>
+</kcfg>
