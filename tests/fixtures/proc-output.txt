@@ -1,0 +1,20 @@
+Inter-|   Receive                                                |  Transmit
+ face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
+    lo: 26115639    8571    0    0    0     0          0         0 26115639    8571    0    0    0     0       0          0
+enp7s0: 1315645898  969810    0 2369    0     0          0       751 51368610  285741    0    0    0     0       0          0
+docker0:  5000000   4000    0    0    0     0          0         0  7000000    3000    0    0    0     0       0          0
+WorkVPN: 400000000  300000    0    0    0     0          0         0 20000000  100000    0    0    0     0       0          0
+wlan0.100:    1000      10    0    0    0     0          0         0     2000      20    0    0    0     0       0          0
+br-1a2b3c4d5e6f:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+  eth1:123456789 1000    0    0    0     0          0         0 98765432   900    0    0    0     0       0          0
+#operstate
+/sys/class/net/WorkVPN/operstate:unknown
+/sys/class/net/br-1a2b3c4d5e6f/operstate:down
+/sys/class/net/docker0/operstate:down
+/sys/class/net/enp7s0/operstate:up
+/sys/class/net/eth1/operstate:up
+/sys/class/net/lo/operstate:unknown
+/sys/class/net/wlan0.100/operstate:up
+#devices
+enp7s0
+eth1
