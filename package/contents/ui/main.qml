@@ -7,6 +7,7 @@
 
 import QtQuick
 import org.kde.plasma.plasmoid
+import org.kde.plasma.core as PlasmaCore
 import "compact"
 import "data"
 import "../code/format.mjs" as Format
@@ -84,6 +85,14 @@ PlasmoidItem {
     compactRepresentation: CompactRepresentation {
         provider: root.provider
         formatOptions: root.formatOptions
+        vertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
+        // qmllint disable missing-property
+        // (configuration is created from main.xml at Plasma runtime)
+        layoutMode: Plasmoid.configuration.layout
+        uploadFirst: Plasmoid.configuration.uploadFirst
+        combined: Plasmoid.configuration.combined
+        fixedWidth: Plasmoid.configuration.fixedWidth
+        // qmllint enable missing-property
     }
 
     toolTipMainText: root.provider.primaryLabel || i18n("Network")
