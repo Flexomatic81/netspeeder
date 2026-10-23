@@ -55,7 +55,7 @@ PlasmoidItem {
         if (p.includedCount === 0 || !p.online) {
             return [i18n("Offline")];
         }
-        const lines = [i18nc("@info:tooltip download and upload speed", "Download: %1   Upload: %2", root.speedText(p.down), root.speedText(p.up))];
+        const lines = [i18nc("@info:tooltip", "Download: %1", root.speedText(p.down)), i18nc("@info:tooltip", "Upload: %1", root.speedText(p.up))];
         if (p.primaryIp !== "") {
             lines.push(i18nc("@info:tooltip", "IP address: %1", root.escapeHtml(p.primaryIp)));
         }
