@@ -13,6 +13,7 @@ import org.kde.plasma.core as PlasmaCore
 import org.kde.notification
 import "compact"
 import "data"
+import "full"
 import "../code/clicks.mjs" as Clicks
 import "../code/format.mjs" as Format
 import "../code/text.mjs" as TextTools
@@ -70,6 +71,12 @@ PlasmoidItem {
         }
     }
 
+    // Reports a failed launch as a notification.
+    function reportLaunchFailure(code: string, target: string) {
+        failure.text = root.launchFailureText(code, target);
+        failure.sendEvent();
+    }
+
     // What a click with a button does, from the settings.
     function runAction(button: string) {
         // (configuration is created from main.xml at Plasma runtime)
@@ -87,9 +94,14 @@ PlasmoidItem {
     // On the desktop the view is the full one; in a panel the compact one.
     preferredRepresentation: Plasmoid.formFactor === PlasmaCore.Types.Planar ? fullRepresentation : compactRepresentation
     // Plasma 6 only instantiates compactRepresentation when a
-    // fullRepresentation exists. The real popup arrives in 0.3; until then an
-    // empty placeholder keeps the panel view alive.
-    fullRepresentation: Item {}
+    // fullRepresentation exists, so the panel view depends on this one.
+    fullRepresentation: FullRepresentation {
+        provider: root.provider
+        formatOptions: root.formatOptions
+        // Only a visible popup (or the desktop view) follows the provider.
+        active: root.expanded || Plasmoid.formFactor === PlasmaCore.Types.Planar
+        onOpenSystemMonitor: monitorLauncher.launch()
+    }
     compactRepresentation: CompactRepresentation {
         provider: root.provider
         formatOptions: root.formatOptions
@@ -124,10 +136,17 @@ PlasmoidItem {
         kind: Plasmoid.configuration.launchKind // qmllint disable missing-property
         app: Plasmoid.configuration.launchApp // qmllint disable missing-property
         command: Plasmoid.configuration.launchCommand // qmllint disable missing-property
-        onFailed: (code, target) => {
-            failure.text = root.launchFailureText(code, target);
-            failure.sendEvent();
-        }
+        onFailed: (code, target) => root.reportLaunchFailure(code, target)
+    }
+
+    // The button in the popup: always the system monitor, whatever the click
+    // actions are set to.
+    Launcher {
+        id: monitorLauncher
+
+        kind: "app"
+        app: "org.kde.plasma-systemmonitor"
+        onFailed: (code, target) => root.reportLaunchFailure(code, target)
     }
 
     Notification {

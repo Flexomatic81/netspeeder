@@ -26,6 +26,8 @@
 	No selected network interface available	
 	Off	
 	Offline	
+	Online	
+	Open System Monitor	
 	Order:	
 	Preview:	
 	Reading network data failed: %1	
@@ -48,6 +50,7 @@
 	Waiting for network data…	
 @info	Could not find “%1”.	
 @info	Could not start “%1”.	
+@info	Source: %1	
 @info	Starting “%1” did not respond.	
 @info	The launch target “%1” is not valid.	
 @info accessible	Download %1, upload %2	

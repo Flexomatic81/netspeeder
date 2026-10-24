@@ -38,7 +38,7 @@ function statusLines(state, t, speedText) {
 
 // A note about the data source, independent of the status above; empty when
 // the source works as chosen.
-function hintLines(state, t) {
+export function hintLines(state, t) {
   const fellBack = state.fallbackNote !== "";
   switch (state.errorCode) {
     case "sensors-unavailable":

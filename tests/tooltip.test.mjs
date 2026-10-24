@@ -3,7 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { escapeHtml, tooltipLines } from "../package/contents/code/tooltip.mjs";
+import { escapeHtml, hintLines, tooltipLines } from "../package/contents/code/tooltip.mjs";
 
 // Identity translators with %n replacement, like the English fallback.
 const fill = (text, args) => text.replace(/%([1-9])/g, (_, d) => String(args[Number(d) - 1]));
@@ -119,4 +119,14 @@ test("line breaks in the detail become one space", () => {
 
 test("an unknown error code adds no hint", () => {
   assert.deepEqual(lines({ errorCode: "other" }), lines({}));
+});
+
+test("hintLines alone returns just the source note", () => {
+  assert.deepEqual(hintLines(live, t), []);
+  assert.deepEqual(hintLines({ ...live, errorCode: "no-interfaces" }, t), [
+    "System sensors report no network interfaces.",
+  ]);
+  assert.deepEqual(hintLines({ ...live, errorCode: "source-failed", errorDetail: "boom" }, t), [
+    "Reading network data failed: boom",
+  ]);
 });
