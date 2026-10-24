@@ -101,6 +101,14 @@ export function speedUnits(opts) {
   return (o.shortUnits ? system.speedShort : system.speed).slice();
 }
 
+// The scaling of the speed display for `opts`: `factor` is the step between
+// two units, `speedScale` the multiplier from bytes/s to the displayed number
+// (8 in bits mode). Used to put other values on the same scale as the display.
+export function speedScaling(opts) {
+  const system = SYSTEMS[normalize(opts).unitSystem];
+  return { factor: system.factor, speedScale: system.speedScale };
+}
+
 export function formatSpeed(bytesPerSecond, opts) {
   const o = normalize(opts);
   const system = SYSTEMS[o.unitSystem];

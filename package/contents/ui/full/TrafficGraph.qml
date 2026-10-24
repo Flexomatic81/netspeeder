@@ -55,7 +55,7 @@ Item {
     readonly property var upSeries: upSource.array
 
     readonly property var windowed: Graph.graphWindow(root.history, root.minutes)
-    readonly property var axis: Graph.axisScale(Math.max(0, ...root.windowed.down, ...root.windowed.up))
+    readonly property var axis: Graph.axisScale(Math.max(0, ...root.windowed.down, ...root.windowed.up), root.formatOptions)
     readonly property int gridSteps: 4
 
     // "256 B/s" for an axis value; no low-speed threshold, or small values
@@ -99,7 +99,12 @@ Item {
                     text: root.trc("@option:radio time span of the graph", "%1 min", modelData)
                     checkable: true
                     checked: root.minutes === modelData
-                    onClicked: root.minutesPicked(modelData)
+                    // A click toggles `checked` and breaks its binding; the
+                    // chosen span (not the click) decides, so bind it again.
+                    onClicked: {
+                        checked = Qt.binding(() => root.minutes === modelData);
+                        root.minutesPicked(modelData);
+                    }
                 }
             }
         }
@@ -157,6 +162,7 @@ Item {
                     to: root.axis.max
                     automatic: false
                 }
+                // The x axis is by sample; only the selection is by time.
                 xRange.automatic: true
                 lineWidth: 2
                 fillOpacity: 0.15

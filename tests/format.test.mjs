@@ -3,7 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { formatSpeed, formatTotal, speedUnits, widestValue } from "../package/contents/code/format.mjs";
+import { formatSpeed, formatTotal, speedScaling, speedUnits, widestValue } from "../package/contents/code/format.mjs";
 
 const cases = [
   // [name, bytes/s, opts, expected]
@@ -83,4 +83,12 @@ test("formatTotal shows negative and undefined sums as 0", () => {
   for (const v of [-1, -1024, undefined, null, Infinity, "abc"]) {
     assert.deepEqual(formatTotal(v, {}), { value: "0", unit: "B" });
   }
+});
+
+test("speedScaling gives the unit factor and the bit scale of the system", () => {
+  assert.deepEqual(speedScaling({ unitSystem: "iec" }), { factor: 1024, speedScale: 1 });
+  assert.deepEqual(speedScaling({ unitSystem: "si" }), { factor: 1000, speedScale: 1 });
+  assert.deepEqual(speedScaling({ unitSystem: "bits" }), { factor: 1000, speedScale: 8 });
+  assert.deepEqual(speedScaling(undefined), { factor: 1024, speedScale: 1 });
+  assert.deepEqual(speedScaling({ unitSystem: "nonsense" }), { factor: 1024, speedScale: 1 });
 });

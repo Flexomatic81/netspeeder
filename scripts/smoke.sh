@@ -30,8 +30,8 @@ expected_lines() {
       echo '^QProcess: Destroyed while process \("/bin/sh"\) is still running\.$'
       ;;
     PopupGraphFailSmoke.qml)
-      # The scene points the graph at a file that does not exist.
-      echo '^file://.*/tests/qml/MissingGraph\.qml: No such file or directory$'
+      # The scene loads a graph file that imports a module that does not exist.
+      echo '^file://.*/tests/qml/BrokenGraph\.qml:[0-9]+:[0-9]+: module "org\.kde\.netspeeder\.missingcharts" is not installed$'
       ;;
     ProviderSmoke.qml)
       # The scene points the provider at a data source that does not exist.

@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
-// Smoke scene for the load isolation of the graph: when the graph file cannot
-// be loaded (as without Qt Quick Charts), the popup shows a note in its place
-// and the header values stay correct.
+// Smoke scene for the load isolation of the graph: when the graph cannot be
+// loaded (BrokenGraph.qml imports a missing module, as without Qt Quick
+// Charts), the popup shows a note in its place and the header values stay
+// correct.
 // It cannot see QML warnings itself: scripts/smoke.sh checks the output of
-// qml6 and allows only the load error of the missing file.
+// qml6 and allows only the load error of the missing module.
 
 import QtQuick
 import QtQuick.Layouts
@@ -58,7 +59,7 @@ Item {
             }
         }
         if (view.graphItem !== null) {
-            scene.finish(false, "SMOKE FAIL popup graph: an item was loaded from the missing file");
+            scene.finish(false, "SMOKE FAIL popup graph: an item was loaded from the broken file");
             return;
         }
         scene.finish(true, "SMOKE OK popup graph failure");
@@ -93,7 +94,7 @@ Item {
 
         provider: stub
         formatOptions: Format.DEFAULT_FORMAT
-        graphSource: Qt.resolvedUrl("MissingGraph.qml")
+        graphSource: Qt.resolvedUrl("BrokenGraph.qml")
         width: Layout.preferredWidth
         height: Layout.preferredHeight
     }

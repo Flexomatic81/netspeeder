@@ -6,11 +6,11 @@
 // Pure functions without Qt or Plasma dependencies, so the module runs inside
 // QML as well as under Node.
 
+import { speedScaling } from "./format.mjs";
+
 const MS_PER_MINUTE = 60 * 1000;
 const DEFAULT_MINUTES = 5;
 const MINUTE_CHOICES = [1, 5, 15];
-// The smallest axis: 1 KiB/s in four steps.
-const MIN_AXIS = 1024;
 const GRID_STEPS = 4;
 
 // The points of `history` that are at most `minutes` older than the newest
@@ -38,20 +38,29 @@ export function validMinutes(value) {
   return MINUTE_CHOICES.indexOf(value) >= 0 ? value : DEFAULT_MINUTES;
 }
 
-// The smallest 1, 2 or 5 times a power of ten that is not below `value`.
-function niceCeiling(value) {
-  const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
-  const mantissa = [1, 2, 5, 10].find((m) => m * magnitude >= value);
-  return mantissa * magnitude;
-}
+// The nice values of the mantissa: 1, 2 and 5 times a power of ten up to 500;
+// the unit factor itself stands for 1 of the next unit.
+const NICE = [1, 2, 5, 10, 20, 50, 100, 200, 500];
 
-// The upper limit of the value axis (bytes per second) for the largest
-// value, and the distance of the four grid intervals. Invalid input and
-// values up to 1 KiB/s give the smallest axis.
-export function axisScale(maxValue) {
-  if (typeof maxValue !== "number" || !isFinite(maxValue) || maxValue <= MIN_AXIS) {
-    return { max: MIN_AXIS, step: MIN_AXIS / GRID_STEPS };
+// The upper limit of the value axis (bytes per second) for the largest value,
+// and the distance of the four grid intervals. The limit is chosen in the
+// displayed unit system (1, 2, 5, 10 ... 500 of a unit, so "1 MiB/s" and not
+// "977 KiB/s"). The smallest axis is one step of the first non-base unit:
+// 1024 B/s (iec), 1000 B/s (si) or 125 B/s = 1 kbit/s (bits). Invalid input
+// and values up to that minimum give the smallest axis.
+export function axisScale(maxValue, formatOptions) {
+  const { factor, speedScale } = speedScaling(formatOptions);
+  const minimum = factor / speedScale;
+  const smallest = { max: minimum, step: minimum / GRID_STEPS };
+  if (typeof maxValue !== "number" || !isFinite(maxValue) || maxValue <= minimum) {
+    return smallest;
   }
-  const max = niceCeiling(maxValue);
+  const shown = maxValue * speedScale;
+  let unit = 1;
+  while (unit * factor <= shown) {
+    unit *= factor;
+  }
+  const mantissa = NICE.concat([factor]).find((m) => m * unit >= shown);
+  const max = (mantissa * unit) / speedScale;
   return { max, step: max / GRID_STEPS };
 }

@@ -23,7 +23,7 @@ test("all points inside the window are kept", () => {
 test("older points fall out, the boundary stays", () => {
   const w = graphWindow(hist([0, 1, MIN, 2 * MIN]), 1);
   assert.deepEqual(w.down, [MIN / 10, (2 * MIN) / 10]);
-  assert.deepEqual(graphWindow(hist([0, 1, MIN, 2 * MIN]), 1).up, [MIN / 100, (2 * MIN) / 100]);
+  assert.deepEqual(w.up, [MIN / 100, (2 * MIN) / 100]);
 });
 
 test("the window is chosen by time, not by count, after an interval change", () => {
@@ -54,16 +54,55 @@ test("validMinutes accepts 1, 5 and 15 only", () => {
   }
 });
 
-test("axisScale picks a nice limit of at least 1 KiB/s in four steps", () => {
+const SI = { unitSystem: "si" };
+const BITS = { unitSystem: "bits" };
+const KiB = 1024;
+const MiB = 1024 * 1024;
+
+test("axisScale picks a nice limit in the displayed unit, in four steps", () => {
+  assert.deepEqual(axisScale(1500), { max: 2 * KiB, step: KiB / 2 });
+  assert.deepEqual(axisScale(2 * KiB), { max: 2 * KiB, step: KiB / 2 });
+  assert.deepEqual(axisScale(977 * KiB), { max: MiB, step: MiB / 4 });
+  assert.deepEqual(axisScale(7 * MiB), { max: 10 * MiB, step: (10 * MiB) / 4 });
+  assert.deepEqual(axisScale(600 * KiB), { max: MiB, step: MiB / 4 });
+  assert.deepEqual(axisScale(1.5 * MiB, { unitSystem: "iec" }), { max: 2 * MiB, step: MiB / 2 });
+});
+
+test("axisScale in si and bits works on the factor and the bit scale", () => {
+  assert.deepEqual(axisScale(1500, SI), { max: 2000, step: 500 });
+  assert.deepEqual(axisScale(1e6, SI), { max: 1e6, step: 250000 });
+  assert.deepEqual(axisScale(1.2e6, SI), { max: 2e6, step: 500000 });
+  // 1 MB/s is 8 Mbit/s, so the limit is 10 Mbit/s = 1.25 MB/s
+  assert.deepEqual(axisScale(1e6, BITS), { max: 1.25e6, step: 312500 });
+  assert.deepEqual(axisScale(100, BITS), { max: 125, step: 31.25 });
+});
+
+test("axisScale returns the smallest axis for invalid input and small values", () => {
   assert.deepEqual(axisScale(0), { max: 1024, step: 256 });
   assert.deepEqual(axisScale(900), { max: 1024, step: 256 });
   assert.deepEqual(axisScale(1024), { max: 1024, step: 256 });
-  assert.deepEqual(axisScale(1500), { max: 2000, step: 500 });
-  assert.deepEqual(axisScale(2000), { max: 2000, step: 500 });
-  assert.deepEqual(axisScale(7 * 1024 * 1024), { max: 10000000, step: 2500000 });
   assert.deepEqual(axisScale(NaN), { max: 1024, step: 256 });
   assert.deepEqual(axisScale(Infinity), { max: 1024, step: 256 });
   assert.deepEqual(axisScale("5"), { max: 1024, step: 256 });
+  assert.deepEqual(axisScale(999, SI), { max: 1000, step: 250 });
+  assert.deepEqual(axisScale(100, BITS), { max: 125, step: 31.25 });
+  assert.deepEqual(axisScale(10, BITS), { max: 125, step: 31.25 });
+});
+
+test("the label of the limit is a round number in every unit system", () => {
+  const round = ["1", "2", "5", "10", "20", "50", "100", "200", "500"];
+  const options = [{ unitSystem: "iec" }, SI, BITS, { unitSystem: "iec", decimals: 0 }];
+  for (const opts of options) {
+    for (let v = 1100; v < 4e9; v *= 1.37) {
+      const { max } = axisScale(v, opts);
+      assert.ok(max >= v, `limit ${max} is below ${v}`);
+      const label = formatSpeed(max, Object.assign({}, opts, { lowSpeedThreshold: 0 }));
+      assert.ok(
+        round.includes(String(Number(label.value))),
+        `${opts.unitSystem}: ${v} -> ${label.value} ${label.unit}`,
+      );
+    }
+  }
 });
 
 test("axis labels do not use the low-speed threshold", () => {

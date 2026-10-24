@@ -328,6 +328,7 @@ Item {
         function test_button() {
             input.pressButton();
             input.pressGraphSwitch();
+            input.pressActiveSwitch();
             scene.finish(true, "SMOKE OK popup");
         }
 
@@ -342,6 +343,22 @@ Item {
             if (scene.opened !== 1) {
                 scene.fail("button: openSystemMonitor was sent " + scene.opened + " times, expected 1");
                 return;
+            }
+        }
+
+        // A click on the switch of the span that is already shown keeps it
+        // checked and changes nothing else.
+        function pressActiveSwitch() {
+            const minutes = view.graphMinutes;
+            const button = scene.itemWithText(view, minutes + " min");
+            if (button === null) {
+                scene.fail("graph: there is no '" + minutes + " min' switch");
+                return;
+            }
+            scene.picked = 0;
+            input.mouseClick(button);
+            if (!button.checked || view.graphItem.minutes !== minutes) {
+                scene.fail("graph: the active switch lost its check (checked " + button.checked + ", minutes " + view.graphItem.minutes + ")");
             }
         }
 
