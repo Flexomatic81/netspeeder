@@ -177,9 +177,8 @@ KCM.SimpleKCM {
             from: 0
             to: 1024
             value: Math.round(root.cfg_idleThreshold / 1024)
+            valueFromText: (text, locale) => TextTools.parseSpinText(text, locale, 0, idleThresholdBox.value)
             textFromValue: (value, locale) => root.trc("@item:valuesuffix %1 is a number", "%1 KiB/s", Number(value).toLocaleString(locale, "f", 0))
-            // The text carries the unit, so read the leading digits only.
-            valueFromText: (text, locale) => Number.isNaN(parseInt(text, 10)) ? idleThresholdBox.value : parseInt(text, 10)
             onValueModified: root.cfg_idleThreshold = idleThresholdBox.value * 1024
         }
 
@@ -192,9 +191,8 @@ KCM.SimpleKCM {
             from: 5
             to: 3600
             value: root.cfg_idleSeconds
+            valueFromText: (text, locale) => TextTools.parseSpinText(text, locale, 0, idleSecondsBox.value)
             textFromValue: (value, locale) => root.trc("@item:valuesuffix %1 is a number of seconds", "%1 s", Number(value).toLocaleString(locale, "f", 0))
-            // The text carries the unit, so read the leading digits only.
-            valueFromText: (text, locale) => Number.isNaN(parseInt(text, 10)) ? idleSecondsBox.value : parseInt(text, 10)
             onValueModified: root.cfg_idleSeconds = idleSecondsBox.value
         }
     }

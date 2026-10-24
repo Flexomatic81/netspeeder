@@ -25,3 +25,35 @@ export function pluralFallback(singular, plural, n, args) {
 export function headerDetails(ip, status) {
   return [ip, status].filter((part) => typeof part === "string" && part !== "").join(" · ");
 }
+
+// What one character of a spin box text contributes to the number: itself for
+// a digit, "." for the decimal point (only with decimals), "" for a group
+// separator (a space-like one also matches any white space), null when the
+// number has ended.
+function numberPart(char, locale, decimals) {
+  const spaceGroup = /^\s*$/.test(locale.groupSeparator);
+  if (char >= "0" && char <= "9") {
+    return char;
+  }
+  if (char === locale.groupSeparator || (spaceGroup && /\s/.test(char))) {
+    return "";
+  }
+  return decimals > 0 && char === locale.decimalPoint ? "." : null;
+}
+
+// The number a spin box shows is followed by a unit ("1.024 KiB/s"), so the
+// default reading of its text fails. This takes the leading number and drops
+// the group separator and the unit. Text without a leading number, such as
+// "", "KiB/s", "-5" or garbage, gives the fallback.
+export function parseSpinText(text, locale, decimals, fallback) {
+  let number = "";
+  for (const char of String(text).replace(/^\s+/, "")) {
+    const part = numberPart(char, locale, decimals);
+    if (part === null) {
+      break;
+    }
+    number += part;
+  }
+  const value = /^\d/.test(number) ? Number(number) : NaN;
+  return Number.isFinite(value) ? value : fallback;
+}

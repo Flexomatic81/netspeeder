@@ -124,6 +124,7 @@ KCM.SimpleKCM {
             to: 200
             stepSize: 10
             value: root.cfg_fontScale
+            valueFromText: (text, locale) => TextTools.parseSpinText(text, locale, 0, fontScaleBox.value)
             textFromValue: (value, locale) => root.trc("@item:valuesuffix %1 is a percentage", "%1 %", Number(value).toLocaleString(locale, "f", 0))
             onValueModified: root.cfg_fontScale = fontScaleBox.value
         }

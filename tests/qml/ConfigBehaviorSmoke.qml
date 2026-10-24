@@ -150,6 +150,22 @@ Item {
             scene.expect("seconds clamped low", secondsBox.value, 5);
             secondsBox.value = 99999;
             scene.expect("seconds clamped high", secondsBox.value, 3600);
+            // The displayed text of a value read back must give the value.
+            page.cfg_idleThreshold = 1048576;
+            page.cfg_idleSeconds = 1500;
+            break;
+        case 12:
+            scene.expect("threshold text read back", thresholdBox.valueFromText(thresholdBox.textFromValue(1024, Qt.locale()), Qt.locale()), 1024);
+            scene.expect("seconds text read back", secondsBox.valueFromText(secondsBox.textFromValue(1500, Qt.locale()), Qt.locale()), 1500);
+            scene.expect("threshold text with grouping", thresholdBox.valueFromText("1.024 KiB/s", Qt.locale("de_DE")), 1024);
+            scene.expect("seconds text with grouping", secondsBox.valueFromText("1,500 s", Qt.locale("en_US")), 1500);
+            // Entering a value earlier replaced the binding of the box, so
+            // set the value the user would see.
+            thresholdBox.value = 1024;
+            thresholdBox.contentItem.text = thresholdBox.textFromValue(1024, Qt.locale());
+            thresholdBox.valueModified();
+            scene.expect("threshold stays at 1024", thresholdBox.value, 1024);
+            scene.expect("threshold setting stays", page.cfg_idleThreshold, 1048576);
             scene.expect("auto-hide type", typeof page.cfg_autoHide, "string");
             scene.expect("threshold type", typeof page.cfg_idleThreshold, "number");
             scene.expect("seconds type", typeof page.cfg_idleSeconds, "number");

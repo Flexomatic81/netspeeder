@@ -153,6 +153,8 @@ KCM.SimpleKCM {
             to: 100
             stepSize: 5
             value: Math.round(root.cfg_updateInterval * 10)
+            // The box counts tenths of a second; the text shows seconds.
+            valueFromText: (text, locale) => Math.round(TextTools.parseSpinText(text, locale, 1, intervalBox.value / 10) * 10)
             textFromValue: (value, locale) => root.trc("@item:valuesuffix %1 is a number of seconds", "%1 s", Number(value / 10).toLocaleString(locale, "f", 1))
             onValueModified: root.cfg_updateInterval = intervalBox.value / 10
         }
