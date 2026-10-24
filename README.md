@@ -216,17 +216,17 @@ and where to find it in Netspeeder (settings page › option).
 | Netspeed Widget key | Netspeeder |
 |---|---|
 | `showSeparately` | Display › "Show only the combined speed" (the sum of download and upload). Turn it on where `showSeparately` was off. |
-| `showLowSpeeds` | Display › "Show as 0 below:". "Off" shows every speed; a threshold such as 1 KiB/s shows lower speeds as 0. |
+| `showLowSpeeds` | Display › "Show as 0 below:". On maps to "Off" (every speed is shown); off, the old default, maps to "1 KiB/s", which is also the default here. In bits mode the old cut-off was about 125 B/s; the nearest choice is "512 B/s". |
 | `speedLayout` | Display › "Layout:" Automatic, Two rows or Side by side. |
 | `swapDownUp` | Display › "Order:" Upload first. |
-| `showIcons` | Appearance › "Symbols:" Arrows, Triangles, Icons, None or Custom. |
+| `showIcons` | Appearance › "Symbols:" on maps to Arrows, off maps to None. Triangles, Icons and Custom are new. |
 | `showUnits` | Not available: Netspeeder always shows the unit. Display › "Use short unit names" keeps it narrow. |
 | `speedUnits` | Display › "Units:" Bytes, binary (KiB/s); Bytes, decimal (kB/s); or Bits (Mbit/s). |
 | `shortUnits` | Display › "Use short unit names". |
-| `fontSize` | Appearance › "Text size:" 50 to 200 %. "Font:" and "Bold" are new. |
+| `fontSize` | Appearance › "Text size:" 50 to 200 %. The old range started at 10 %; sizes below 50 % have no equivalent. "Font:" and "Bold" are new. |
 | `updateInterval` | Display › "Update interval:" 0.5 to 10 seconds. |
 | `customColors` | Appearance › "Colors:" By speed. "By direction" (one color for download, one for upload) is new. |
-| `byteColor`, `kilobyteColor`, `megabyteColor`, `gigabyteColor` | Replaced by Appearance › "Speed levels:" up to six levels, each with a minimum speed and a color. Levels at 0 B/s, 1 KiB/s, 1 MiB/s and 1 GiB/s come close to the old colors per unit. |
+| `byteColor`, `kilobyteColor`, `megabyteColor`, `gigabyteColor` | Replaced by Appearance › "Speed levels:" up to six levels, each with a minimum speed and a color. With byte units, levels at 0 B/s, 1 KiB/s, 1 MiB/s and 1 GiB/s come close to the old colors per unit. With bits, the old switch points were 1 kbit/s, 1 Mbit/s and 1 Gbit/s, that is levels at 0, 125, 125000 and 125000000 B/s. The old widget colored only the number, so leave "Color units and symbols too" off (the default). |
 | `launchApplicationEnabled` | Behavior › "Left click:" Start the application or command. The middle click can do the same. |
 | `launchApplication` | Behavior › "Start:" Application, then "Application:" (the desktop ID, or "Choose…" to pick it). "Command" is new. |
 | `interfacesWhitelistEnabled` | Data › "Interfaces counted in the total:" Selected interfaces only. Often not needed any more: the automatic mode already leaves out VPN and container interfaces. |
@@ -300,7 +300,8 @@ files (`libplasma`, `ki18n`) and `gettext`.
 ```sh
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr
 cmake --build build
-sudo cmake --install build   # honors DESTDIR
+sudo cmake --install build
+# for a package: DESTDIR="$pkgdir" cmake --install build
 ```
 
 This installs the widget to `<prefix>/share/plasma/plasmoids/` and the

@@ -97,3 +97,26 @@ test("the store's short descriptions fit in 200 characters", () => {
     assert.ok([...line.slice(2)].length <= 200, line);
   }
 });
+
+// The value of an entry in main.xml, or of one of its limits.
+function configEntry(name, tag) {
+  const xml = readFileSync(new URL("../package/contents/config/main.xml", import.meta.url), "utf8");
+  const entry = xml.match(new RegExp('<entry name="' + name + '"[^>]*>([\\s\\S]*?)</entry>'));
+  assert.ok(entry, name);
+  const value = entry[1].match(new RegExp("<" + tag + ">([^<]*)</" + tag + ">"));
+  return value ? value[1] : null;
+}
+
+test("the defaults and ranges the migration table relies on", () => {
+  const table = section(readme, "Coming from Netspeed Widget");
+  // "1 KiB/s, which is also the default here"
+  assert.match(table, /"1 KiB\/s", which is also the default here/);
+  assert.equal(configEntry("lowSpeedThreshold", "default"), "1024");
+  // "Color units and symbols too" stays off by default.
+  assert.match(table, /leave "Color units and symbols too" off \(the default\)/);
+  assert.equal(configEntry("colorUnits", "default"), "false");
+  // Text size 50 to 200 %.
+  assert.match(table, /"Text size:" 50 to 200 %/);
+  assert.equal(configEntry("fontScale", "min"), "50");
+  assert.equal(configEntry("fontScale", "max"), "200");
+});
