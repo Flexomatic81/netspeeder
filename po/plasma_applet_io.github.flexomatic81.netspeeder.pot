@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: netspeeder\n"
 "Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
-"POT-Creation-Date: 2026-10-24 17:21+0200\n"
+"POT-Creation-Date: 2026-10-24 17:49+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -237,7 +237,7 @@ msgid "physical"
 msgstr ""
 
 #: package/contents/ui/config/ConfigData.qml:252
-#: package/contents/ui/full/InterfaceList.qml:147
+#: package/contents/ui/full/InterfaceList.qml:150
 msgctxt "@info interface kind"
 msgid "virtual"
 msgstr ""
@@ -354,57 +354,57 @@ msgstr ""
 msgid "Online"
 msgstr ""
 
-#: package/contents/ui/full/FullRepresentation.qml:296
+#: package/contents/ui/full/FullRepresentation.qml:320
 msgctxt "@info"
 msgid "The traffic graph is not available because Qt Quick Charts is missing."
 msgstr ""
 
-#: package/contents/ui/full/FullRepresentation.qml:343
+#: package/contents/ui/full/FullRepresentation.qml:367
 msgctxt "@label"
 msgid "Peak"
 msgstr ""
 
-#: package/contents/ui/full/FullRepresentation.qml:360
+#: package/contents/ui/full/FullRepresentation.qml:384
 msgctxt "@label"
 msgid "This session"
 msgstr ""
 
-#: package/contents/ui/full/FullRepresentation.qml:392
+#: package/contents/ui/full/FullRepresentation.qml:416
 msgid "Open System Monitor"
 msgstr ""
 
-#: package/contents/ui/full/FullRepresentation.qml:399
+#: package/contents/ui/full/FullRepresentation.qml:423
 msgctxt "@info"
 msgid "Source: %1"
 msgstr ""
 
-#: package/contents/ui/full/InterfaceList.qml:150
+#: package/contents/ui/full/InterfaceList.qml:153
 msgctxt "@info interface kind"
 msgid "not counted"
 msgstr ""
 
-#: package/contents/ui/full/InterfaceList.qml:153
+#: package/contents/ui/full/InterfaceList.qml:156
 #, javascript-format
 msgctxt "@info Wi-Fi signal strength in percent"
 msgid "Signal %1%"
 msgstr ""
 
-#: package/contents/ui/full/InterfaceList.qml:157
+#: package/contents/ui/full/InterfaceList.qml:160
 msgctxt "@info download and upload total since the interface became active"
 msgid "Total ↓ %1   ↑ %2"
 msgstr ""
 
-#: package/contents/ui/full/InterfaceList.qml:195
+#: package/contents/ui/full/InterfaceList.qml:198
 msgctxt "@info"
 msgid "Copied"
 msgstr ""
 
-#: package/contents/ui/full/InterfaceList.qml:212
+#: package/contents/ui/full/InterfaceList.qml:215
 msgctxt "@info:tooltip"
 msgid "Copy IP address"
 msgstr ""
 
-#: package/contents/ui/full/TrafficGraph.qml:99
+#: package/contents/ui/full/TrafficGraph.qml:153
 msgctxt "@option:radio time span of the graph"
 msgid "%1 min"
 msgstr ""

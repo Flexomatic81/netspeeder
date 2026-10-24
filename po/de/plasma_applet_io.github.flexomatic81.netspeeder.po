@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: netspeeder\n"
 "Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
-"POT-Creation-Date: 2026-10-24 17:21+0200\n"
+"POT-Creation-Date: 2026-10-24 17:49+0200\n"
 "PO-Revision-Date: 2026-10-24 01:44+0200\n"
 "Last-Translator: Flexomatic81\n"
 "Language-Team: German\n"
@@ -18,12 +18,15 @@ msgstr ""
 #: package/contents/code/launchtext.mjs:16
 msgctxt "@info"
 msgid "No application is set. Choose one in the widget settings."
-msgstr "Es ist keine Anwendung festgelegt. Wähle in den Widget-Einstellungen eine aus."
+msgstr ""
+"Es ist keine Anwendung festgelegt. Wähle in den Widget-Einstellungen eine "
+"aus."
 
 #: package/contents/code/launchtext.mjs:17
 msgctxt "@info"
 msgid "No command is set. Choose one in the widget settings."
-msgstr "Es ist kein Befehl festgelegt. Wähle in den Widget-Einstellungen einen aus."
+msgstr ""
+"Es ist kein Befehl festgelegt. Wähle in den Widget-Einstellungen einen aus."
 
 #: package/contents/code/launchtext.mjs:22
 msgctxt "@info"
@@ -246,7 +249,7 @@ msgid "physical"
 msgstr "physisch"
 
 #: package/contents/ui/config/ConfigData.qml:252
-#: package/contents/ui/full/InterfaceList.qml:147
+#: package/contents/ui/full/InterfaceList.qml:150
 msgctxt "@info interface kind"
 msgid "virtual"
 msgstr "virtuell"
@@ -363,57 +366,57 @@ msgstr "Vorschau:"
 msgid "Online"
 msgstr "Online"
 
-#: package/contents/ui/full/FullRepresentation.qml:296
+#: package/contents/ui/full/FullRepresentation.qml:320
 msgctxt "@info"
 msgid "The traffic graph is not available because Qt Quick Charts is missing."
 msgstr "Das Verkehrsdiagramm ist nicht verfügbar, weil Qt Quick Charts fehlt."
 
-#: package/contents/ui/full/FullRepresentation.qml:343
+#: package/contents/ui/full/FullRepresentation.qml:367
 msgctxt "@label"
 msgid "Peak"
 msgstr "Spitze"
 
-#: package/contents/ui/full/FullRepresentation.qml:360
+#: package/contents/ui/full/FullRepresentation.qml:384
 msgctxt "@label"
 msgid "This session"
 msgstr "Diese Sitzung"
 
-#: package/contents/ui/full/FullRepresentation.qml:392
+#: package/contents/ui/full/FullRepresentation.qml:416
 msgid "Open System Monitor"
 msgstr "Systemmonitor öffnen"
 
-#: package/contents/ui/full/FullRepresentation.qml:399
+#: package/contents/ui/full/FullRepresentation.qml:423
 msgctxt "@info"
 msgid "Source: %1"
 msgstr "Quelle: %1"
 
-#: package/contents/ui/full/InterfaceList.qml:150
+#: package/contents/ui/full/InterfaceList.qml:153
 msgctxt "@info interface kind"
 msgid "not counted"
 msgstr "nicht gezählt"
 
-#: package/contents/ui/full/InterfaceList.qml:153
+#: package/contents/ui/full/InterfaceList.qml:156
 #, javascript-format
 msgctxt "@info Wi-Fi signal strength in percent"
 msgid "Signal %1%"
 msgstr "Signal %1%"
 
-#: package/contents/ui/full/InterfaceList.qml:157
+#: package/contents/ui/full/InterfaceList.qml:160
 msgctxt "@info download and upload total since the interface became active"
 msgid "Total ↓ %1   ↑ %2"
 msgstr "Gesamt ↓ %1   ↑ %2"
 
-#: package/contents/ui/full/InterfaceList.qml:195
+#: package/contents/ui/full/InterfaceList.qml:198
 msgctxt "@info"
 msgid "Copied"
 msgstr "Kopiert"
 
-#: package/contents/ui/full/InterfaceList.qml:212
+#: package/contents/ui/full/InterfaceList.qml:215
 msgctxt "@info:tooltip"
 msgid "Copy IP address"
 msgstr "IP-Adresse kopieren"
 
-#: package/contents/ui/full/TrafficGraph.qml:99
+#: package/contents/ui/full/TrafficGraph.qml:153
 msgctxt "@option:radio time span of the graph"
 msgid "%1 min"
 msgstr "%1 Min."
