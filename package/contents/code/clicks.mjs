@@ -30,15 +30,43 @@ export function nextExpanded(wasExpanded) {
   return !wasExpanded;
 }
 
-function decodePath(path) {
-  const parts = path.split("/").map((part) => decodeURIComponent(part));
-  return parts.some((part) => part.includes("/")) ? null : parts.join("/");
+// Drops "." segments and resolves ".." segments of an absolute path.
+function normalizePath(parts) {
+  const out = [];
+  parts.forEach((part, index) => {
+    if (part === "..") {
+      if (out.length > 1) {
+        out.pop();
+      }
+    } else if (part !== "." && (part !== "" || index === 0 || index === parts.length - 1)) {
+      out.push(part);
+    }
+  });
+  return out.join("/");
 }
 
-// A root as a plain path without "file://" and without trailing slashes.
+// The path with every segment percent-decoded and "."/".." resolved, or null
+// when a decoded segment contains a slash. Throws URIError for a malformed
+// encoding.
+function decodePath(path) {
+  const parts = path.split("/").map((part) => decodeURIComponent(part));
+  return parts.some((part) => part.includes("/")) ? null : normalizePath(parts);
+}
+
+// A root as a decoded plain path without "file://" and without trailing
+// slashes. Callers may pass it encoded or decoded; a text that is no valid
+// encoding is taken as it is.
 function plainRoot(root) {
   const text = String(root ?? "");
-  return (text.startsWith("file://") ? text.slice("file://".length) : text).replace(/\/+$/, "");
+  const raw = (text.startsWith("file://") ? text.slice("file://".length) : text).replace(/\/+$/, "");
+  try {
+    return decodePath(raw) ?? raw;
+  } catch (error) {
+    if (error instanceof URIError) {
+      return raw;
+    }
+    throw error;
+  }
 }
 
 // The part of the path below the longest root that contains it, or "" when

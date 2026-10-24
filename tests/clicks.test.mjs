@@ -78,6 +78,25 @@ test("the longest matching root is the prefix of the desktop ID", () => {
   );
 });
 
+test("roots and paths match in encoded and decoded form, with spaces and accents", () => {
+  const file = "/.local/share/applications/kde4/foo.desktop";
+  const dirs = [
+    ["/home/user%20name", "/home/user name"],
+    ["/home/caf%C3%A9", "/home/caf\u00e9"],
+  ];
+  for (const [encoded, decoded] of dirs) {
+    for (const root of [`file://${encoded}/.local/share/applications`, `${decoded}/.local/share/applications`]) {
+      assert.equal(desktopIdFromUrl(`file://${encoded}${file}`, [root]), "kde4-foo", root);
+      assert.equal(desktopIdFromUrl(`${decoded}${file}`, [root]), "kde4-foo", root);
+    }
+  }
+});
+
+test("dot segments are resolved in roots and paths", () => {
+  const root = "/usr/share/./x/../applications/";
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/a/../kde4/foo.desktop", [root]), "kde4-foo");
+});
+
 test("a launcher outside every root gives its file name", () => {
   assert.equal(desktopIdFromUrl("file:///opt/tools/x/foo.desktop", ROOTS), "foo");
   assert.equal(desktopIdFromUrl("file:///usr/share/applicationsx/foo.desktop", ROOTS), "foo");
