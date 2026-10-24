@@ -162,18 +162,28 @@ msginit --no-translator --locale=fr --input=po/plasma_applet_io.github.flexomati
 
 ## Development
 
+`node tools/check.mjs` is the one entry point; CI runs the same steps.
+
 | Command | Purpose |
 |---|---|
-| `npm test` | Unit tests of the logic modules (`package/contents/code/*.mjs`); needs Node 22 or newer, no dependencies |
-| `scripts/lint.sh` | `qmllint` over all QML files (Qt 6 tool; set `QMLLINT` if it is not in `/usr/lib/qt6/bin`) |
+| `node tools/check.mjs` | All steps: `eslint`, `format`, `test`, `qmllint`, `shellcheck`, `smoke`, `load` |
+| `node tools/check.mjs fast` | Group `fast`: the Node checks (`eslint`, `format`, `test` with its coverage floor); a few seconds |
+| `node tools/check.mjs <step>...` | Only the named steps, e.g. `qmllint` or `shellcheck qmllint` |
+| `node tools/check.mjs --install-hook` | Installs a pre-commit hook that runs the `fast` group |
+| `pnpm test` | Only the unit tests of the logic modules (`package/contents/code/*.mjs`) |
 | `scripts/smoke.sh` | QML smoke scenes with `qml6`; local only, needs `ksystemstats` and a desktop session |
 | `scripts/load-check.sh` | Starts the installed widget offscreen and checks that it loads; needs a desktop session |
 | `scripts/build-plasmoid.sh <version>` | Builds `dist/netspeeder-<version>.plasmoid` |
 
-Continuous integration (`.github/workflows/ci.yml`) runs the tests on Node 22
-and 24 and the lint step, and builds the `.plasmoid` for version tags.
-[docs/testing.md](docs/testing.md) is the manual checklist that is worked
-through before each release.
+Run `pnpm install --frozen-lockfile` once for the Node tools. `qmllint` needs
+the Qt 6 tool (`/usr/lib/qt6/bin/qmllint`); steps that need Qt or a desktop
+session are reported as skipped locally and fail in CI. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
+
+Continuous integration (`.github/workflows/ci.yml`) runs the `fast` group on
+Node 22.13 and 24, shellcheck and `qmllint`, and builds the `.plasmoid` for
+version tags. [docs/testing.md](docs/testing.md) is the manual checklist that
+is worked through before each release.
 
 ## Origin
 

@@ -6,8 +6,8 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 # Manuelle Tests
 
 Diese Checkliste wird vor jeder Veröffentlichung abgearbeitet. Die
-automatischen Tests (`npm test`, in CI so aufgerufen und lokal gleichwertig
-`pnpm test`, sowie `scripts/lint.sh` und `scripts/smoke.sh`) ersetzen sie
+automatischen Tests (`node tools/check.mjs`, in CI laufen davon die Schritte der Gruppe `fast`,
+`shellcheck` und `qmllint`) ersetzen sie
 nicht: Sie prüfen Logik und einzelne Szenen, nicht das Verhalten in einem
 echten Panel.
 
@@ -70,18 +70,17 @@ Datum: 2026-10-24, Stand `f4846c5`, auf dem Entwicklungsrechner (Node 24.22,
 Qt/qmllint 6.12, Plasma 6.8). Diese Läufe ersetzen die manuellen Prüfpunkte
 oben nicht. Dort bleibt „Ergebnis" leer, bis sie von Hand durchgegangen sind.
 
-Befehl (in CI läuft `npm test`; auf diesem Rechner ist npm nicht installiert,
-`pnpm test` führt dasselbe Skript `test` aus `package.json` aus):
+Befehl (der Check-Runner führt `eslint`, `format`, `test`, `qmllint`,
+`shellcheck`, `smoke` und `load` aus; `pnpm test` ist nur der Testschritt):
 
 ```
-pnpm test && scripts/lint.sh && scripts/smoke.sh && scripts/dev-install.sh \
-  && scripts/load-check.sh && scripts/build-plasmoid.sh 0.1.0
+node tools/check.mjs && scripts/build-plasmoid.sh 0.1.0
 ```
 
 | Prüfung | Ergebnis |
 |---|---|
 | `pnpm test` | 86 Tests, 86 bestanden, 0 fehlgeschlagen |
-| `scripts/lint.sh` | `lint: 20 QML files OK`, keine Warnungen |
+| `node tools/check.mjs qmllint` | alle QML-Dateien ohne Warnungen |
 | `scripts/smoke.sh` | `SMOKE OK` für runner, compact, combobox, parity, proc, provider, sensors, vertical |
 | `LC_ALL=C scripts/smoke.sh tests/qml/ParitySmoke.qml` | `SMOKE OK parity` |
 | `scripts/dev-install.sh` | Paket aktualisiert, Übersetzung kompiliert |

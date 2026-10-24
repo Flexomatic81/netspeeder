@@ -41,6 +41,12 @@ First pre-release, stage "Kern" (core).
   (tests on Node 22 and 24, QML lint, `.plasmoid` as release asset for version
   tags).
 
+### Development
+
+- Development checks: ESLint, Prettier, coverage floor, strict qmllint,
+  shellcheck, one check runner (`node tools/check.mjs`) used locally, as
+  pre-commit hook and in CI.
+
 ### Addressed (issues of the original Netspeed Widget)
 
 - #36: settings jump back to their old values. Selection lists share one

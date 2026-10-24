@@ -1,58 +1,81 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # SPDX-FileCopyrightText: 2026 Flexomatic81
 
-# test:    the Node unit tests of the logic modules.
-# lint:    qmllint over every QML file, in an Arch Linux container because
+# test:    ESLint, Prettier, the Node unit tests with their coverage floor and
+#          the other Node checks (group "fast" of tools/check.mjs).
+# lint:    shellcheck over the shell scripts, in the version pinned in
+#          tools/requirements-dev.txt.
+# qml:     qmllint over every QML file, in an Arch Linux container because
 #          that is where the Plasma QML modules are packaged in current versions.
 # package: only for tags v*; builds the .plasmoid and attaches it to the
 #          GitHub release with the GitHub CLI (no third-party action runs in
 #          the job that has write access). The upload to the KDE Store stays
 #          manual.
-# The QML smoke scenes (scripts/smoke.sh) are not part of CI: they need
+# The QML smoke scenes and the load check are not part of CI: they need
 # ksystemstats and a desktop session.
 name: CI
 
 on:
   push:
-    branches: ["**"]
+    branches: [main, dev]   # other branches are checked through their pull request
     tags: ["v*"]
   pull_request:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  # A newer push to a pull request replaces the older run; on main, dev and tags every commit keeps its own result.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
-        # 22 is the minimum version: node --test only takes glob patterns
-        # from Node 21 on, and Node 20 is out of support.
-        node-version: [22, 24]
+        # 22.13 is the oldest supported version (see "engines" in package.json).
+        node-version: ["22.13", 24]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm test
+      - name: Install pnpm
+        # Not through Corepack: the one in Node 22.13 does not know the current
+        # npm signing keys and aborts. The version is the one in package.json.
+        run: npm install -g pnpm@12.14.0
+      - run: pnpm install --frozen-lockfile
+      - run: node tools/check.mjs fast
 
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install -r tools/requirements-dev.txt
+      - run: node tools/check.mjs shellcheck
+
+  qml:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     container: archlinux:latest
     steps:
       - name: Install the Qt and Plasma QML modules
         run: >
-          pacman -Syu --noconfirm
-          qt6-declarative libplasma kirigami kcmutils libksysguard
+          pacman -Syu --noconfirm --needed
+          git nodejs qt6-declarative libplasma kirigami kcmutils libksysguard
           kquickcharts plasma5support knotifications
       - uses: actions/checkout@v4
-      - name: Lint the QML files
-        run: QMLLINT=/usr/lib/qt6/bin/qmllint scripts/lint.sh
+      - run: node tools/check.mjs qmllint
 
   package:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [test, lint]
+    needs: [test, lint, qml]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     container: archlinux:latest
     permissions:
       # Attaching the file to the release needs write access.
