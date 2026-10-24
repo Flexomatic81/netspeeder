@@ -6,11 +6,11 @@
 //
 //   qml6 tools/screenshots/Screenshots.qml -- <output directory>
 //
-// The panel views: two rows at 44 px, one combined value, a vertical panel
-// 48 px wide, the colors by speed ("thresholds") and the mini chart behind
-// the text, each on the background color of the theme. The popup has its
-// preferred size. The text uses the first available of the fonts in demo.mjs;
-// the colors come from the current color scheme.
+// The panel views: two rows at 44 px, both values side by side on one line,
+// a vertical panel 48 px wide, the colors by speed ("thresholds") and the
+// mini chart behind the text, each on the background color of the theme.
+// The popup has its preferred size. The text uses the first available of the
+// fonts in demo.mjs; the colors come from the current color scheme.
 //
 // Output: "SCREENSHOT saved <file> <width>x<height>" per image, the chart area
 // of the popup as "SCREENSHOT chart popup.png <x> <y> <width> <height> of
@@ -175,7 +175,7 @@ QQC2.ApplicationWindow {
         PanelShot {
             id: singleShot
 
-            view.combined: true
+            view.layoutMode: "columns"
         }
 
         PanelShot {

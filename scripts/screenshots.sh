@@ -43,13 +43,16 @@ done
 dir="${NETSPEEDER_SCREENSHOT_DIR:-$root/docs/images}"
 mkdir -p "$dir" || exit 1
 dir="$(cd "$dir" && pwd)"
+# The directory as shown: relative to the repository when it is inside it, so
+# pasted output carries no home path.
+shown="${dir#"$root"/}"
 
 scheme=""
 if command -v kreadconfig6 >/dev/null; then
   scheme="$(kreadconfig6 --file kdeglobals --group General --key ColorScheme)"
 fi
 echo "screenshots: color scheme: ${scheme:-not set (the Plasma default)}"
-echo "screenshots: writing to $dir"
+echo "screenshots: writing to $shown"
 
 log="$(mktemp)"
 trap 'rm -f "$log"' EXIT
@@ -76,6 +79,6 @@ if [ -n "$others" ]; then
 fi
 node "$root/tools/screenshots/check-images.mjs" "$dir" --log "$log" || status=1
 if [ "$status" -eq 0 ]; then
-  echo "screenshots: done. Look at every image in $dir before committing it."
+  echo "screenshots: done. Look at every image in $shown before committing it."
 fi
 exit "$status"
