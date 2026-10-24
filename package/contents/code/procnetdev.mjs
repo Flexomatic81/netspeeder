@@ -123,6 +123,7 @@ export function toProcSample(timestamp, parsed, rates) {
       up: rate.up,
       totalDown: counter.rx,
       totalUp: counter.tx,
+      totalsKnown: true,
       kind: parsed.physical.indexOf(name) >= 0 ? "physical" : "virtual",
       online: isOnline(state, counter),
       label: "",

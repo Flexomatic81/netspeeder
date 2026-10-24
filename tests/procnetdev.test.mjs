@@ -52,6 +52,7 @@ test("toProcSample classifies and maps fields", () => {
     up: 20,
     totalDown: 1315645898,
     totalUp: 51368610,
+    totalsKnown: true,
     kind: "physical",
     online: true,
     label: "",

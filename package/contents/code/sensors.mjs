@@ -68,6 +68,14 @@ function toCount(value) {
   return isFinite(number) && number >= 0 ? number : 0;
 }
 
+// True only for a real counter reading, so that a counter at 0 (after a
+// reset) can be told from "no reading yet".
+function isCounter(value) {
+  if (value === null || value === "") return false;
+  const number = Number(value);
+  return isFinite(number) && number >= 0;
+}
+
 function toText(value) {
   return typeof value === "string" ? value : "";
 }
@@ -95,6 +103,7 @@ export function buildSensorSample(timestamp, values, physical) {
       up: toCount(raw.upload),
       totalDown: toCount(raw.totalDownload),
       totalUp: toCount(raw.totalUpload),
+      totalsKnown: isCounter(raw.totalDownload) && isCounter(raw.totalUpload),
       kind: isPhysical ? "physical" : "virtual",
       online: ipv4 !== "" || ipv6 !== "",
       label: toText(raw.network),

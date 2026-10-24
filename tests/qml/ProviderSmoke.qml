@@ -2,9 +2,10 @@
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
 // Smoke scene for NetworkProvider with the real data sources, in eight phases:
-//   1  auto mode takes data from ksystemstats
+//   1  auto mode takes data from ksystemstats; after three samples the
+//      history holds at least three points and its peak covers every one
 //   2  the same instance switched to /proc: no old values, virtual interfaces
-//      stay out of the sum
+//      stay out of the sum, the session total did not drop with the switch
 //   3  the same instance with an unloadable sensor source and dataSource
 //      "sensors": no data, no old values, "sensors-unavailable"
 //   4  auto mode with an unloadable sensor source falls back to /proc and
@@ -39,6 +40,8 @@ Item {
     property string lastProblem: ""
     property bool interfaceAdded: false
     property bool modeSwitched: false
+    // Session total at the end of phase 1; a source switch must not lower it.
+    property real sessionDownBefore: 0
     // Phase 8: 0 find the test double, 1 wait for settled data, 2 count
     // emissions of `interfaces`, 3 wait for `stale` after the data stopped.
     property int steadyStep: 0
@@ -119,6 +122,30 @@ Item {
             }
         }
         return "";
+    }
+
+    // Phase 1: the history has filled with samples and its peak is real.
+    function historyProblem() {
+        const h = scene.provider.history;
+        if (h.down.length < 3) {
+            return "history holds " + h.down.length + " points, expected at least 3";
+        }
+        for (let i = 0; i < h.down.length; i++) {
+            if (h.down[i] > h.peakDown) {
+                return "peakDown " + h.peakDown + " is below history value " + h.down[i];
+            }
+        }
+        scene.sessionDownBefore = h.sessionDown;
+        return "";
+    }
+
+    // Phase 2: the source switch kept the session total.
+    function sessionProblem() {
+        const total = scene.provider.history.sessionDown;
+        if (total < scene.sessionDownBefore) {
+            return "sessionDown fell from " + scene.sessionDownBefore + " to " + total + " at the source switch";
+        }
+        return scene.virtualProblem();
     }
 
     function fallbackProblem(reason) {
@@ -215,12 +242,12 @@ Item {
             scene.enter(1);
             break;
         case 1:
-            if (scene.settled("sensors", () => "")) {
+            if (scene.settled("sensors", scene.historyProblem)) {
                 scene.enter(2);
             }
             break;
         case 2:
-            if (scene.settled("proc", scene.virtualProblem)) {
+            if (scene.settled("proc", scene.sessionProblem)) {
                 scene.enter(3);
             }
             break;

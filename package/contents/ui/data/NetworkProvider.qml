@@ -8,6 +8,7 @@
 
 import QtQuick
 import "../../code/providerstate.mjs" as ProviderState
+import "../../code/history.mjs" as History
 
 Item {
     id: root
@@ -47,6 +48,10 @@ Item {
     readonly property string errorDetail: internals.view.errorDetail
     // Why auto mode switched to /proc, "" if it did not.
     readonly property string fallbackNote: internals.view.fallbackNote
+    // Rolling traffic history of the included interfaces: down, up and times
+    // lists, peakDown/peakUp, and the session totals sessionDown/sessionUp.
+    // A new object after every sample; see history.mjs.
+    readonly property var history: internals.history
 
     onDataSourceChanged: internals.applyChoice()
     onSensorSourceUrlChanged: internals.applyChoice()
@@ -66,7 +71,10 @@ Item {
             return Math.round(Math.min(10, Math.max(0.5, isFinite(seconds) ? seconds : 1)) * 1000);
         }
 
+        onIntervalMsChanged: internals.history = History.resize(internals.history, History.capacityFor(internals.intervalMs))
+
         property var state: ProviderState.initialState()
+        property var history: History.createHistory(History.capacityFor(internals.intervalMs))
         property real now: Date.now()
         // Everything the views show except `stale`. This binding must not
         // read the clock: derive() builds new objects on every call, so a
@@ -120,6 +128,36 @@ Item {
             internals.state = ProviderState.reduce(internals.state, event);
         }
 
+        // Counter baselines of one source mean nothing for the next.
+        function forgetBaselines() {
+            internals.history = History.resetBaselines(internals.history);
+        }
+
+        // Adds the sample just dispatched to the history. Totals come from the
+        // included interfaces only; an ignored empty sample adds nothing.
+        function recordHistory(now) {
+            if (!internals.view.hasData) {
+                return;
+            }
+            const totals = {};
+            const rows = internals.view.interfaces;
+            for (let i = 0; i < rows.length; i++) {
+                if (rows[i].included) {
+                    totals[rows[i].name] = {
+                        down: rows[i].totalDown,
+                        up: rows[i].totalUp,
+                        known: rows[i].totalsKnown === true
+                    };
+                }
+            }
+            internals.history = History.pushSample(internals.history, {
+                timestamp: now,
+                down: internals.view.down,
+                up: internals.view.up,
+                totals: totals
+            });
+        }
+
         // Loads the source that dataSource and sensorSourceUrl ask for. Does
         // nothing when that is the source already in use, so a change that
         // does not affect the effective source (for example a new
@@ -147,6 +185,7 @@ Item {
             // The old source's data must be gone before the new one can fail
             // or deliver.
             internals.dispatch({ type: "source-changed" });
+            internals.forgetBaselines();
             internals.loadedUrl = url;
             // The loader keeps its item when the URL did not change (for
             // example auto -> sensors), so look at it again.
@@ -165,6 +204,7 @@ Item {
         function fallBack(reason) {
             console.warn("netspeeder: using /proc instead of ksystemstats (" + reason + ")");
             internals.dispatch({ type: "fallback", reason: reason });
+            internals.forgetBaselines();
             internals.fallenBack = true;
             internals.sensorsActive = false;
             internals.interfacesSeen = false;
@@ -268,7 +308,9 @@ Item {
 
         function onSampleReady(sample) {
             internals.lastWarning = "";
-            internals.dispatch({ type: "sample", sample: sample, now: Date.now() });
+            const now = Date.now();
+            internals.dispatch({ type: "sample", sample: sample, now: now });
+            internals.recordHistory(now);
         }
 
         function onFailed(message) {

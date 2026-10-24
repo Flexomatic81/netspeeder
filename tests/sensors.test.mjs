@@ -82,6 +82,7 @@ test("buildSensorSample coerces raw values", () => {
     up: 0,
     totalDown: 5000,
     totalUp: 0,
+    totalsKnown: false,
     kind: "physical",
     online: true,
     label: "Wired 1",
@@ -94,6 +95,7 @@ test("buildSensorSample coerces raw values", () => {
     up: 10,
     totalDown: 1,
     totalUp: 2,
+    totalsKnown: true,
     kind: "virtual",
     online: false,
     label: "",
@@ -140,6 +142,7 @@ test("buildSensorSample keeps NaN and undefined out of every field", () => {
       up: 0,
       totalDown: 0,
       totalUp: 0,
+      totalsKnown: false,
       kind: "physical",
       online: false,
       label: "",
@@ -170,4 +173,18 @@ test("interfaceFromSensorId rejects aggregate and regex group names only", () =>
   assert.equal(interfaceFromSensorId("network/a|b/download"), null);
   assert.equal(interfaceFromSensorId("network/en[p]/download"), null);
   assert.equal(interfaceFromSensorId("network/enp7s0/download/extra"), null);
+});
+test("buildSensorSample tells a counter at 0 from no reading", () => {
+  const s = buildSensorSample(
+    1,
+    {
+      zero: { totalDownload: 0, totalUpload: 0 },
+      missing: { totalDownload: undefined, totalUpload: 5 },
+      nan: { totalDownload: 5, totalUpload: NaN },
+    },
+    null,
+  );
+  assert.equal(s.interfaces.zero.totalsKnown, true);
+  assert.equal(s.interfaces.missing.totalsKnown, false);
+  assert.equal(s.interfaces.nan.totalsKnown, false);
 });
