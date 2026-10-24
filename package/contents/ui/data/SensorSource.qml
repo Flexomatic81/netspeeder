@@ -64,6 +64,31 @@ Item {
             return instances.objectAt(index);
         }
 
+        // The CommandRunner behind the device query, null while it is not
+        // loaded. Its properties are only known at runtime, hence the
+        // untyped result.
+        function deviceRunner(): var {
+            return devicesLoader.item;
+        }
+
+        // Asks which interfaces are hardware-backed. Without a runner there
+        // is nobody to ask and every interface counts as physical.
+        function queryDevices() {
+            const runner = internals.deviceRunner();
+            if (runner !== null) {
+                runner.run();
+            }
+        }
+
+        function applyDeviceList(exitCode, stdout, stderr) {
+            if (exitCode !== 0) {
+                internals.physical = null;
+                console.warn("netspeeder: device query failed (exit " + exitCode + "): " + stderr);
+                return;
+            }
+            internals.physical = Procnetdev.parseDeviceList(stdout);
+        }
+
         // Appends the sensor IDs of all rows below `parent` that are at most
         // `depth` levels deep. Leaves carry an ID, categories and groups do not.
         function collectSensorIds(parent, depth, ids) {
@@ -92,7 +117,7 @@ Item {
             }
             internals.interfaceNames = names;
             internals.syncModel(names);
-            devices.run();
+            internals.queryDevices();
         }
 
         // Brings the delegate model in line with `names` by removing and
@@ -163,19 +188,25 @@ Item {
 
     Component.onCompleted: rescanTimer.start()
 
-    // Tells which interfaces are hardware-backed (kind "physical").
-    CommandRunner {
-        id: devices
+    // Tells which interfaces are hardware-backed (kind "physical"). It is
+    // loaded from its file instead of being declared here: CommandRunner
+    // imports plasma5support, and where that module is missing this source
+    // must still deliver the readings. internals.physical then stays null and
+    // every interface counts as physical.
+    Loader {
+        id: devicesLoader
 
-        command: Procnetdev.DEVICES_COMMAND
+        source: "CommandRunner.qml"
 
-        onFinished: (exitCode, stdout, stderr) => {
-            if (exitCode !== 0) {
-                internals.physical = null;
-                console.warn("netspeeder: device query failed (exit " + exitCode + "): " + stderr);
-                return;
+        onLoaded: {
+            const runner = internals.deviceRunner();
+            runner.command = Procnetdev.DEVICES_COMMAND;
+            runner.finished.connect(internals.applyDeviceList);
+        }
+        onStatusChanged: {
+            if (devicesLoader.status === Loader.Error) {
+                console.warn("netspeeder: device query unavailable, treating every interface as physical");
             }
-            internals.physical = Procnetdev.parseDeviceList(stdout);
         }
     }
 

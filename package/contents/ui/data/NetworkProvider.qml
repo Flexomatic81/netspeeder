@@ -171,6 +171,12 @@ Item {
             internals.appliedKey = internals.appliedMode + "|" + internals.procUrl;
             fallbackTimer.stop();
             internals.loadedUrl = internals.procUrl;
+            // A sensor source that failed to load leaves the loader in the
+            // error state, and /proc failing to load too is no status change,
+            // so it would go unreported.
+            if (loader.status === Loader.Error) {
+                Qt.callLater(internals.handleLoadError);
+            }
         }
 
         // The sensor source cannot be used: auto mode falls back, a fixed
