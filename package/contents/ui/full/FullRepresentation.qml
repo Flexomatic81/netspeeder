@@ -2,13 +2,14 @@
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
 // The popup (and the desktop view): header with the current speeds, the
-// status and a note about the data source, a footer with the button for the
-// system monitor and the active source. The view reads nothing from Plasmoid,
+// status and a note about the data source, the graph, the session figures,
+// the data usage from vnStat, the interfaces, and a footer with the button
+// for the system monitor and the active source. The view reads nothing from Plasmoid,
 // so it also runs in plain qml6 (see tests/qml/PopupSmoke.qml).
 //
-// Everything below the header reads `shown`, a snapshot of the provider that
-// is only refreshed while the popup is active: a closed popup does not
-// compute anything.
+// Everything below the header reads `shown`, a snapshot of the provider and
+// of `usage` that is only refreshed while the popup is active: a closed popup
+// does not compute anything.
 
 import QtQuick
 import QtQuick.Layouts
@@ -17,6 +18,7 @@ import org.kde.kirigami as Kirigami
 import "../../code/format.mjs" as Format
 import "../../code/text.mjs" as TextTools
 import "../../code/tooltip.mjs" as Tooltip
+import "../../code/usage.mjs" as Usage
 
 Item {
     id: root
@@ -47,11 +49,16 @@ Item {
     property int graphMinutes: 5
     // The file of the graph. Only tests point it elsewhere.
     property url graphSource: Qt.resolvedUrl("TrafficGraph.qml")
+    // The data usage: { summary, status, detail, cap, lastUpdated, outdated }
+    // (see UsagePanel). Without a usage source the section stays hidden.
+    property var usage: root.usageOf("disabled")
 
     // The user picked another time span in the graph.
     signal graphMinutesPicked(int minutes)
     // The button for the system monitor was pressed.
     signal openSystemMonitor
+    // The popup became active: the usage should be read again.
+    signal usageRefreshRequested
 
     // The provider values as of the last refresh. Never write it elsewhere.
     readonly property var shown: internals.shown
@@ -63,9 +70,12 @@ Item {
     readonly property Item interfaceList: list
     // The row with the System Monitor button (for the smoke scene).
     readonly property Item footer: footerRow
+    // The usage section (for the smoke scene).
+    readonly property Item usagePanel: usageSection
 
     Layout.preferredWidth: Kirigami.Units.gridUnit * 22
-    Layout.preferredHeight: Kirigami.Units.gridUnit * 30
+    // Never below the minimum, which grows with the usage section.
+    Layout.preferredHeight: Math.max(Kirigami.Units.gridUnit * 30, root.Layout.minimumHeight)
     // The width minimum is fixed: long names, addresses and texts elide
     // instead of widening the popup. The height minimum follows the content:
     // everything that is shown at its own minimum (or, without one, its
@@ -87,7 +97,25 @@ Item {
         return total + Math.max(0, shownCount - 1) * column.spacing + column.anchors.margins * 2;
     }
 
-    // Copies the provider values into `shown`; does nothing while inactive.
+    // A usage input without figures, in `status`.
+    function usageOf(status: string): var {
+        return {
+            summary: Usage.emptySummary(Usage.localNow(new Date()), 1),
+            status: status,
+            detail: "",
+            cap: {
+                enabled: false,
+                percent: 0,
+                level: 0,
+                capBytes: 0
+            },
+            lastUpdated: "",
+            outdated: false
+        };
+    }
+
+    // Copies the provider values and the usage into `shown`; does nothing
+    // while inactive.
     function refresh() {
         if (!root.active) {
             return;
@@ -105,7 +133,8 @@ Item {
             history: root.provider.history,
             errorCode: root.provider.errorCode,
             errorDetail: root.provider.errorDetail,
-            fallbackNote: root.provider.fallbackNote
+            fallbackNote: root.provider.fallbackNote,
+            usage: root.usage
         };
     }
 
@@ -152,7 +181,13 @@ Item {
 
     onActiveChanged: {
         if (root.active) {
+            root.usageRefreshRequested();
             root.refresh();
+        }
+    }
+    onUsageChanged: {
+        if (root.active) {
+            Qt.callLater(root.refresh);
         }
     }
     Component.onCompleted: root.refresh()
@@ -174,7 +209,8 @@ Item {
                 history: null,
                 errorCode: "",
                 errorDetail: "",
-                fallbackNote: ""
+                fallbackNote: "",
+                usage: root.usageOf("loading")
             })
     }
 
@@ -398,6 +434,19 @@ Item {
                 text: "↑ " + root.totalText(root.shown.history ? root.shown.history.sessionUp : 0)
                 font.features: { "tnum": 1 }
             }
+        }
+
+        UsagePanel {
+            id: usageSection
+
+            Layout.fillWidth: true
+            summary: root.shown.usage.summary
+            status: root.shown.usage.status
+            detail: root.shown.usage.detail
+            cap: root.shown.usage.cap
+            lastUpdated: root.shown.usage.lastUpdated
+            outdated: root.shown.usage.outdated
+            formatOptions: root.formatOptions
         }
 
         InterfaceList {

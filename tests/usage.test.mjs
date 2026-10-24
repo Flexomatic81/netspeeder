@@ -16,6 +16,8 @@ import {
   capNotification,
   capAction,
   isOutdated,
+  localNow,
+  dateParts,
 } from "../package/contents/code/usage.mjs";
 
 const fixture = parseVnstat(readFileSync(new URL("./fixtures/vnstat-v2.json", import.meta.url), "utf8"));
@@ -505,4 +507,37 @@ test("isOutdated with an invalid now is outdated", () => {
   assert.equal(isOutdated("2026-10-24T18:30", null), true);
   assert.equal(isOutdated("2026-10-24T18:30", at(2026, 10, 24, 25, 0)), true);
   assert.equal(isOutdated("2026-10-24T18:30", at(2026, 2, 30, 1, 0)), true);
+});
+
+// --- localNow and dateParts -------------------------------------------------
+
+test("localNow reads the local calendar day and time of a Date", () => {
+  assert.deepEqual(localNow(new Date(2026, 9, 24, 18, 5, 59)), { year: 2026, month: 10, day: 24, hour: 18, minute: 5 });
+  assert.deepEqual(localNow(new Date(2027, 0, 1, 0, 0)), { year: 2027, month: 1, day: 1, hour: 0, minute: 0 });
+});
+
+test("localNow without a valid Date is null", () => {
+  assert.equal(localNow(new Date(NaN)), null);
+  assert.equal(localNow("2026-10-24"), null);
+  assert.equal(localNow(null), null);
+});
+
+test("dateParts splits a day key and an update stamp", () => {
+  assert.deepEqual(dateParts("2026-10-24"), { year: 2026, month: 10, day: 24, hour: 0, minute: 0 });
+  assert.deepEqual(dateParts("2026-10-24T18:05"), { year: 2026, month: 10, day: 24, hour: 18, minute: 5 });
+  assert.deepEqual(dateParts("2028-02-29T23:59"), { year: 2028, month: 2, day: 29, hour: 23, minute: 59 });
+});
+
+test("dateParts rejects anything else", () => {
+  for (const value of [
+    "",
+    "2026-02-30",
+    "2026-10-24T24:00",
+    "2026-10-24T18:60",
+    "2026-10-24 18:05",
+    "24.10.2026",
+    null,
+  ]) {
+    assert.equal(dateParts(value), null, String(value));
+  }
 });

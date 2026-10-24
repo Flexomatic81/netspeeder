@@ -9,7 +9,12 @@
 // error hint shown, rows that stay keep their delegate, a click on an address
 // copies it) and the snapshot: while the popup is not active a
 // new provider value changes neither `shown` nor the displayed text, and
-// after it becomes active again both are current at once.
+// after it becomes active again both are current at once. The usage section:
+// hidden while disabled (the minimum height stays), the hints per status, the
+// table with complete and incomplete periods, the data cap bar per level, the
+// untracked interfaces, the vnstat update time and its outdated hint, the
+// minimum size with everything shown, the snapshot while inactive and the
+// refresh request on activation.
 // It cannot see QML warnings itself: read the output of qml6 for the scene as
 // well, it must be free of warnings (scripts/smoke.sh checks that).
 
@@ -21,6 +26,7 @@ import org.kde.kquickcontrolsaddons
 import "../../package/contents/ui/full"
 import "../../package/contents/code/format.mjs" as Format
 import "../../package/contents/code/history.mjs" as History
+import "../../package/contents/code/usage.mjs" as Usage
 
 Item {
     id: scene
@@ -32,6 +38,7 @@ Item {
     property int step: 0
     property int opened: 0
     property int picked: 0
+    property int usageRequests: 0
     // The time the popup gets to settle after a change (Qt.callLater runs in
     // the next event loop pass).
     readonly property int settleMs: 60
@@ -549,7 +556,279 @@ Item {
         }
     ]
 
+    // --- usage -----------------------------------------------------------
+
+    readonly property var usageToday: ({ year: 2026, month: 10, day: 24 })
+    readonly property real gib: 1024 * 1024 * 1024
+    readonly property var noCap: ({ enabled: false, percent: 0, level: 0, capBytes: 0 })
+    readonly property string missingText: "Install vnstat and enable its service to see daily and monthly usage."
+    readonly property string outdatedText: "The vnstat data is not current. Is the vnstat service running?"
+    // The minimum height of the popup with the usage section disabled.
+    property real minimumWithoutUsage: 0
+
+    // vnStat data of eth0 (1 GB down, 0.1 GB up a day) known since `created`.
+    function usageParsed(created: string): var {
+        const days = [];
+        for (let key = created; key <= "2026-10-24"; key = Usage.addDays(key, 1)) {
+            days.push({ date: key, rx: 1000000000, tx: 100000000 });
+        }
+        return {
+            status: "ok",
+            version: "2",
+            interfaces: { eth0: { created: created, updated: "2026-10-24T18:00", days: days } }
+        };
+    }
+
+    function usageSummaryOf(created: string, names: var): var {
+        return Usage.usageSummary(scene.usageParsed(created), names, scene.usageToday, 1);
+    }
+
+    // The usage input of the view; `extra` overrides single fields.
+    function usageOf(status: string, summary: var, extra: var): var {
+        return Object.assign({
+            summary: summary !== null ? summary : Usage.emptySummary(scene.usageToday, 1),
+            status: status,
+            detail: "",
+            cap: scene.noCap,
+            lastUpdated: "",
+            outdated: false
+        }, extra);
+    }
+
+    function capOf(percent: real, level: int): var {
+        return { enabled: true, percent: percent, level: level, capBytes: 100 * scene.gib };
+    }
+
+    // "" when the section is visible and shows `expected` but none of
+    // `absent` (nor any other status hint).
+    function usageProblem(where: string, expected: var, absent: var): string {
+        if (!view.usagePanel.visible || view.usagePanel.height <= 0) {
+            return where + ": the usage section is hidden";
+        }
+        const hints = [scene.missingText, "This vnstat version is not supported.", "Reading vnstat failed", "Loading usage…", scene.outdatedText, "vnstat does not track"];
+        const others = hints.filter(h => !expected.some(e => e.indexOf(h) === 0));
+        return scene.textProblem(where, expected, absent.concat(others));
+    }
+
+    // "" when the cap bar shows `value` in `color` with `text`.
+    function capProblem(where: string, value: real, color: color, text: string): string {
+        const panel = view.usagePanel;
+        if (!panel.capBar.visible) {
+            return where + ": the cap bar is hidden";
+        }
+        if (panel.capBar.from !== 0 || panel.capBar.to !== 100 || panel.capBar.value !== value) {
+            return where + ": the bar shows " + panel.capBar.value + " of " + panel.capBar.from + "…" + panel.capBar.to + ", expected " + value;
+        }
+        if (panel.capColor.toString() !== color.toString()) {
+            return where + ": the cap color is " + panel.capColor + ", expected " + color;
+        }
+        return scene.usageProblem(where, [text], []);
+    }
+
+    readonly property var usageSteps: [
+        {
+            name: "usage disabled",
+            apply: () => {},
+            check: () => {
+                if (view.usagePanel.visible) {
+                    return "usage disabled: the section is visible";
+                }
+                scene.minimumWithoutUsage = view.Layout.minimumHeight;
+                return scene.textProblem("usage disabled", [], ["Today", "vnstat", "Loading usage"]);
+            }
+        },
+        {
+            name: "usage loading",
+            apply: () => {
+                view.usage = scene.usageOf("loading", null, {});
+            },
+            check: () => scene.usageProblem("usage loading", ["Loading usage…"], ["Today"])
+        },
+        {
+            name: "usage of complete periods",
+            apply: () => {
+                view.usage = scene.usageOf("ok", scene.usageSummaryOf("2026-08-20", ["eth0"]), { lastUpdated: "2026-10-24T18:00" });
+            },
+            check: () => {
+                const problem = scene.usageProblem("usage complete", [
+                    "Today", "Yesterday", "This period", "Last period",
+                    "↓ " + scene.totalText(1000000000), "↑ " + scene.totalText(100000000), "Σ " + scene.totalText(1100000000),
+                    "↓ " + scene.totalText(24 * 1000000000), "Σ " + scene.totalText(30 * 1100000000)
+                ], ["(incomplete)", "Loading usage"]);
+                if (problem !== "") {
+                    return problem;
+                }
+                const texts = scene.shownTexts(view, []);
+                const updated = texts.find(t => t.indexOf("vnstat last updated: ") === 0);
+                if (updated === undefined || updated.indexOf("2026-10-24T") >= 0) {
+                    return "usage complete: no formatted update time in [" + texts.join(" | ") + "]";
+                }
+                return view.usagePanel.capBar.visible ? "usage complete: the cap bar is shown without a cap" : "";
+            }
+        },
+        {
+            name: "usage of incomplete periods",
+            apply: () => {
+                view.usage = scene.usageOf("ok", scene.usageSummaryOf("2026-10-05", ["eth0"]), {});
+            },
+            check: () => scene.usageProblem("usage incomplete", ["Today", "This period (incomplete)", "Last period (incomplete)"], ["vnstat last updated"])
+        },
+        {
+            name: "cap at 50 %",
+            apply: () => {
+                view.usage = scene.usageOf("ok", scene.usageSummaryOf("2026-08-20", ["eth0"]), { cap: scene.capOf(50, 0) });
+            },
+            check: () => scene.capProblem("cap 50", 50, Kirigami.Theme.highlightColor, scene.totalText(24 * 1100000000) + " of " + scene.totalText(100 * scene.gib) + " (50 %)")
+        },
+        {
+            name: "cap at 85.5 %",
+            apply: () => {
+                view.usage = scene.usageOf("ok", scene.usageSummaryOf("2026-08-20", ["eth0"]), { cap: scene.capOf(85.5, 1) });
+            },
+            check: () => scene.capProblem("cap 85", 85.5, Kirigami.Theme.neutralTextColor, scene.totalText(24 * 1100000000) + " of " + scene.totalText(100 * scene.gib) + " (85.5 %)")
+        },
+        {
+            name: "cap at 120 %",
+            apply: () => {
+                view.usage = scene.usageOf("ok", scene.usageSummaryOf("2026-08-20", ["eth0"]), { cap: scene.capOf(120, 2) });
+            },
+            check: () => scene.capProblem("cap 120", 100, Kirigami.Theme.negativeTextColor, scene.totalText(24 * 1100000000) + " of " + scene.totalText(100 * scene.gib) + " (120 %)")
+        },
+        {
+            name: "untracked interface",
+            apply: () => {
+                view.usage = scene.usageOf("ok", scene.usageSummaryOf("2026-08-20", ["docker0", "eth0"]), {});
+            },
+            check: () => scene.usageProblem("untracked", ["Today", "vnstat does not track docker0"], [])
+        },
+        {
+            name: "outdated data",
+            apply: () => {
+                view.usage = scene.usageOf("ok", scene.usageSummaryOf("2026-08-20", ["eth0"]), { lastUpdated: "2026-10-20T18:00", outdated: true });
+            },
+            check: () => scene.usageProblem("outdated", ["Today", scene.outdatedText], [])
+        },
+        {
+            name: "vnstat missing",
+            apply: () => {
+                view.usage = scene.usageOf("missing", null, {});
+            },
+            check: () => scene.usageProblem("missing", [scene.missingText, "vnstat website"], ["Today", "vnstat last updated"])
+        },
+        {
+            name: "vnstat unsupported",
+            apply: () => {
+                view.usage = scene.usageOf("unsupported", null, {});
+            },
+            check: () => scene.usageProblem("unsupported", ["This vnstat version is not supported."], ["Today", "vnstat website"])
+        },
+        {
+            name: "vnstat failed",
+            apply: () => {
+                view.usage = scene.usageOf("error", null, { detail: "boom2" });
+            },
+            check: () => scene.usageProblem("error", ["Reading vnstat failed: boom2"], ["Today"])
+        },
+        {
+            name: "everything in the usage section",
+            apply: () => {
+                stub.errorCode = "source-failed";
+                view.usage = scene.usageOf("ok", scene.usageSummaryOf("2026-10-05", ["docker0", "eth0"]), {
+                    cap: scene.capOf(85.5, 1),
+                    lastUpdated: "2026-10-20T18:00",
+                    outdated: true
+                });
+            },
+            check: () => scene.usageProblem("full usage", ["Today", "This period (incomplete)", scene.outdatedText, "vnstat does not track docker0", "Reading network data failed: boom"], [])
+        },
+        {
+            name: "preferred size with the usage section",
+            apply: () => {},
+            check: () => view.height >= view.Layout.minimumHeight ? scene.layoutProblem("preferred with usage") : "preferred with usage: the popup is " + view.height + " px high, below its minimum " + view.Layout.minimumHeight
+        },
+        {
+            name: "minimum size with the usage section",
+            apply: () => {
+                const problem = scene.minimumProblem("minimum with usage");
+                if (problem !== "") {
+                    scene.fail(problem);
+                }
+            },
+            check: () => ""
+        },
+        {
+            // The hints wrap into more lines at the narrower width, which
+            // raises the minimum; Plasma follows it, so the scene does too.
+            name: "minimum size with the usage section after wrapping",
+            apply: () => {
+                view.height = view.Layout.minimumHeight;
+            },
+            check: () => {
+                if (view.height !== view.Layout.minimumHeight) {
+                    return "minimum with usage: the minimum moved again to " + view.Layout.minimumHeight + " at " + view.height;
+                }
+                return scene.layoutProblem("minimum with usage");
+            }
+        },
+        {
+            name: "back to the preferred size with usage",
+            apply: () => {
+                stub.errorCode = "";
+                view.width = Qt.binding(() => view.Layout.preferredWidth);
+                view.height = Qt.binding(() => view.Layout.preferredHeight);
+            },
+            check: () => scene.layoutProblem("restore with usage")
+        },
+        {
+            name: "usage while inactive",
+            apply: () => {
+                scene.before = {
+                    usage: view.shown.usage,
+                    text: scene.shownTexts(view, []).join("|")
+                };
+                view.active = false;
+                view.usage = scene.usageOf("error", null, { detail: "late" });
+            },
+            check: () => {
+                if (view.shown.usage !== scene.before.usage) {
+                    return "usage inactive: shown.usage changed while inactive";
+                }
+                const now = scene.shownTexts(view, []).join("|");
+                return now === scene.before.text ? "" : "usage inactive: the displayed text changed while inactive: " + now;
+            }
+        },
+        {
+            name: "usage after activation",
+            apply: () => {
+                scene.usageRequests = 0;
+                view.active = true;
+            },
+            check: () => {
+                if (scene.usageRequests !== 1) {
+                    return "usage active: usageRefreshRequested was sent " + scene.usageRequests + " times, expected 1";
+                }
+                return scene.usageProblem("usage active", ["Reading vnstat failed: late"], []);
+            }
+        },
+        {
+            name: "usage disabled again",
+            apply: () => {
+                view.usage = scene.usageOf("disabled", null, {});
+            },
+            check: () => {
+                if (view.usagePanel.visible) {
+                    return "usage disabled again: the section is visible";
+                }
+                if (view.Layout.minimumHeight !== scene.minimumWithoutUsage) {
+                    return "usage disabled again: the minimum height is " + view.Layout.minimumHeight + ", expected " + scene.minimumWithoutUsage;
+                }
+                return scene.textProblem("usage disabled again", [], ["Today", "vnstat"]);
+            }
+        }
+    ]
+
     property var before: ({})
+    readonly property var allSteps: scene.steps.concat(scene.usageSteps)
 
     // "" when the view, sized to its own minimum, keeps the graph and the list
     // at their minimum and the footer completely inside, nothing overlapping.
@@ -576,7 +855,8 @@ Item {
         if (list.oneRowHeight < tallest - 0.5 || list.height < tallest - 0.5) {
             return where + ": the list is " + list.height + " px high (minimum " + list.oneRowHeight + "), below one full row of " + tallest;
         }
-        const items = [graph, list, footer];
+        const usage = view.usagePanel;
+        const items = usage.visible ? [graph, usage, list, footer] : [graph, list, footer];
         let previousBottom = 0;
         for (const item of items) {
             const top = item.mapToItem(view, 0, 0).y;
@@ -633,11 +913,11 @@ Item {
             if (scene.done) {
                 return;
             }
-            if (scene.step >= scene.steps.length) {
+            if (scene.step >= scene.allSteps.length) {
                 stepper.running = false;
                 return;
             }
-            const current = scene.steps[scene.step];
+            const current = scene.allSteps[scene.step];
             if (!stepper.applied) {
                 current.apply();
                 stepper.applied = true;
@@ -659,7 +939,7 @@ Item {
         id: input
 
         name: "input"
-        when: scene.step >= scene.steps.length && !scene.done
+        when: scene.step >= scene.allSteps.length && !scene.done
 
         function test_button() {
             input.pressButton();
@@ -759,5 +1039,6 @@ Item {
         height: Layout.preferredHeight
         onOpenSystemMonitor: scene.opened++
         onGraphMinutesPicked: minutes => scene.picked = minutes
+        onUsageRefreshRequested: scene.usageRequests++
     }
 }

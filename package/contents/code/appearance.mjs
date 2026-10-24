@@ -180,6 +180,11 @@ export function validInt(value, min, max, fallback) {
   return Number.isInteger(value) && value >= min && value <= max ? value : fallback;
 }
 
+// `value` when it is a positive finite number, otherwise `fallback`.
+export function validPositive(value, fallback) {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
 // The units of the threshold editor; each is 1024 times the one before.
 export const BYTE_UNITS = ["B/s", "KiB/s", "MiB/s", "GiB/s"];
 const UNIT_FACTOR = 1024;

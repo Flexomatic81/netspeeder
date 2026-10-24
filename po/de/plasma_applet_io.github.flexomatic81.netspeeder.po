@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: netspeeder\n"
 "Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
-"POT-Creation-Date: 2026-10-24 20:48+0200\n"
+"POT-Creation-Date: 2026-10-24 21:48+0200\n"
 "PO-Revision-Date: 2026-10-24 01:44+0200\n"
 "Last-Translator: Flexomatic81\n"
 "Language-Team: German\n"
@@ -50,12 +50,12 @@ msgstr "„%1“ konnte nicht gestartet werden."
 
 #: package/contents/code/tooltip.mjs:18
 #: package/contents/ui/config/ConfigData.qml:231
-#: package/contents/ui/full/FullRepresentation.qml:134
+#: package/contents/ui/full/FullRepresentation.qml:163
 msgid "Waiting for network data…"
 msgstr "Warten auf Netzwerkdaten …"
 
 #: package/contents/code/tooltip.mjs:21
-#: package/contents/ui/full/FullRepresentation.qml:137
+#: package/contents/ui/full/FullRepresentation.qml:166
 msgid "No current data"
 msgstr "Keine aktuellen Daten"
 
@@ -64,7 +64,7 @@ msgid "No selected network interface available"
 msgstr "Keine ausgewählte Netzwerkschnittstelle verfügbar"
 
 #: package/contents/code/tooltip.mjs:27
-#: package/contents/ui/full/FullRepresentation.qml:139
+#: package/contents/ui/full/FullRepresentation.qml:168
 msgid "Offline"
 msgstr "Offline"
 
@@ -357,12 +357,12 @@ msgid "Applications (*.desktop)"
 msgstr "Anwendungen (*.desktop)"
 
 #: package/contents/ui/config/ConfigData.qml:123
-#: package/contents/ui/full/FullRepresentation.qml:145
+#: package/contents/ui/full/FullRepresentation.qml:174
 msgid "System sensors"
 msgstr "Systemsensoren"
 
 #: package/contents/ui/config/ConfigData.qml:125
-#: package/contents/ui/full/FullRepresentation.qml:147
+#: package/contents/ui/full/FullRepresentation.qml:176
 msgid "Kernel counters"
 msgstr "Kernel-Zähler"
 
@@ -533,30 +533,30 @@ msgstr "Stufe entfernen"
 msgid "Add level"
 msgstr "Stufe hinzufügen"
 
-#: package/contents/ui/full/FullRepresentation.qml:139
+#: package/contents/ui/full/FullRepresentation.qml:168
 msgid "Online"
 msgstr "Online"
 
-#: package/contents/ui/full/FullRepresentation.qml:322
+#: package/contents/ui/full/FullRepresentation.qml:358
 msgctxt "@info"
 msgid "The traffic graph is not available because Qt Quick Charts is missing."
 msgstr "Das Verkehrsdiagramm ist nicht verfügbar, weil Qt Quick Charts fehlt."
 
-#: package/contents/ui/full/FullRepresentation.qml:369
+#: package/contents/ui/full/FullRepresentation.qml:405
 msgctxt "@label"
 msgid "Peak"
 msgstr "Spitze"
 
-#: package/contents/ui/full/FullRepresentation.qml:386
+#: package/contents/ui/full/FullRepresentation.qml:422
 msgctxt "@label"
 msgid "This session"
 msgstr "Diese Sitzung"
 
-#: package/contents/ui/full/FullRepresentation.qml:420
+#: package/contents/ui/full/FullRepresentation.qml:469
 msgid "Open System Monitor"
 msgstr "Systemmonitor öffnen"
 
-#: package/contents/ui/full/FullRepresentation.qml:427
+#: package/contents/ui/full/FullRepresentation.qml:476
 msgctxt "@info"
 msgid "Source: %1"
 msgstr "Quelle: %1"
@@ -592,10 +592,71 @@ msgctxt "@option:radio time span of the graph"
 msgid "%1 min"
 msgstr "%1 Min."
 
-#: package/contents/ui/main.qml:139
+#: package/contents/ui/full/UsagePanel.qml:69
+msgctxt "@label"
+msgid "Today"
+msgstr "Heute"
+
+#: package/contents/ui/full/UsagePanel.qml:70
+msgctxt "@label"
+msgid "Yesterday"
+msgstr "Gestern"
+
+#: package/contents/ui/full/UsagePanel.qml:71
+msgctxt "@label"
+msgid "This period"
+msgstr "Dieser Zeitraum"
+
+#: package/contents/ui/full/UsagePanel.qml:72
+msgctxt "@label"
+msgid "Last period"
+msgstr "Letzter Zeitraum"
+
+#: package/contents/ui/full/UsagePanel.qml:76
+msgctxt "@info"
+msgid "(incomplete)"
+msgstr "(unvollständig)"
+
+#: package/contents/ui/full/UsagePanel.qml:118
+msgid "Install vnstat and enable its service to see daily and monthly usage."
+msgstr "Installieren Sie vnstat und aktivieren Sie dessen Dienst, um den täglichen und monatlichen Verbrauch zu sehen."
+
+#: package/contents/ui/full/UsagePanel.qml:120
+msgid "This vnstat version is not supported."
+msgstr "Diese vnstat-Version wird nicht unterstützt."
+
+#: package/contents/ui/full/UsagePanel.qml:122
+msgid "Reading vnstat failed: %1"
+msgstr "Lesen von vnstat fehlgeschlagen: %1"
+
+#: package/contents/ui/full/UsagePanel.qml:124
+msgid "Loading usage…"
+msgstr "Verbrauch wird geladen…"
+
+#: package/contents/ui/full/UsagePanel.qml:172
+msgid "%1 of %2 (%3 %)"
+msgstr "%1 von %2 (%3 %)"
+
+#: package/contents/ui/full/UsagePanel.qml:193
+msgid "vnstat last updated: %1"
+msgstr "vnstat zuletzt aktualisiert: %1"
+
+#: package/contents/ui/full/UsagePanel.qml:202
+msgid "The vnstat data is not current. Is the vnstat service running?"
+msgstr "Die vnstat-Daten sind nicht aktuell. Läuft der vnstat-Dienst?"
+
+#: package/contents/ui/full/UsagePanel.qml:210
+msgid "vnstat does not track %1"
+msgstr "vnstat erfasst %1 nicht"
+
+#: package/contents/ui/full/UsagePanel.qml:229
+msgid "vnstat website"
+msgstr "vnstat-Website"
+
+#: package/contents/ui/main.qml:163
 msgid "Network"
 msgstr "Netzwerk"
 
-#: package/contents/ui/main.qml:180
+#: package/contents/ui/main.qml:232
 msgid "Netspeeder"
 msgstr "Netspeeder"

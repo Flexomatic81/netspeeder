@@ -306,14 +306,45 @@ function minuteOf(date, hour, minute) {
   return dayNumber(date) * MINUTES_PER_DAY + hour * 60 + minute;
 }
 
-function stampMinutes(stamp) {
+// "YYYY-MM-DDTHH:MM" -> { year, month, day, hour, minute }, or null.
+function parseStamp(stamp) {
   const m = STAMP_PATTERN.exec(String(stamp));
   if (m === null) return null;
-  const date = { year: Number(m[1]), month: Number(m[2]), day: Number(m[3]) };
-  const hour = Number(m[4]);
-  const minute = Number(m[5]);
-  if (!isValidDate(date) || hour > 23 || minute > 59) return null;
-  return minuteOf(date, hour, minute);
+  const parts = {
+    year: Number(m[1]),
+    month: Number(m[2]),
+    day: Number(m[3]),
+    hour: Number(m[4]),
+    minute: Number(m[5]),
+  };
+  return isValidDate(parts) && parts.hour <= 23 && parts.minute <= 59 ? parts : null;
+}
+
+function stampMinutes(stamp) {
+  const parts = parseStamp(stamp);
+  return parts === null ? null : minuteOf(parts, parts.hour, parts.minute);
+}
+
+// A day key ("YYYY-MM-DD", at 00:00) or an update stamp
+// ("YYYY-MM-DDTHH:MM") as { year, month, day, hour, minute }, so the views
+// can build a local Date for display; null for anything else.
+export function dateParts(text) {
+  const day = parseKey(text);
+  return day !== null ? { year: day.year, month: day.month, day: day.day, hour: 0, minute: 0 } : parseStamp(text);
+}
+
+// The local calendar day and time of a Date as { year, month, day, hour,
+// minute } (what usageSummary takes as today and isOutdated as now); null
+// for anything but a valid Date.
+export function localNow(date) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+  return {
+    year: date.getFullYear(),
+    month: date.getMonth() + 1,
+    day: date.getDate(),
+    hour: date.getHours(),
+    minute: date.getMinutes(),
+  };
 }
 
 function nowMinutes(now) {

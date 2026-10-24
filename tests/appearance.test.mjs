@@ -24,6 +24,7 @@ import {
   unitLimit,
   validChoice,
   validInt,
+  validPositive,
 } from "../package/contents/code/appearance.mjs";
 
 const MIB = 1048576;
@@ -221,6 +222,15 @@ test("validInt accepts integers in range and falls back to the default", () => {
   assert.equal(validInt("150", 50, 200, 100), 100);
   assert.equal(validInt(NaN, 50, 200, 100), 100);
   assert.equal(validInt(undefined, 50, 200, 100), 100);
+});
+
+test("validPositive accepts positive finite numbers and falls back to the default", () => {
+  assert.equal(validPositive(100, 100), 100);
+  assert.equal(validPositive(0.5, 100), 0.5);
+  assert.equal(validPositive(2048.25, 100), 2048.25);
+  for (const value of [0, -1, NaN, Infinity, "50", null, undefined]) {
+    assert.equal(validPositive(value, 100), 100, String(value));
+  }
 });
 
 test("validChoice accepts listed values and falls back to the default", () => {
