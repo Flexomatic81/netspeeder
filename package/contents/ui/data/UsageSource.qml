@@ -34,6 +34,8 @@ Item {
     // Number of runs actually started.
     readonly property int runs: internals.runs
     readonly property bool busy: runner.busy
+    // Number of warnings logged so far (tests check that each is logged once).
+    readonly property int warnings: internals.warnings
 
     // Starts a run. Ignored while disabled or while a run is in progress.
     function refresh() {
@@ -41,6 +43,7 @@ Item {
             return;
         }
         internals.runs += 1;
+        internals.startedIn = internals.generation;
         runner.command = root.command;
         runner.run();
     }
@@ -53,6 +56,11 @@ Item {
         property string detail: ""
         property string lastUpdated: ""
         property int runs: 0
+        property int warnings: 0
+        // Counts enabled changes; a run that started in an earlier
+        // generation is stale and its result is dropped.
+        property int generation: 0
+        property int startedIn: 0
         // The last state that was logged, so a repeated one is logged once.
         property string warned: ""
 
@@ -72,12 +80,13 @@ Item {
             internals.detail = detail;
             const loud = status === "unsupported" || status === "error";
             if (loud && internals.warned !== status + detail) {
+                internals.warnings += 1;
                 console.warn("netspeeder: vnstat " + status + (detail !== "" ? " (" + detail + ")" : ""));
             }
             internals.warned = loud ? status + detail : "";
         }
 
-        function failure(exitCode, stdout, stderr) {
+        function failure(exitCode, stderr) {
             if (exitCode === -2) {
                 internals.setStatus("error", "timeout");
             } else if (exitCode === 127 || stderr.indexOf("not found") >= 0) {
@@ -94,8 +103,11 @@ Item {
                 internals.setStatus("error", "invalid output");
                 return;
             }
-            internals.parsed = result;
-            internals.lastUpdated = internals.newest(result);
+            // Only readable current-format data replaces the last good result.
+            if (result.status === "ok") {
+                internals.parsed = result;
+                internals.lastUpdated = internals.newest(result);
+            }
             internals.setStatus(result.status, "");
         }
 
@@ -103,7 +115,7 @@ Item {
             if (exitCode === 0) {
                 internals.accept(stdout);
             } else {
-                internals.failure(exitCode, stdout, stderr);
+                internals.failure(exitCode, stderr);
             }
         }
     }
@@ -113,10 +125,17 @@ Item {
 
         timeoutMs: root.timeoutMs
         onFinished: (exitCode, stdout, stderr) => {
-            // A result that arrives after disabling is dropped.
-            if (root.enabled) {
-                internals.handle(exitCode, stdout, stderr);
+            // A result that arrives after disabling, or from a run that
+            // started before the last enabled change, is dropped.
+            if (!root.enabled) {
+                return;
             }
+            if (internals.startedIn !== internals.generation) {
+                // Enabled again while the old run was still going: start anew.
+                root.refresh();
+                return;
+            }
+            internals.handle(exitCode, stdout, stderr);
         }
     }
 
@@ -127,6 +146,9 @@ Item {
         onTriggered: root.refresh()
     }
 
-    onEnabledChanged: root.refresh()
+    onEnabledChanged: {
+        internals.generation += 1;
+        root.refresh();
+    }
     Component.onCompleted: root.refresh()
 }
