@@ -63,7 +63,7 @@ Item {
     readonly property Item interfaceList: list
 
     Layout.preferredWidth: Kirigami.Units.gridUnit * 22
-    Layout.preferredHeight: Kirigami.Units.gridUnit * 26
+    Layout.preferredHeight: Kirigami.Units.gridUnit * 30
     Layout.minimumWidth: Kirigami.Units.gridUnit * 18
     Layout.minimumHeight: Kirigami.Units.gridUnit * 20
 
@@ -219,39 +219,63 @@ Item {
 
             Kirigami.Heading {
                 Layout.fillWidth: true
-                level: 2
+                level: 3
                 text: root.speedLine("↓", root.shown.down)
                 elide: Text.ElideRight
             }
 
             Kirigami.Heading {
                 Layout.fillWidth: true
-                level: 2
+                level: 3
                 text: root.speedLine("↑", root.shown.up)
                 elide: Text.ElideRight
             }
         }
 
-        QQC2.Label {
+        // Name, address and status in one line; the name gives way first.
+        RowLayout {
             Layout.fillWidth: true
-            visible: text !== ""
-            text: root.shown.primaryLabel
-            elide: Text.ElideRight
-        }
+            spacing: Kirigami.Units.smallSpacing
 
-        QQC2.Label {
-            Layout.fillWidth: true
-            visible: text !== ""
-            text: root.shown.primaryIp
-            opacity: 0.7
-            elide: Text.ElideRight
-        }
+            QQC2.Label {
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+                visible: text !== ""
+                text: root.shown.primaryLabel
+                font: Kirigami.Theme.smallFont
+                opacity: 0.7
+                elide: Text.ElideRight
+            }
 
-        QQC2.Label {
-            Layout.fillWidth: true
-            text: root.statusText(root.shown)
-            opacity: 0.7
-            elide: Text.ElideRight
+            QQC2.Label {
+                visible: root.shown.primaryLabel !== "" && root.shown.primaryIp !== ""
+                text: "·"
+                font: Kirigami.Theme.smallFont
+                opacity: 0.7
+            }
+
+            QQC2.Label {
+                visible: text !== ""
+                text: root.shown.primaryIp
+                font: Kirigami.Theme.smallFont
+                opacity: 0.7
+            }
+
+            QQC2.Label {
+                visible: root.shown.primaryLabel !== "" || root.shown.primaryIp !== ""
+                text: "·"
+                font: Kirigami.Theme.smallFont
+                opacity: 0.7
+            }
+
+            QQC2.Label {
+                Layout.fillWidth: !(root.shown.primaryLabel !== "")
+                Layout.minimumWidth: 0
+                text: root.statusText(root.shown)
+                font: Kirigami.Theme.smallFont
+                opacity: 0.7
+                elide: Text.ElideRight
+            }
         }
 
         // The note about the data source. Not a Kirigami.InlineMessage: its
@@ -287,7 +311,7 @@ Item {
 
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight: Kirigami.Units.gridUnit * 3
+            Layout.minimumHeight: Kirigami.Units.gridUnit * 6
             source: root.graphSource
 
             QQC2.Label {
@@ -379,7 +403,7 @@ Item {
 
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight: Kirigami.Units.gridUnit * 3
+            Layout.minimumHeight: list.twoRowsHeight
             interfaces: root.shown.interfaces
             formatOptions: root.formatOptions
         }

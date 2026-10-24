@@ -215,7 +215,45 @@ Item {
         if (size !== "") {
             return size;
         }
+        const room = scene.roomProblem("interfaces", "eth0");
+        if (room !== "") {
+            return room;
+        }
         return view.height === view.Layout.preferredHeight ? "" : "interfaces: the popup is " + view.height + " px high";
+    }
+
+    // "" when the popup at its preferred size gives the graph at least six
+    // grid units, shows the row of `name` completely (second line included)
+    // at the top of the list, and every label of the speed axis is round.
+    function roomProblem(where: string, name: string): string {
+        const unit = Kirigami.Units.gridUnit;
+        const graph = view.graphItem;
+        if (graph === null) {
+            return where + ": the graph is not loaded";
+        }
+        if (graph.height < unit * 6) {
+            return where + ": the graph is " + graph.height + " px high, expected at least " + unit * 6;
+        }
+        const list = view.interfaceList;
+        const row = list.rowFor(name);
+        if (row === null) {
+            return where + ": there is no row for " + name;
+        }
+        const top = row.mapToItem(list, 0, 0).y;
+        const bottom = row.mapToItem(list, 0, row.height).y;
+        if (top < 0 || bottom > list.viewportHeight || row.height < row.implicitHeight) {
+            return where + ": the row of " + name + " is cut (top " + top + ", bottom " + bottom + ", view " + list.viewportHeight + ", row " + row.height + " of " + row.implicitHeight + ")";
+        }
+        const labels = graph.axisLabels.filter(label => label !== "");
+        if (labels.length < 3 || labels[0].indexOf("0") !== 0) {
+            return where + ": the axis shows " + labels.length + " labels [" + labels.join(" | ") + "]";
+        }
+        for (const label of labels) {
+            if (!/^\d+(\.[05]0?)?( \S+)?$/.test(label)) {
+                return where + ": the axis label '" + label + "' is not round in [" + labels.join(" | ") + "]";
+            }
+        }
+        return "";
     }
 
     // "" when the row of `name` is the object it was before.
@@ -367,6 +405,13 @@ Item {
             }
         },
         {
+            name: "one interface at the preferred size",
+            apply: () => {
+                stub.interfaces = scene.interfaceRows(1000).slice(0, 1);
+            },
+            check: () => view.height === view.Layout.preferredHeight ? scene.roomProblem("one interface", "eth0") : "one interface: the popup is " + view.height + " px high"
+        },
+        {
             name: "interfaces, figures and hint",
             apply: () => {
                 stub.history = scene.totalsHistory();
@@ -416,7 +461,7 @@ Item {
         if (view.Layout.minimumWidth < unit * 18 || view.Layout.minimumHeight < unit * 20) {
             return "size: minimum is " + view.Layout.minimumWidth + "x" + view.Layout.minimumHeight + ", expected at least " + unit * 18 + "x" + unit * 20;
         }
-        if (view.Layout.preferredWidth !== unit * 22 || view.Layout.preferredHeight !== unit * 26) {
+        if (view.Layout.preferredWidth !== unit * 22 || view.Layout.preferredHeight !== unit * 30) {
             return "size: preferred is " + view.Layout.preferredWidth + "x" + view.Layout.preferredHeight;
         }
         if (view.width < view.Layout.minimumWidth || view.height < view.Layout.minimumHeight) {

@@ -3,7 +3,13 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { axisScale, graphWindow, validMinutes } from "../package/contents/code/graph.mjs";
+import {
+  axisLabelIndices,
+  axisScale,
+  graphWindow,
+  pickDistinct,
+  validMinutes,
+} from "../package/contents/code/graph.mjs";
 import { formatSpeed } from "../package/contents/code/format.mjs";
 
 const MIN = 60000;
@@ -59,34 +65,80 @@ const BITS = { unitSystem: "bits" };
 const KiB = 1024;
 const MiB = 1024 * 1024;
 
-test("axisScale picks a nice limit in the displayed unit, in four steps", () => {
-  assert.deepEqual(axisScale(1500), { max: 2 * KiB, step: KiB / 2 });
-  assert.deepEqual(axisScale(2 * KiB), { max: 2 * KiB, step: KiB / 2 });
-  assert.deepEqual(axisScale(977 * KiB), { max: MiB, step: MiB / 4 });
-  assert.deepEqual(axisScale(7 * MiB), { max: 10 * MiB, step: (10 * MiB) / 4 });
-  assert.deepEqual(axisScale(600 * KiB), { max: MiB, step: MiB / 4 });
-  assert.deepEqual(axisScale(1.5 * MiB, { unitSystem: "iec" }), { max: 2 * MiB, step: MiB / 2 });
+test("axisScale picks a nice limit in the displayed unit with round steps", () => {
+  assert.deepEqual(axisScale(1500), { max: 2 * KiB, step: KiB / 2, steps: 4 });
+  assert.deepEqual(axisScale(2 * KiB), { max: 2 * KiB, step: KiB / 2, steps: 4 });
+  assert.deepEqual(axisScale(977 * KiB), { max: MiB, step: MiB / 4, steps: 4 });
+  assert.deepEqual(axisScale(7 * MiB), { max: 10 * MiB, step: 2 * MiB, steps: 5 });
+  assert.deepEqual(axisScale(600 * KiB), { max: MiB, step: MiB / 4, steps: 4 });
+  assert.deepEqual(axisScale(1.5 * MiB, { unitSystem: "iec" }), { max: 2 * MiB, step: MiB / 2, steps: 4 });
+  assert.deepEqual(axisScale(3.5 * MiB), { max: 5 * MiB, step: MiB, steps: 5 });
+  assert.deepEqual(axisScale(30 * MiB), { max: 50 * MiB, step: 10 * MiB, steps: 5 });
+  assert.deepEqual(axisScale(150 * MiB), { max: 200 * MiB, step: 50 * MiB, steps: 4 });
 });
 
 test("axisScale in si and bits works on the factor and the bit scale", () => {
-  assert.deepEqual(axisScale(1500, SI), { max: 2000, step: 500 });
-  assert.deepEqual(axisScale(1e6, SI), { max: 1e6, step: 250000 });
-  assert.deepEqual(axisScale(1.2e6, SI), { max: 2e6, step: 500000 });
+  assert.deepEqual(axisScale(1500, SI), { max: 2000, step: 500, steps: 4 });
+  assert.deepEqual(axisScale(1e6, SI), { max: 1e6, step: 250000, steps: 4 });
+  assert.deepEqual(axisScale(1.2e6, SI), { max: 2e6, step: 500000, steps: 4 });
   // 1 MB/s is 8 Mbit/s, so the limit is 10 Mbit/s = 1.25 MB/s
-  assert.deepEqual(axisScale(1e6, BITS), { max: 1.25e6, step: 312500 });
-  assert.deepEqual(axisScale(100, BITS), { max: 125, step: 31.25 });
+  assert.deepEqual(axisScale(1e6, BITS), { max: 1.25e6, step: 250000, steps: 5 });
+  assert.deepEqual(axisScale(100, BITS), { max: 125, step: 31.25, steps: 4 });
 });
 
 test("axisScale returns the smallest axis for invalid input and small values", () => {
-  assert.deepEqual(axisScale(0), { max: 1024, step: 256 });
-  assert.deepEqual(axisScale(900), { max: 1024, step: 256 });
-  assert.deepEqual(axisScale(1024), { max: 1024, step: 256 });
-  assert.deepEqual(axisScale(NaN), { max: 1024, step: 256 });
-  assert.deepEqual(axisScale(Infinity), { max: 1024, step: 256 });
-  assert.deepEqual(axisScale("5"), { max: 1024, step: 256 });
-  assert.deepEqual(axisScale(999, SI), { max: 1000, step: 250 });
-  assert.deepEqual(axisScale(100, BITS), { max: 125, step: 31.25 });
-  assert.deepEqual(axisScale(10, BITS), { max: 125, step: 31.25 });
+  assert.deepEqual(axisScale(0), { max: 1024, step: 256, steps: 4 });
+  assert.deepEqual(axisScale(900), { max: 1024, step: 256, steps: 4 });
+  assert.deepEqual(axisScale(1024), { max: 1024, step: 256, steps: 4 });
+  assert.deepEqual(axisScale(NaN), { max: 1024, step: 256, steps: 4 });
+  assert.deepEqual(axisScale(Infinity), { max: 1024, step: 256, steps: 4 });
+  assert.deepEqual(axisScale("5"), { max: 1024, step: 256, steps: 4 });
+  assert.deepEqual(axisScale(999, SI), { max: 1000, step: 250, steps: 4 });
+  assert.deepEqual(axisScale(100, BITS), { max: 125, step: 31.25, steps: 4 });
+  assert.deepEqual(axisScale(10, BITS), { max: 125, step: 31.25, steps: 4 });
+});
+
+test("every grid label is a round value that covers 0 to the limit", () => {
+  const options = [{ unitSystem: "iec" }, SI, BITS, { unitSystem: "iec", decimals: 2 }];
+  for (const opts of options) {
+    for (let v = 1100; v < 4e9; v *= 1.37) {
+      const { max, step, steps } = axisScale(v, opts);
+      assert.ok(steps === 4 || steps === 5, `${steps} steps`);
+      assert.ok(Math.abs(step * steps - max) < 1e-6 * max, `${step} x ${steps} is not ${max}`);
+      for (let i = 0; i <= steps; i++) {
+        const label = formatSpeed(step * i, Object.assign({}, opts, { lowSpeedThreshold: 0 }));
+        // at most one decimal, and that one is a five (0.5, 1.5), never 3.8
+        assert.match(
+          label.value,
+          /^\d+(\.[05]0?)?$/,
+          `${opts.unitSystem}: ${v} step ${i} -> ${label.value} ${label.unit}`,
+        );
+      }
+    }
+  }
+});
+
+test("pickDistinct returns the first candidate that is clearly away from the base", () => {
+  const orange = { r: 1, g: 0.5, b: 0.1 };
+  const nearOrange = { r: 0.95, g: 0.55, b: 0.1 };
+  const green = { r: 0.4, g: 0.6, b: 0.4 };
+  const teal = { r: 0, g: 0.67, b: 0.5 };
+  assert.equal(pickDistinct(orange, [green, teal]), 0);
+  assert.equal(pickDistinct(orange, [nearOrange, teal, green]), 1);
+  assert.equal(pickDistinct(orange, [nearOrange, orange, orange]), 2);
+  assert.equal(pickDistinct(orange, [nearOrange]), 0);
+  assert.equal(pickDistinct(orange, []), -1);
+});
+
+test("axisLabelIndices keeps every label when there is room", () => {
+  assert.deepEqual(axisLabelIndices(4, 200, 14), [0, 1, 2, 3, 4]);
+  assert.deepEqual(axisLabelIndices(5, 5 * 14 * 1.6, 14), [0, 1, 2, 3, 4, 5]);
+});
+
+test("axisLabelIndices thins to every second label and keeps 0 and the top", () => {
+  assert.deepEqual(axisLabelIndices(4, 80, 14), [0, 2, 4]);
+  assert.deepEqual(axisLabelIndices(5, 80, 14), [0, 2, 5]);
+  assert.deepEqual(axisLabelIndices(5, 0, 14), [0, 2, 5]);
 });
 
 test("the label of the limit is a round number in every unit system", () => {

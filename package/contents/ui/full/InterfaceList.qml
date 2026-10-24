@@ -47,6 +47,9 @@ Item {
     // The height of all rows and of the visible part (for the smoke scene).
     readonly property real contentHeight: column.implicitHeight
     readonly property real viewportHeight: scroll.availableHeight
+    // The height of two rows (or of all, when there are fewer), so the list
+    // never shows less than that; the average row stands for both.
+    readonly property real twoRowsHeight: rowModel.count === 0 ? 0 : Math.min(rowModel.count, 2) * (column.implicitHeight + column.spacing) / rowModel.count - column.spacing
 
     // The row item of `name`; null if there is none.
     function rowFor(name: string): var {
