@@ -34,6 +34,11 @@ expected_lines() {
       # owns that process when the scene exits.
       echo '^QProcess: Destroyed while process \("/bin/sh"\) is still running\.$'
       ;;
+    UsageSourceSmoke.qml)
+      # The scene abandons a "sleep" through the time limit; the engine still
+      # owns that process when the scene exits.
+      echo '^QProcess: Destroyed while process \("/bin/sh"\) is still running\.$'
+      ;;
     PopupGraphFailSmoke.qml)
       # The scene loads a graph file that imports a module that does not exist.
       echo '^file://.*/tests/qml/BrokenGraph\.qml:[0-9]+:[0-9]+: module "org\.kde\.netspeeder\.missingcharts" is not installed$'
