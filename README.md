@@ -41,7 +41,7 @@ Daniel Faust, see [Origin](#origin).
   source; to be verified by hand.
 - **Tooltip** with the connection name, download, upload and IP address, and a
   note when the data source has a problem.
-- **Settings** pages "Display", "Data", (0.2) "Behavior" and (0.3) "Appearance". The data page lists every network
+- **Settings** pages "Display", "Data", (0.2) "Behavior", (0.3) "Appearance" and (0.4) "Usage". The data page lists every network
   interface with its kind and current speed.
 - **Translations:** English and German.
 
@@ -118,6 +118,65 @@ Limitations:
   for anything else (shell syntax, variables) it is started unchecked.
 - A launch that fails after it started (the program crashes) is not detected.
 
+## Data usage and data cap (0.4)
+
+Netspeeder can show how much you have transferred per day and per billing
+period. The numbers come from [vnStat](https://humdi.net/vnstat/), which keeps
+its own statistics in the background, so they cover the time before the widget
+started and survive a restart. vnStat is optional: without it everything else
+works and the popup shows a hint instead.
+
+The popup gets a "Usage" section with download, upload and total for
+
+- **Today** and **Yesterday**,
+- **This period** and **Last period**. A billing period starts on a day of the
+  month you choose (1 to 28, default 1).
+
+A period that vnStat does not cover completely (for example right after
+vnStat was installed) is marked with an asterisk and a footnote. Below the
+figures the popup says when vnStat last updated its data, with a hint when
+that is more than an hour ago (the vnStat service is probably not running).
+It also tells you when vnStat is missing (with a link to its website), when
+its version is not supported, and when an interface that counts is not tracked
+by vnStat.
+
+**Data cap:** optionally set a monthly cap in GiB and a warning level in
+percent (default 80). The popup shows the share of the cap as a bar. From the
+warning level the bar takes the neutral color of the theme, from 100 % the
+negative color. In the panel a small dot appears from the warning level on;
+its accessible name mentions the cap for screen readers. The tooltip gets a
+"Today" line with the traffic of the day.
+
+**Notifications:** when the warning level and when 100 % are reached, one
+desktop notification each per billing period. What has been reported is stored
+in the configuration, so a restart of Plasma does not repeat it. If the usage
+jumps straight past 100 %, only the 100 % level is reported. With
+notifications switched off the level is still recorded, so switching them on
+later does not report levels that were reached earlier.
+
+The settings page "Usage" has these options: show usage from vnstat (on by
+default; it also shows whether vnstat can be read), the data cap (off by
+default), the monthly cap, the day the billing period starts, the warning level
+and the notification switch.
+
+**Which interfaces count:** in manual mode the interfaces you selected on the
+page "Data" count, even while they are absent (a USB tethering device that is
+unplugged keeps its past traffic in the sum). In automatic mode the interfaces
+vnStat knows count, except `lo` and those the widget currently sees as
+virtual. Limitation: an absent virtual interface cannot be recognized in
+automatic mode, so its recorded traffic is counted until you switch to manual
+selection or remove it from vnStat.
+
+**Installing vnStat** (version 2.0 or newer, which writes JSON version 2):
+install the `vnstat` package with your distribution's package manager, then
+enable the service so that it collects data:
+
+```sh
+systemctl enable --now vnstat
+```
+
+It takes a day for the first daily figures to appear.
+
 ## Planned releases
 
 | Version | Content |
@@ -134,6 +193,8 @@ Limitations:
   only 6.3 and newer are tested).
 - Nothing else for the default data source: it uses the system sensors
   (`ksystemstats`) that every Plasma installation ships.
+- Optional: vnStat 2.0 or newer for the usage statistics and the data cap
+  (see [Data usage and data cap](#data-usage-and-data-cap-0-4)).
 
 ## Installation
 

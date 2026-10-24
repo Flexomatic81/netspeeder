@@ -5,6 +5,38 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 
 # Changelog
 
+## 0.4.0 (unreleased)
+
+Fourth pre-release, stage "Verbrauch" (usage).
+
+### Added
+
+- Data usage from vnStat (version 2.0 or newer, optional): the popup shows
+  today, yesterday, this billing period and the last one, each with download,
+  upload and total. An asterisk marks a period that vnStat does not cover
+  completely. The popup also shows when vnStat last updated its data, with a
+  hint after an hour, and hints when vnStat is missing (with a link), when its
+  version is not supported and when an interface is not tracked by vnStat.
+- Optional monthly data cap with a billing day (1 to 28) and a warning level.
+  The popup shows the share as a bar (neutral color from the warning level,
+  negative from 100 %); the panel shows a dot from the warning level on, and
+  its accessible name mentions the cap.
+- A "Today" line in the tooltip.
+- Desktop notifications when the warning level and when 100 % are reached,
+  once per level and billing period, kept across restarts. Turning
+  notifications off still records the level, so turning them on later does not
+  report old levels; a jump straight past 100 % reports only that level.
+- Settings page "Usage" with the options above.
+- German translation of the new texts.
+
+### Notes
+
+- Manual interface selection counts the configured interfaces even while they
+  are absent. Automatic selection counts the interfaces vnStat knows, minus
+  `lo` and those the widget currently sees as virtual; absent virtual
+  interfaces cannot be recognized there.
+- vnStat is read in the background only while usage is enabled.
+
 ## 0.3.0 (unreleased)
 
 Third pre-release, stage "Darstellung" (appearance).

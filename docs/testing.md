@@ -96,13 +96,35 @@ because the checker compares it against the German interface.
 | German system language: all texts of the pages "Appearance" and "Behavior" are German and nothing is cut off | 0.3 | |
 | Restart with the symbol style "Icons" after at least 30 minutes of uptime, using the restart command that detects a hang: `bash -c 'systemctl --user stop --no-block plasma-plasmashell; sleep 5; p=$(pgrep -x plasmashell) && { kill -ABRT $p; sleep 5; }; systemctl --user start plasma-plasmashell'` | 0.3 | |
 
+## Usage and data cap
+
+For these checks vnstat 2.0 or newer is installed and its service enabled
+(`systemctl enable --now vnstat`), unless the item says otherwise. Page
+"Usage" (German: “Verbrauch”).
+
+| Check | Stage | Result |
+|---|---|---|
+| vnstat present: the popup section "Usage" (German: “Verbrauch”) shows today, yesterday, this period and last period with download, upload and total, and "vnstat last updated" (German: “vnstat zuletzt aktualisiert”); the page "Usage" says "vnstat found" | 0.4 | |
+| vnstat missing (uninstall it or hide it from `PATH` for the session): the popup shows a hint and a "vnstat website" button instead of an error, and the rest of the popup works; the page "Usage" says "vnstat is not installed" | 0.4 | |
+| vnstat service stopped (`systemctl stop vnstat`): after an hour the popup shows that the data is not current (German: “nicht aktuell”); starting the service removes the hint after the next update | 0.4 | |
+| Billing day: change it on the page "Usage"; "This period" and "Last period" change accordingly and the totals follow the new start day | 0.4 | |
+| Incomplete period right after installing vnstat: "This period" carries an asterisk and the footnote "incomplete" is shown; a period fully covered has none | 0.4 | |
+| An interface that counts but is not tracked by vnstat: the popup names it in a hint | 0.4 | |
+| Data cap with a small value (e.g. 1 GiB) and the warning level at a low value: the bar appears; at the warning level it takes the neutral color, at 100 % the negative color | 0.4 | |
+| Notification delivery in a real session: the warning level and 100 % each produce one desktop notification with the expected text, not two | 0.4 | |
+| Restart (use the restart command that detects a hang, see above) with the cap still exceeded: no notification is reported again; the configuration keeps `capNotifiedCycle` and `capNotifiedLevel` across the restart | 0.4 | |
+| Notifications switched off, level reached, notifications switched on again: the earlier level is not reported | 0.4 | |
+| Cap set so that usage is already past 100 %: only the 100 % notification appears, not the warning too | 0.4 | |
+| Panel dot: appears from the warning level on, not before; a screen reader (or the accessibility inspector) reads the cap sentence in the widget's name | 0.4 | |
+| Tooltip in a real panel: a "Today" line (German: “Heute”) with download and upload | 0.4 | |
+| Manual interface selection with an absent interface in the list: its recorded traffic stays in the totals; automatic mode counts the interfaces vnstat knows, without `lo` and without those currently virtual | 0.4 | |
+| Popup that has been resized before (a stored small size): after the update the "Usage" section may not fit; enlarging the popup once is enough and the size is kept | 0.4 | |
+| German system language: all texts of the section "Usage" and the settings page are German and nothing is cut off | 0.4 | |
+
 ## Later stages and release candidates
 
 | Check | Stage | Result |
 |---|---|---|
-| vnstat present: daily and monthly usage appear | 0.4 | |
-| vnstat missing: a hint instead of an error | 0.4 | |
-| Data cap notification: once per level and billing period, not again after a restart | 0.4 | |
 | Run through all items on Plasma 6.3 (Debian 13, VM) | before 1.0 | |
 
 ## Automatic acceptance 0.1
