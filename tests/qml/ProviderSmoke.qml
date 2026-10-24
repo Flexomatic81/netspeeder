@@ -274,8 +274,8 @@ Item {
             scene.expectCleared();
             if (p.errorCode === "sensors-unavailable") {
                 scene.enter(4);
-            } else if (now - scene.phaseStart > 2000) {
-                scene.fail("errorCode is '" + p.errorCode + "' after 2 s (" + scene.describe() + ")");
+            } else if (now - scene.phaseStart > scene.phaseTimeoutMs) {
+                scene.fail("errorCode is '" + p.errorCode + "' after " + scene.phaseTimeoutMs / 1000 + " s (" + scene.describe() + ")");
             }
             break;
         case 4:
@@ -317,7 +317,7 @@ Item {
             if (scene.steadySource !== null) {
                 scene.steadySource.addInterface();
                 scene.idleStep = 1;
-            } else if (now - scene.phaseStart > 2000) {
+            } else if (now - scene.phaseStart > scene.phaseTimeoutMs) {
                 scene.fail("test double not found in the provider");
             }
             break;
@@ -367,8 +367,8 @@ Item {
                 return;
             }
             scene.finish(true, "SMOKE OK provider");
-        } else if (now - scene.phaseStart > 2000) {
-            scene.fail("errorCode is '" + p.errorCode + "' after 2 s (" + scene.describe() + ")");
+        } else if (now - scene.phaseStart > scene.phaseTimeoutMs) {
+            scene.fail("errorCode is '" + p.errorCode + "' after " + scene.phaseTimeoutMs / 1000 + " s (" + scene.describe() + ")");
         }
     }
 
@@ -379,8 +379,8 @@ Item {
                 p.dataSource = "auto";
                 scene.expectCleared();
                 scene.modeSwitched = true;
-            } else if (now - scene.phaseStart > 2000) {
-                scene.fail("errorCode is '" + p.errorCode + "' after 2 s (" + scene.describe() + ")");
+            } else if (now - scene.phaseStart > scene.phaseTimeoutMs) {
+                scene.fail("errorCode is '" + p.errorCode + "' after " + scene.phaseTimeoutMs / 1000 + " s (" + scene.describe() + ")");
             }
         } else if (scene.settled("proc", () => scene.fallbackProblem("sensors-unavailable"))) {
             scene.enter(8);
@@ -399,7 +399,7 @@ Item {
             if (scene.steadySource !== null) {
                 scene.steadySource.addInterface();
                 scene.steadyStep = 1;
-            } else if (now - scene.phaseStart > 2000) {
+            } else if (now - scene.phaseStart > scene.phaseTimeoutMs) {
                 scene.fail("test double not found in the provider");
             }
             break;
@@ -465,8 +465,9 @@ Item {
         } else if (p.hasData && p.errorCode === "" && p.activeSource === "sensors"
                 && p.includedCount === 1 && isFinite(p.down) && isFinite(p.up)) {
             scene.enter(6);
-        } else if (now - scene.interfaceAddedAt > 2000) {
-            scene.fail("no recovery within 2 s of the new interface (" + scene.describe() + ")");
+        } else if (now - scene.interfaceAddedAt > scene.phaseTimeoutMs) {
+            scene.fail("no recovery within " + scene.phaseTimeoutMs / 1000 + " s of the new interface ("
+                + scene.describe() + ")");
         }
     }
 

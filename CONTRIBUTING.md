@@ -56,7 +56,8 @@ session; without them these steps are reported as skipped locally. `shellcheck` 
 Some smoke scenes are live: they read the real network and need `ksystemstats` running and a
 connected physical network interface that has received data. Where that is missing, for example in
 a container, `NETSPEEDER_SMOKE_SKIP_LIVE=1 node tools/check.mjs` skips them; each one is reported as
-`SMOKE SKIPPED (live) <scene>`. Without the variable all scenes run. The list is `live_scenes` in
+`SMOKE SKIPPED (live) <scene>`; the parts of those scenes that need no network are skipped with
+them. Without the variable all scenes run. The list is `live_scenes` in
 `scripts/smoke.sh`; [docs/testing.md](docs/testing.md) has the details.
 
 The unit tests have a coverage floor; please add tests for new behaviour and for bug fixes. Code is

@@ -72,6 +72,7 @@ Item {
                 + ", expected " + JSON.stringify(want));
             return;
         }
+        // Covered by the wait above by now; kept as the case's own check.
         if (launcher.busy) {
             scene.fail("'" + current.line + "' left the launcher busy");
             return;

@@ -18,6 +18,17 @@ import {
   selectSteps,
 } from "../tools/check.mjs";
 
+/** Runs fn with console.log silenced and returns its result. */
+function quietly(fn) {
+  const silent = console.log;
+  console.log = () => {};
+  try {
+    return fn();
+  } finally {
+    console.log = silent;
+  }
+}
+
 function makeEnv(overrides = {}) {
   const tools = overrides.tools ?? [];
   return {
@@ -158,7 +169,7 @@ test("actionlint runs through uvx with the pinned versions of actionlint and she
   ]);
 });
 
-test("actionlint without uvx, as in CI, is taken from PATH", () => {
+test("actionlint without uvx is taken from PATH, as CI runs it", () => {
   const env = makeEnv({ tools: ["actionlint"], gitFiles: WORKFLOWS, inCi: true });
   const step = planStep("actionlint", env);
   assert.deepEqual(step.command, ["/usr/bin/actionlint", ".github/workflows/ci.yml"]);
@@ -171,14 +182,7 @@ test("a missing actionlint fails locally and in CI with a hint how to install it
     const step = planStep("actionlint", env);
     assert.equal(step.command, null);
     assert.equal(classify(step, env), "failed");
-    const silent = console.log;
-    console.log = () => {};
-    let results;
-    try {
-      results = runSteps([step], env, () => 0);
-    } finally {
-      console.log = silent;
-    }
+    const results = quietly(() => runSteps([step], env, () => 0));
     assert.equal(results.actionlint[0], "failed");
     assert.match(results.actionlint[1], /actionlint not found - .*requirements-dev\.txt/);
   }
@@ -192,14 +196,7 @@ test("actionlint with no workflow file fails instead of passing vacuously", () =
 
 test("a missing shellcheck names the Python tool requirements, not pnpm", () => {
   const env = makeEnv();
-  const silent = console.log;
-  console.log = () => {};
-  let results;
-  try {
-    results = runSteps([planStep("shellcheck", env)], env, () => 0);
-  } finally {
-    console.log = silent;
-  }
+  const results = quietly(() => runSteps([planStep("shellcheck", env)], env, () => 0));
   assert.match(results.shellcheck[1], /shellcheck not found - .*requirements-dev\.txt/);
 });
 

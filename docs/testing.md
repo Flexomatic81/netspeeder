@@ -26,12 +26,19 @@ scenes read the real network and need:
 They are listed in `live_scenes` in `scripts/smoke.sh` and each says so in
 its header comment ("Live scene: needs ..."). On a machine without these, for
 example in a container, `NETSPEEDER_SMOKE_SKIP_LIVE=1 scripts/smoke.sh` skips
-them and prints `SMOKE SKIPPED (live) <scene>` for each one. Without the
-variable every scene runs, and a live scene that finds no network fails.
+them and prints `SMOKE SKIPPED (live) <scene>` for each one. The skip covers
+whole scenes, including their parts that need no network: the test-double
+phases of `ProviderSmoke` (3, 5, 8, 9 and 10) and the stub steps of
+`ConfigDataSmoke`. Without the variable every scene runs, and a live scene
+that finds no network fails.
 
-Scenes that start commands or wait for data follow state changes (a run that
-ends, a status that changes) and use their time limits only as an upper bound,
-so a slow or busy machine makes them slower, not red.
+Most scenes that start commands or wait for data follow state changes (a run
+that ends, a status that changes) and use generous time limits only as an
+upper bound, so a slow machine mostly makes them slower. Two scenes check a
+timing contract on purpose and can fail on a heavily loaded machine:
+`HeartbeatSmoke` (when samples stop after the heartbeat window, with about
+150 ms of tolerance) and `CommandRunnerSmoke` (a 500 ms time limit must be
+reported within 2 s).
 
 Procedure: install the current version (`scripts/dev-install.sh`), restart
 plasmashell (`systemctl --user restart plasma-plasmashell`), go through the
