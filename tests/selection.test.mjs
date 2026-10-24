@@ -99,3 +99,26 @@ test("interfaceList keeps every sample field and adds name and included", () => 
     signal: null,
   });
 });
+test("compareNames breaks case-insensitive ties by spelling, in both directions", () => {
+  assert.equal(compareNames("A", "a"), -1);
+  assert.equal(compareNames("a", "A"), 1);
+  assert.equal(compareNames("eth0", "eth0"), 0);
+  assert.equal(compareNames("a", "B"), -1);
+  assert.equal(compareNames("B", "a"), 1);
+});
+test("objects without a numeric length count as an empty selection", () => {
+  assert.deepEqual(summarize(ifs, "manual", { enp7s0: true }).included, []);
+  assert.deepEqual(summarize(ifs, "manual", { length: "1", 0: "enp7s0" }).included, []);
+  assert.deepEqual(summarize(ifs, "manual", null).included, []);
+  assert.deepEqual(
+    interfaceList({ eth0: iface({}) }, { eth0: true }).map((r) => r.included),
+    [false],
+  );
+});
+test("null and undefined interface maps behave like an empty map", () => {
+  const empty = { down: 0, up: 0, online: false, included: [], primary: null };
+  assert.deepEqual(summarize(null, "auto", []), empty);
+  assert.deepEqual(summarize(undefined, "manual", ["eth0"]), empty);
+  assert.deepEqual(interfaceList(null, []), []);
+  assert.deepEqual(interfaceList(undefined, ["eth0"]), []);
+});

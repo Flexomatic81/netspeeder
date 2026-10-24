@@ -127,3 +127,10 @@ test("a failure after the fallback is replaced by the note again on the next sam
   s = feed(s, sample("proc", { eth0: iface({}) }), 0);
   assert.deepEqual([derive(s, at(0)).errorCode, derive(s, at(0)).errorDetail], ["no-interfaces", ""]);
 });
+test("a sample without an interfaces map counts as empty", () => {
+  for (const bad of [null, {}, { timestamp: 0, source: "sensors" }]) {
+    const s = feed(initialState(), bad, 5);
+    const v = derive(s, at(5));
+    assert.deepEqual([v.hasData, v.includedCount, v.down], [false, 0, 0]);
+  }
+});

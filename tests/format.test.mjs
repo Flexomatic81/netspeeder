@@ -62,3 +62,25 @@ test("widestValue", () => {
   assert.equal(widestValue({ decimals: 1 }), "888.8");
   assert.equal(widestValue({ decimals: 2, decimalPoint: "," }), "888,88");
 });
+
+test("missing options object behaves like the defaults", () => {
+  assert.deepEqual(formatSpeed(1536), { value: "1.5", unit: "KiB/s" });
+  assert.deepEqual(formatSpeed(1536, null), { value: "1.5", unit: "KiB/s" });
+  assert.deepEqual(formatTotal(1536), { value: "1.5", unit: "KiB" });
+  assert.deepEqual(formatTotal(1536, null), { value: "1.5", unit: "KiB" });
+  assert.deepEqual(speedUnits(), ["B/s", "KiB/s", "MiB/s", "GiB/s"]);
+  assert.equal(widestValue(), "88.8");
+});
+test("rounding out of the base unit moves up one unit", () => {
+  assert.deepEqual(formatSpeed(999.6, { lowSpeedThreshold: 0 }), { value: "1.0", unit: "KiB/s" });
+  assert.deepEqual(formatTotal(999.6, {}), { value: "1.0", unit: "KiB" });
+});
+test("formatTotal ignores shortUnits and the speed scale", () => {
+  assert.deepEqual(formatTotal(1536, { shortUnits: true }), { value: "1.5", unit: "KiB" });
+  assert.deepEqual(formatTotal(1500, { unitSystem: "bits", shortUnits: true }), { value: "1.5", unit: "kB" });
+});
+test("formatTotal shows negative and undefined sums as 0", () => {
+  for (const v of [-1, -1024, undefined, null, Infinity, "abc"]) {
+    assert.deepEqual(formatTotal(v, {}), { value: "0", unit: "B" });
+  }
+});

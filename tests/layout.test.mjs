@@ -44,3 +44,18 @@ test("fitVertical keeps the first candidate when it fits", () => {
 test("fitVertical falls back to the last candidate when nothing is readable", () => {
   assert.deepEqual(fitVertical(10, [631, 400, 230], 14, 12), { index: 2, pixelSize: 4 });
 });
+
+test("values that have not loaded yet fall back to safe defaults", () => {
+  assert.equal(fontPixelSize(NaN, 100), 1); // row height 0
+  assert.equal(fontPixelSize(undefined, undefined), 1);
+  assert.equal(fontPixelSize(22, NaN), 15); // scale 100 %
+  assert.equal(fontPixelSize(22, undefined), 15);
+  // thickness 0 gives a 1 px font, which is below the readable minimum
+  assert.equal(resolveLayout({ ...base, thickness: undefined }), "columns");
+  // an unknown minimum counts as 0, so any size is readable
+  assert.equal(resolveLayout({ ...base, thickness: 20, minReadablePx: undefined }), "rows");
+  assert.equal(fitPixelSize(NaN, 160, 14), 1); // no space available
+  assert.equal(fitPixelSize(32, 160, NaN), 1); // no usable maximum
+  assert.equal(fitPixelSize(32, undefined, 14), 14); // nothing measured
+  assert.deepEqual(fitVertical(64, [400], 14, undefined), { index: 0, pixelSize: 14 });
+});

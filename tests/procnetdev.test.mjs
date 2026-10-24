@@ -65,3 +65,52 @@ test("toProcSample classifies and maps fields", () => {
   assert.equal(s.interfaces["br-1a2b3c4d5e6f"].online, false); // down
   assert.equal(s.interfaces.eth1.down, 0); // missing rate → 0
 });
+
+const HEADER = "Inter-|   Receive    |  Transmit\n face |bytes packets|bytes packets\n";
+const counterLine = (name, rx, tx) => `${name}: ${rx} 1 0 0 0 0 0 0 ${tx} 1 0 0 0 0 0 0`;
+
+test("parseProcNetDev skips short lines and non-numeric counters", () => {
+  const text = [
+    HEADER.trim(),
+    "short: 1 2 3",
+    `bad: abc 1 0 0 0 0 0 0 5 1 0 0 0 0 0 0`,
+    `bad2: 7 1 0 0 0 0 0 0 xyz 1 0 0 0 0 0 0`,
+    counterLine("eth0", 100, 200),
+  ].join("\n");
+  assert.deepEqual(parseProcNetDev(text), { eth0: { rx: 100, tx: 200 } });
+});
+test("a header without interface lines parses to an empty result", () => {
+  assert.deepEqual(parseProcNetDev(HEADER), {});
+  const parsed = parseProcOutput(`${HEADER}#operstate\n#devices\n`);
+  assert.deepEqual(parsed, { counters: {}, operstate: {}, physical: [] });
+});
+test("CRLF input parses like LF input", () => {
+  const lf = `${HEADER}${counterLine("eth0", 100, 200)}\n#operstate\n/sys/class/net/eth0/operstate:up\n#devices\neth0\n`;
+  const crlf = lf.replace(/\n/g, "\r\n");
+  assert.deepEqual(parseProcOutput(crlf), parseProcOutput(lf));
+  assert.deepEqual(parseProcOutput(crlf), {
+    counters: { eth0: { rx: 100, tx: 200 } },
+    operstate: { eth0: "up" },
+    physical: ["eth0"],
+  });
+});
+test("toProcSample: missing operstate counts as offline, even with traffic", () => {
+  const parsed = { counters: { tun0: { rx: 10, tx: 10 } }, operstate: {}, physical: [] };
+  assert.equal(toProcSample(1, parsed, {}).interfaces.tun0.online, false);
+});
+test("toProcSample: unknown state is online only with traffic", () => {
+  const parsed = {
+    counters: { idle0: { rx: 0, tx: 0 }, busy0: { rx: 0, tx: 1 } },
+    operstate: { idle0: "unknown", busy0: "unknown" },
+    physical: [],
+  };
+  const { interfaces } = toProcSample(1, parsed, {});
+  assert.equal(interfaces.idle0.online, false);
+  assert.equal(interfaces.busy0.online, true);
+});
+test("toProcSample: rates = null gives every interface 0", () => {
+  const parsed = { counters: { eth0: { rx: 5, tx: 6 } }, operstate: { eth0: "up" }, physical: ["eth0"] };
+  const { interfaces } = toProcSample(1, parsed, null);
+  assert.deepEqual([interfaces.eth0.down, interfaces.eth0.up], [0, 0]);
+  assert.deepEqual([interfaces.eth0.totalDown, interfaces.eth0.totalUp], [5, 6]);
+});
