@@ -15,6 +15,9 @@ Item {
     // True while a run is in progress. Already false inside a finished()
     // handler, so a handler may call run() to start the next run itself.
     readonly property bool busy: internals.activeSource !== ""
+    // Longest time a run may take in milliseconds; 0 means no limit. A run
+    // that exceeds it is abandoned and reports exit code -2.
+    property int timeoutMs: 0
 
     signal finished(int exitCode, string stdout, string stderr)
 
@@ -33,6 +36,10 @@ Item {
         const sourceName = root.command + " # netspeeder-" + internals.instanceId + "-" + internals.runCount;
         internals.activeSource = sourceName;
         executor.connectSource(sourceName);
+        if (root.timeoutMs > 0) {
+            limit.interval = root.timeoutMs;
+            limit.restart();
+        }
     }
 
     QtObject {
@@ -43,6 +50,31 @@ Item {
         property int runCount: 0
         // Keeps the source names of several CommandRunner instances apart.
         readonly property string instanceId: Math.random().toString(36).slice(2, 10)
+
+        // Ends the active run: disconnects the source (so the engine does not
+        // run the command again), reports the result and starts a merged
+        // follow-up run if one was requested.
+        function complete(exitCode, stdout, stderr) {
+            executor.disconnectSource(internals.activeSource);
+            limit.stop();
+            const again = internals.rerunPending;
+            internals.rerunPending = false;
+            internals.activeSource = "";
+            root.finished(exitCode, stdout, stderr);
+            // A handler of finished() may already have started a run; that run
+            // is newer than the request, so it covers it.
+            if (again && !root.busy) {
+                root.run();
+            }
+        }
+    }
+
+    // Abandons a run that takes too long. A result that still arrives later
+    // is dropped by the source name check in onNewData.
+    Timer {
+        id: limit
+
+        onTriggered: internals.complete(-2, "", "timed out after " + root.timeoutMs + " ms")
     }
 
     Plasma5Support.DataSource {
@@ -54,25 +86,13 @@ Item {
             if (sourceName !== internals.activeSource) {
                 return;
             }
-            // Disconnect at once so the engine does not run the command again.
-            executor.disconnectSource(sourceName);
-            const again = internals.rerunPending;
-            internals.rerunPending = false;
-            internals.activeSource = "";
-
             let exitCode = Number(data["exit code"]);
             if (isNaN(exitCode)) {
                 exitCode = -1;
             }
             const stdout = data["stdout"] === undefined ? "" : String(data["stdout"]);
             const stderr = data["stderr"] === undefined ? "" : String(data["stderr"]);
-            root.finished(exitCode, stdout, stderr);
-
-            // A handler of finished() may already have started a run; that run
-            // is newer than the request, so it covers it.
-            if (again && !root.busy) {
-                root.run();
-            }
+            internals.complete(exitCode, stdout, stderr);
         }
     }
 

@@ -4,6 +4,8 @@
 // Smoke scene for CommandRunner: two instances run the same command at the
 // same time. Requests made while busy must merge into one extra run, and every
 // run must return fresh output (no cached result of an equal source name).
+// A last phase checks the time limit: a command that outlives timeoutMs must
+// report exit code -2 in time, release busy, and the runner must keep working.
 
 import QtQuick
 import "../../package/contents/ui/data"
@@ -19,6 +21,8 @@ Item {
     property var firstResults: []
     property var secondResults: []
     property bool done: false
+    property double phaseStart: 0
+    property int slowStage: 0
 
     function finish(ok, message) {
         if (scene.done) {
@@ -66,6 +70,35 @@ Item {
             scene.finish(false, "SMOKE FAIL runner: still busy after all runs finished");
             return;
         }
+        scene.startTimeoutPhase();
+    }
+
+    function startTimeoutPhase() {
+        scene.phaseStart = Date.now();
+        slow.run();
+    }
+
+    function onSlowFinished(exitCode, stderr) {
+        if (scene.slowStage === 0) {
+            const elapsed = Date.now() - scene.phaseStart;
+            if (exitCode !== -2 || elapsed > 2000 || stderr.indexOf("timed out") < 0) {
+                scene.finish(false, "SMOKE FAIL runner: timeout run gave exit " + exitCode
+                    + " after " + elapsed + " ms, stderr '" + stderr + "'");
+                return;
+            }
+            if (slow.busy) {
+                scene.finish(false, "SMOKE FAIL runner: still busy after the timeout");
+                return;
+            }
+            scene.slowStage = 1;
+            slow.command = "echo again";
+            slow.run();
+            return;
+        }
+        if (exitCode !== 0) {
+            scene.finish(false, "SMOKE FAIL runner: run after timeout gave exit " + exitCode);
+            return;
+        }
         scene.finish(true, "SMOKE OK runner");
     }
 
@@ -96,6 +129,14 @@ Item {
         }
     }
 
+    CommandRunner {
+        id: slow
+
+        command: "sleep 5"
+        timeoutMs: 500
+        onFinished: (exitCode, stdout, stderr) => scene.onSlowFinished(exitCode, stderr)
+    }
+
     // Waits for late, unexpected finished() signals before judging.
     Timer {
         id: settle
@@ -105,9 +146,9 @@ Item {
     }
 
     Timer {
-        interval: 10000
+        interval: 15000
         running: true
-        onTriggered: scene.finish(false, "SMOKE FAIL runner: timeout after 10 s (first "
+        onTriggered: scene.finish(false, "SMOKE FAIL runner: timeout after 15 s (first "
             + scene.firstResults.length + ", second " + scene.secondResults.length + ")")
     }
 
