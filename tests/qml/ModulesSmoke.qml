@@ -24,6 +24,7 @@ import "../../package/contents/code/selection.mjs" as Selection
 import "../../package/contents/code/sensors.mjs" as Sensors
 import "../../package/contents/code/text.mjs" as Text
 import "../../package/contents/code/tooltip.mjs" as Tooltip
+import "../../package/contents/code/visibility.mjs" as Visibility
 
 Item {
     id: scene
@@ -45,7 +46,8 @@ Item {
             Selection.compareNames("a", "b") < 0,
             Sensors.HEARTBEAT_SENSOR.length > 0,
             Text.substitute("%1", ["x"]) === "x",
-            Tooltip.escapeHtml("<") === "&lt;"
+            Tooltip.escapeHtml("<") === "&lt;",
+            Visibility.autoHideState("never", { hasData: true, online: true, idle: false }, { editMode: false, expanded: false }) === "shown"
         ];
         const bad = results.indexOf(false);
         if (bad >= 0) {

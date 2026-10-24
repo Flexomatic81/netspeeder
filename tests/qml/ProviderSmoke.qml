@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
-// Smoke scene for NetworkProvider with the real data sources, in eight phases:
+// Smoke scene for NetworkProvider with the real data sources, in nine phases:
 //   1  auto mode takes data from ksystemstats; after three samples the
 //      history holds at least three points and its peak covers every one
 //   2  the same instance switched to /proc: no old values, virtual interfaces
@@ -19,6 +19,8 @@
 //   8  steady data: `interfaces` changes once per sample and not on the
 //      provider's own clock tick (a popup list bound to it must not be rebuilt
 //      between samples), and `stale` still follows the clock
+//   9  `idle` turns true on the clock alone, at least 5 s after the data began
+//      and without a new sample, and a source switch resets it
 // The phases run one after another; each waits for settled data, at most
 // 12 seconds.
 
@@ -50,6 +52,10 @@ Item {
     property int emittedAtStart: 0
     property double stepStart: 0
     property var steadySource: null
+    // Phase 9: 0 find the test double, 1 wait for data, 2 wait for idle
+    // without samples, 3 check the reset after a source switch.
+    property int idleStep: 0
+    property double idleDataAt: 0
     property double interfaceAddedAt: 0
     property bool done: false
 
@@ -228,6 +234,10 @@ Item {
             scene.counting = false;
             scene.replaceProvider(steadyComponent);
             break;
+        case 9:
+            scene.idleStep = 0;
+            scene.replaceProvider(idleComponent);
+            break;
         }
     }
 
@@ -278,6 +288,59 @@ Item {
             break;
         case 8:
             scene.tickSteady(now);
+            break;
+        case 9:
+            scene.tickIdle(now);
+            break;
+        }
+    }
+
+    // Phase 9. The traffic of the test double (3 KiB/s) is far below the
+    // threshold, so the quiet period starts with the first sample. Stopping
+    // the double leaves only the clock to flip `idle`.
+    function tickIdle(now) {
+        const p = scene.provider;
+        switch (scene.idleStep) {
+        case 0:
+            scene.steadySource = scene.findSource();
+            if (scene.steadySource !== null) {
+                scene.steadySource.addInterface();
+                scene.idleStep = 1;
+            } else if (now - scene.phaseStart > 2000) {
+                scene.fail("test double not found in the provider");
+            }
+            break;
+        case 1:
+            if (p.hasData) {
+                if (p.idle) {
+                    scene.fail("idle with the first sample (" + scene.describe() + ")");
+                    return;
+                }
+                scene.idleDataAt = now;
+                scene.steadySource.running = false;
+                scene.idleStep = 2;
+            } else if (now - scene.phaseStart > 3000) {
+                scene.fail("no data (" + scene.describe() + ")");
+            }
+            break;
+        case 2:
+            if (p.idle) {
+                // The first sample came up to one interval before it was seen.
+                if (now - scene.idleDataAt < 4000) {
+                    scene.fail("idle after only " + (now - scene.idleDataAt) + " ms");
+                    return;
+                }
+                scene.provider.dataSource = "proc";
+                scene.idleStep = 3;
+                if (p.idle) {
+                    scene.fail("idle survived the source switch");
+                }
+            } else if (now - scene.idleDataAt > 8000) {
+                scene.fail("not idle 8 s after the last sample (" + scene.describe() + ")");
+            }
+            break;
+        case 3:
+            scene.finish(true, "SMOKE OK provider");
             break;
         }
     }
@@ -343,7 +406,7 @@ Item {
             break;
         case 3:
             if (p.stale) {
-                scene.finish(true, "SMOKE OK provider");
+                scene.enter(9);
             } else if (now - scene.stepStart > 3500) {
                 scene.fail("not stale 3.5 s after the last sample (" + scene.describe() + ")");
             }
@@ -444,6 +507,18 @@ Item {
     }
 
     Component {
+        id: idleComponent
+
+        NetworkProvider {
+            dataSource: "sensors"
+            updateInterval: 0.5
+            idleSeconds: 5
+            idleThreshold: 1000000000
+            sensorSourceUrl: Qt.resolvedUrl("EmptySource.qml")
+        }
+    }
+
+    Component {
         id: missingSensorsComponent
 
         NetworkProvider {
@@ -461,8 +536,8 @@ Item {
     }
 
     Timer {
-        interval: 38000
+        interval: 50000
         running: true
-        onTriggered: scene.fail("overall timeout after 38 s")
+        onTriggered: scene.fail("overall timeout after 50 s")
     }
 }

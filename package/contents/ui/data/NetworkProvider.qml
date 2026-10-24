@@ -9,6 +9,7 @@
 import QtQuick
 import "../../code/providerstate.mjs" as ProviderState
 import "../../code/history.mjs" as History
+import "../../code/visibility.mjs" as Visibility
 
 Item {
     id: root
@@ -21,6 +22,10 @@ Item {
     property var selectedInterfaces: []
     // Update interval in seconds, clamped to 0.5 .. 10.
     property real updateInterval: 1.0
+    // Idle means: down plus up stayed below idleThreshold (bytes per second)
+    // for idleSeconds.
+    property int idleThreshold: 1024
+    property int idleSeconds: 30
 
     // Test seams. A relative sensorSourceUrl is resolved against this file
     // (the default depends on it); tests pass absolute URLs.
@@ -36,6 +41,7 @@ Item {
     readonly property real up: internals.view.up
     readonly property bool online: internals.view.online
     readonly property bool stale: internals.stale
+    readonly property bool idle: internals.idleState.idle
     // "sensors", "proc", or "" while there is no data.
     readonly property string activeSource: internals.view.activeSource
     // Rows for the popup: the sample fields plus name and included.
@@ -98,6 +104,9 @@ Item {
             intervalMs: internals.intervalMs
         }).stale
 
+        // Result of Visibility.nextIdle(); `idle` is its output.
+        property var idleState: ({ belowSince: null, lastNow: null, idle: false })
+
         property bool ready: false
         // "auto", "sensors" or "proc" as last applied, and the mode plus the
         // URL of the source behind it. A new key means a new source.
@@ -128,9 +137,23 @@ Item {
             internals.state = ProviderState.reduce(internals.state, event);
         }
 
-        // Counter baselines of one source mean nothing for the next.
+        // Evaluates idleness at `now`, on every sample and every clock tick.
+        // Without data the traffic is unknown, which counts as activity.
+        function evaluateIdle(now) {
+            const v = internals.view;
+            internals.idleState = Visibility.nextIdle(internals.idleState, {
+                total: v.hasData ? v.down + v.up : NaN,
+                now: now,
+                threshold: root.idleThreshold,
+                seconds: root.idleSeconds
+            });
+        }
+
+        // Counter baselines of one source mean nothing for the next, and
+        // neither does the quiet period measured on the old one.
         function forgetBaselines() {
             internals.history = History.resetBaselines(internals.history);
+            internals.idleState = { belowSince: null, lastNow: null, idle: false };
         }
 
         // Adds the sample just dispatched to the history. Totals come from the
@@ -311,6 +334,7 @@ Item {
             const now = Date.now();
             internals.dispatch({ type: "sample", sample: sample, now: now });
             internals.recordHistory(now);
+            internals.evaluateIdle(now);
         }
 
         function onFailed(message) {
@@ -335,6 +359,9 @@ Item {
         interval: internals.intervalMs
         repeat: true
         running: true
-        onTriggered: internals.now = Date.now()
+        onTriggered: {
+            internals.now = Date.now();
+            internals.evaluateIdle(internals.now);
+        }
     }
 }
