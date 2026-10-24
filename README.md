@@ -176,8 +176,9 @@ msginit --no-translator --locale=fr --input=po/plasma_applet_io.github.flexomati
 | `scripts/build-plasmoid.sh <version>` | Builds `dist/netspeeder-<version>.plasmoid` |
 
 Run `pnpm install --frozen-lockfile` once for the Node tools. `qmllint` needs
-the Qt 6 tool (`/usr/lib/qt6/bin/qmllint`); steps that need Qt or a desktop
-session are reported as skipped locally and fail in CI. See
+the Qt 6 tool (`/usr/lib/qt6/bin/qmllint`); locally, steps that need Qt or a
+desktop session are reported as skipped. In CI a missing `qmllint` fails the
+run, and `smoke` and `load` are skipped. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
 
 Continuous integration (`.github/workflows/ci.yml`) runs the `fast` group on

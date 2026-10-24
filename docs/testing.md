@@ -71,10 +71,11 @@ Qt/qmllint 6.12, Plasma 6.8). Diese Läufe ersetzen die manuellen Prüfpunkte
 oben nicht. Dort bleibt „Ergebnis" leer, bis sie von Hand durchgegangen sind.
 
 Befehl (der Check-Runner führt `eslint`, `format`, `test`, `qmllint`,
-`shellcheck`, `smoke` und `load` aus; `pnpm test` ist nur der Testschritt):
+`shellcheck`, `smoke` und `load` aus; `pnpm test` ist nur der Testschritt;
+`load` prüft die installierte Fassung, daher zuerst installieren):
 
 ```
-node tools/check.mjs && scripts/build-plasmoid.sh 0.1.0
+scripts/dev-install.sh && node tools/check.mjs && scripts/build-plasmoid.sh 0.1.0
 ```
 
 | Prüfung | Ergebnis |

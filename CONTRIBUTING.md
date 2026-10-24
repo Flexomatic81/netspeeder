@@ -37,8 +37,8 @@ Plasma) to see the result.
 
 ## Checks
 
-CI runs these checks for every pull request, and they must pass. One command runs the same checks
-locally:
+CI runs all of these checks except the local-only `smoke` and `load` steps for every pull request,
+and they must pass. One command runs the checks locally:
 
 ```bash
 node tools/check.mjs                    # everything: ESLint, Prettier, tests, qmllint, shellcheck, smoke, load

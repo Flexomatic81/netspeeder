@@ -26,7 +26,7 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  # A newer push to a pull request replaces the older run; on main, dev and tags every commit keeps its own result.
+  # A newer push to a pull request cancels the run that is still going (a pending run can be replaced too); on main, dev and tags every commit keeps its own result.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -55,7 +55,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - run: python3 -m pip install -r tools/requirements-dev.txt
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: python -m pip install -r tools/requirements-dev.txt
       - run: node tools/check.mjs shellcheck
 
   qml:
