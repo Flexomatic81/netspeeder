@@ -131,13 +131,14 @@ function periodUsage(sums, period, complete) {
   };
 }
 
-function summaryOf(status, periods, sums, untracked) {
+function summaryOf(status, periods, sums, counted, untracked) {
   return {
     status: status,
     today: usage(sums.today.down, sums.today.up),
     yesterday: usage(sums.yesterday.down, sums.yesterday.up),
     current: periodUsage(sums.current, periods.current, periods.currentComplete),
     previous: periodUsage(sums.previous, periods.previous, periods.previousComplete),
+    counted: counted,
     untracked: untracked,
   };
 }
@@ -157,7 +158,7 @@ function periodsFor(today, billingDay) {
 }
 
 function emptyResult(status, today, billingDay) {
-  return summaryOf(status, periodsFor(today, billingDay), zeroSums(), []);
+  return summaryOf(status, periodsFor(today, billingDay), zeroSums(), [], []);
 }
 
 // The summary shown before the first vnStat result arrived.
@@ -202,8 +203,8 @@ function uniqueSorted(names) {
   return names.filter((name, i) => names.indexOf(name) === i).sort(compareNames);
 }
 
-// Sums the daily traffic of the `names` vnStat knows; the other names are
-// returned in `untracked`. `parsed` is the parseVnstat result or null before
+// Sums the daily traffic of the `names` vnStat knows, returned in `counted`;
+// the other names are returned in `untracked`. `parsed` is the parseVnstat result or null before
 // the first run.
 export function usageSummary(parsed, names, today, billingDay) {
   if (parsed === null || parsed === undefined) return emptyResult("none", today, billingDay);
@@ -226,7 +227,15 @@ export function usageSummary(parsed, names, today, billingDay) {
   }
   periods.currentComplete = isComplete(ifaces, periods.current.start);
   periods.previousComplete = isComplete(ifaces, periods.previous.start);
-  return summaryOf("ok", periods, sums, untracked);
+  return summaryOf("ok", periods, sums, counted, untracked);
+}
+
+// The usage of today for the tooltip: null unless the usage is current (`ok`)
+// and vnStat tracks at least one of the interfaces that count, so an empty
+// selection does not read as a day without traffic.
+export function todayUsage(ok, summary) {
+  if (!ok || !summary || summary.status !== "ok") return null;
+  return toList(summary.counted).length > 0 ? summary.today : null;
 }
 
 function liveRows(live) {

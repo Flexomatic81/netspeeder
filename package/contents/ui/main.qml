@@ -200,7 +200,7 @@ PlasmoidItem {
 
     toolTipMainText: root.provider.primaryLabel || root.tr("Network")
     toolTipSubText: Tooltip.tooltipLines(root.provider, { tr: root.tr, trc: root.trc }, root.speedText, {
-        usageToday: root.usageOk ? root.summary.today : null,
+        usageToday: Usage.todayUsage(root.usageOk, root.summary),
         totalText: root.totalText
     }).join("<br>")
     toolTipTextFormat: Text.StyledText

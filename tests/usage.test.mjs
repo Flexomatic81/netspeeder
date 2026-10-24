@@ -20,6 +20,7 @@ import {
   dateParts,
   namesKey,
   namesFromKey,
+  todayUsage,
 } from "../package/contents/code/usage.mjs";
 
 const fixture = parseVnstat(readFileSync(new URL("./fixtures/vnstat-v2.json", import.meta.url), "utf8"));
@@ -128,6 +129,7 @@ test("usageSummary without a result is status none with zeros", () => {
     yesterday: ZERO,
     current: { ...ZERO, start: "2026-10-01", end: "2026-10-31", complete: false },
     previous: { ...ZERO, start: "2026-09-01", end: "2026-09-30", complete: false },
+    counted: [],
     untracked: [],
   });
   assert.deepEqual(emptySummary(TODAY, 1), r);
@@ -201,6 +203,12 @@ test("usageSummary lists unknown names sorted in untracked", () => {
   const r = usageSummary(fixture, ["wlan0", "tun0", "docker0", "eth0", "docker0"], TODAY, 1);
   assert.deepEqual(r.untracked, ["docker0", "tun0"]);
   assert.equal(r.today.down, 760000000);
+});
+
+test("usageSummary lists the counted names sorted", () => {
+  const r = usageSummary(fixture, ["wlan0", "tun0", "eth0"], TODAY, 1);
+  assert.deepEqual(r.counted, ["eth0", "wlan0"]);
+  assert.deepEqual(usageSummary(fixture, ["tun0"], TODAY, 1).counted, []);
 });
 
 test("usageSummary counts a name listed twice once", () => {
@@ -415,6 +423,24 @@ test("capNotification treats a malformed store as nothing reported", () => {
     notify: 1,
     store: { cycle: "2026-10-01", level: 1 },
   });
+});
+
+// --- todayUsage -------------------------------------------------------------
+
+test("todayUsage returns the usage of today while it is current and counted", () => {
+  const r = usageSummary(fixture, ["eth0"], TODAY, 1);
+  assert.equal(todayUsage(true, r), r.today);
+});
+
+test("todayUsage is null when vnstat tracks none of the counted interfaces", () => {
+  assert.equal(todayUsage(true, usageSummary(fixture, ["tun0"], TODAY, 1)), null);
+  assert.equal(todayUsage(true, usageSummary(fixture, [], TODAY, 1)), null);
+});
+
+test("todayUsage is null without current usage", () => {
+  assert.equal(todayUsage(false, usageSummary(fixture, ["eth0"], TODAY, 1)), null);
+  assert.equal(todayUsage(true, usageSummary(null, ["eth0"], TODAY, 1)), null);
+  assert.equal(todayUsage(true, null), null);
 });
 
 // --- capAction --------------------------------------------------------------

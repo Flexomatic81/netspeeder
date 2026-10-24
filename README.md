@@ -167,6 +167,9 @@ virtual. Limitation: an absent virtual interface cannot be recognized in
 automatic mode, so its recorded traffic is counted until you switch to manual
 selection or remove it from vnStat.
 
+The tooltip leaves out the "Today" line while vnStat tracks none of the
+interfaces that count.
+
 **Installing vnStat** (version 2.0 or newer, which writes JSON version 2):
 install the `vnstat` package with your distribution's package manager, then
 enable the service so that it collects data:
