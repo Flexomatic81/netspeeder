@@ -253,6 +253,20 @@ export function usageNames(mode, selected, live, known) {
   return uniqueSorted(names.filter((name) => name !== LOOPBACK));
 }
 
+const KEY_SEPARATOR = "\n";
+
+// usageNames as one string ("eth0\nwlan0"). A string only counts as changed
+// when its value changes, so a new interfaces array per sample with the same
+// names leaves the usage sums alone.
+export function namesKey(mode, selected, live, known) {
+  return usageNames(mode, selected, live, known).join(KEY_SEPARATOR);
+}
+
+// The names of a namesKey; [] for an empty key.
+export function namesFromKey(key) {
+  return typeof key === "string" && key !== "" ? key.split(KEY_SEPARATOR) : [];
+}
+
 function isPositiveFinite(v) {
   return typeof v === "number" && Number.isFinite(v) && v > 0;
 }

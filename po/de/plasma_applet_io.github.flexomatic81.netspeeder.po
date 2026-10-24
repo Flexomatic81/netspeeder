@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: netspeeder\n"
 "Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
-"POT-Creation-Date: 2026-10-24 21:48+0200\n"
+"POT-Creation-Date: 2026-10-24 22:02+0200\n"
 "PO-Revision-Date: 2026-10-24 01:44+0200\n"
 "Last-Translator: Flexomatic81\n"
 "Language-Team: German\n"
@@ -537,26 +537,26 @@ msgstr "Stufe hinzufügen"
 msgid "Online"
 msgstr "Online"
 
-#: package/contents/ui/full/FullRepresentation.qml:358
+#: package/contents/ui/full/FullRepresentation.qml:368
 msgctxt "@info"
 msgid "The traffic graph is not available because Qt Quick Charts is missing."
 msgstr "Das Verkehrsdiagramm ist nicht verfügbar, weil Qt Quick Charts fehlt."
 
-#: package/contents/ui/full/FullRepresentation.qml:405
+#: package/contents/ui/full/FullRepresentation.qml:415
 msgctxt "@label"
 msgid "Peak"
 msgstr "Spitze"
 
-#: package/contents/ui/full/FullRepresentation.qml:422
+#: package/contents/ui/full/FullRepresentation.qml:432
 msgctxt "@label"
 msgid "This session"
 msgstr "Diese Sitzung"
 
-#: package/contents/ui/full/FullRepresentation.qml:469
+#: package/contents/ui/full/FullRepresentation.qml:479
 msgid "Open System Monitor"
 msgstr "Systemmonitor öffnen"
 
-#: package/contents/ui/full/FullRepresentation.qml:476
+#: package/contents/ui/full/FullRepresentation.qml:486
 msgctxt "@info"
 msgid "Source: %1"
 msgstr "Quelle: %1"
@@ -592,71 +592,77 @@ msgctxt "@option:radio time span of the graph"
 msgid "%1 min"
 msgstr "%1 Min."
 
-#: package/contents/ui/full/UsagePanel.qml:69
+#: package/contents/ui/full/UsagePanel.qml:75
 msgctxt "@label"
 msgid "Today"
 msgstr "Heute"
 
-#: package/contents/ui/full/UsagePanel.qml:70
+#: package/contents/ui/full/UsagePanel.qml:76
 msgctxt "@label"
 msgid "Yesterday"
 msgstr "Gestern"
 
-#: package/contents/ui/full/UsagePanel.qml:71
+#: package/contents/ui/full/UsagePanel.qml:77
 msgctxt "@label"
 msgid "This period"
 msgstr "Dieser Zeitraum"
 
-#: package/contents/ui/full/UsagePanel.qml:72
+#: package/contents/ui/full/UsagePanel.qml:78
 msgctxt "@label"
 msgid "Last period"
 msgstr "Letzter Zeitraum"
 
-#: package/contents/ui/full/UsagePanel.qml:76
-msgctxt "@info"
-msgid "(incomplete)"
-msgstr "(unvollständig)"
-
-#: package/contents/ui/full/UsagePanel.qml:118
+#: package/contents/ui/full/UsagePanel.qml:151
 msgid "Install vnstat and enable its service to see daily and monthly usage."
-msgstr "Installieren Sie vnstat und aktivieren Sie dessen Dienst, um den täglichen und monatlichen Verbrauch zu sehen."
+msgstr ""
+"Installieren Sie vnstat und aktivieren Sie dessen Dienst, um den täglichen "
+"und monatlichen Verbrauch zu sehen."
 
-#: package/contents/ui/full/UsagePanel.qml:120
+#: package/contents/ui/full/UsagePanel.qml:153
 msgid "This vnstat version is not supported."
 msgstr "Diese vnstat-Version wird nicht unterstützt."
 
-#: package/contents/ui/full/UsagePanel.qml:122
+#: package/contents/ui/full/UsagePanel.qml:155
 msgid "Reading vnstat failed: %1"
 msgstr "Lesen von vnstat fehlgeschlagen: %1"
 
-#: package/contents/ui/full/UsagePanel.qml:124
+#: package/contents/ui/full/UsagePanel.qml:157
 msgid "Loading usage…"
-msgstr "Verbrauch wird geladen…"
+msgstr "Verbrauch wird geladen …"
 
-#: package/contents/ui/full/UsagePanel.qml:172
+#: package/contents/ui/full/UsagePanel.qml:169
+msgctxt "@title:group"
+msgid "Usage"
+msgstr "Verbrauch"
+
+#: package/contents/ui/full/UsagePanel.qml:217
+msgid "* incomplete: vnstat lacks some days of this period"
+msgstr "* unvollständig: vnstat fehlen einige Tage dieses Zeitraums"
+
+#: package/contents/ui/full/UsagePanel.qml:226
 msgid "%1 of %2 (%3 %)"
 msgstr "%1 von %2 (%3 %)"
 
-#: package/contents/ui/full/UsagePanel.qml:193
+#: package/contents/ui/full/UsagePanel.qml:247
 msgid "vnstat last updated: %1"
 msgstr "vnstat zuletzt aktualisiert: %1"
 
-#: package/contents/ui/full/UsagePanel.qml:202
+#: package/contents/ui/full/UsagePanel.qml:256
 msgid "The vnstat data is not current. Is the vnstat service running?"
 msgstr "Die vnstat-Daten sind nicht aktuell. Läuft der vnstat-Dienst?"
 
-#: package/contents/ui/full/UsagePanel.qml:210
+#: package/contents/ui/full/UsagePanel.qml:264
 msgid "vnstat does not track %1"
 msgstr "vnstat erfasst %1 nicht"
 
-#: package/contents/ui/full/UsagePanel.qml:229
+#: package/contents/ui/full/UsagePanel.qml:283
 msgid "vnstat website"
 msgstr "vnstat-Website"
 
-#: package/contents/ui/main.qml:163
+#: package/contents/ui/main.qml:146
 msgid "Network"
 msgstr "Netzwerk"
 
-#: package/contents/ui/main.qml:232
+#: package/contents/ui/main.qml:201
 msgid "Netspeeder"
 msgstr "Netspeeder"

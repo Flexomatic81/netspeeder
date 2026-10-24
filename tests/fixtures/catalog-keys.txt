@@ -132,7 +132,6 @@
 @label	Yesterday	
 @label	This period	
 @label	Last period	
-@info	(incomplete)	
 	Install vnstat and enable its service to see daily and monthly usage.	
 	This vnstat version is not supported.	
 	Reading vnstat failed: %1	
@@ -142,3 +141,5 @@
 	The vnstat data is not current. Is the vnstat service running?	
 	vnstat does not track %1	
 	vnstat website	
+@title:group	Usage	
+	* incomplete: vnstat lacks some days of this period	

@@ -74,8 +74,8 @@ Item {
     readonly property Item usagePanel: usageSection
 
     Layout.preferredWidth: Kirigami.Units.gridUnit * 22
-    // Never below the minimum, which grows with the usage section.
-    Layout.preferredHeight: Math.max(Kirigami.Units.gridUnit * 30, root.Layout.minimumHeight)
+    // The usage section gets room of its own; never below the minimum.
+    Layout.preferredHeight: Math.max(Kirigami.Units.gridUnit * 30 + (usageSection.visible ? usageSection.implicitHeight + column.spacing : 0), root.Layout.minimumHeight)
     // The width minimum is fixed: long names, addresses and texts elide
     // instead of widening the popup. The height minimum follows the content:
     // everything that is shown at its own minimum (or, without one, its
@@ -190,7 +190,17 @@ Item {
             Qt.callLater(root.refresh);
         }
     }
-    Component.onCompleted: root.refresh()
+    Component.onCompleted: {
+        if (root.active) {
+            root.refresh();
+        } else if (root.usage.status === "disabled") {
+            // Created closed: a disabled usage section must not count in the
+            // minimum height before the first opening.
+            internals.shown = Object.assign({}, internals.shown, {
+                usage: root.usageOf("disabled")
+            });
+        }
+    }
 
     QtObject {
         id: internals

@@ -11,10 +11,12 @@
 // new provider value changes neither `shown` nor the displayed text, and
 // after it becomes active again both are current at once. The usage section:
 // hidden while disabled (the minimum height stays), the hints per status, the
-// table with complete and incomplete periods, the data cap bar per level, the
+// table with complete and incomplete periods (its cells stay when the data
+// is delivered again), the data cap bar per level, the
 // untracked interfaces, the vnstat update time and its outdated hint, the
 // minimum size with everything shown, the snapshot while inactive and the
-// refresh request on activation.
+// refresh request on activation. A popup created closed starts with the
+// section disabled when usage is disabled.
 // It cannot see QML warnings itself: read the output of qml6 for the scene as
 // well, it must be free of warnings (scripts/smoke.sh checks that).
 
@@ -565,6 +567,14 @@ Item {
     readonly property string outdatedText: "The vnstat data is not current. Is the vnstat service running?"
     // The minimum height of the popup with the usage section disabled.
     property real minimumWithoutUsage: 0
+    readonly property string incompleteText: "* incomplete: vnstat lacks some days of this period"
+    // The first and last table cell as of the complete-periods step.
+    property var cellsBefore: []
+
+    // How many incomplete marks the table shows.
+    function marks(): int {
+        return scene.shownTexts(view.usagePanel, []).filter(t => t === "*").length;
+    }
 
     // vnStat data of eth0 (1 GB down, 0.1 GB up a day) known since `created`.
     function usageParsed(created: string): var {
@@ -605,7 +615,7 @@ Item {
         if (!view.usagePanel.visible || view.usagePanel.height <= 0) {
             return where + ": the usage section is hidden";
         }
-        const hints = [scene.missingText, "This vnstat version is not supported.", "Reading vnstat failed", "Loading usage…", scene.outdatedText, "vnstat does not track"];
+        const hints = [scene.incompleteText, scene.missingText, "This vnstat version is not supported.", "Reading vnstat failed", "Loading usage…", scene.outdatedText, "vnstat does not track"];
         const others = hints.filter(h => !expected.some(e => e.indexOf(h) === 0));
         return scene.textProblem(where, expected, absent.concat(others));
     }
@@ -634,6 +644,9 @@ Item {
                     return "usage disabled: the section is visible";
                 }
                 scene.minimumWithoutUsage = view.Layout.minimumHeight;
+                if (closedView.shown.usage.status !== "disabled") {
+                    return "usage disabled: a popup created closed starts as '" + closedView.shown.usage.status + "'";
+                }
                 return scene.textProblem("usage disabled", [], ["Today", "vnstat", "Loading usage"]);
             }
         },
@@ -651,12 +664,19 @@ Item {
             },
             check: () => {
                 const problem = scene.usageProblem("usage complete", [
-                    "Today", "Yesterday", "This period", "Last period",
+                    "Usage", "Today", "Yesterday", "This period", "Last period",
                     "↓ " + scene.totalText(1000000000), "↑ " + scene.totalText(100000000), "Σ " + scene.totalText(1100000000),
                     "↓ " + scene.totalText(24 * 1000000000), "Σ " + scene.totalText(30 * 1100000000)
-                ], ["(incomplete)", "Loading usage"]);
+                ], ["(incomplete)", "vnstat lacks", "Loading usage"]);
                 if (problem !== "") {
                     return problem;
+                }
+                if (scene.marks() !== 0) {
+                    return "usage complete: " + scene.marks() + " incomplete marks";
+                }
+                scene.cellsBefore = [view.usagePanel.cellAt(0), view.usagePanel.cellAt(view.usagePanel.cellCount - 1)];
+                if (scene.cellsBefore[0] === null || scene.cellsBefore[1] === null) {
+                    return "usage complete: the table has no cells";
                 }
                 const texts = scene.shownTexts(view, []);
                 const updated = texts.find(t => t.indexOf("vnstat last updated: ") === 0);
@@ -667,11 +687,33 @@ Item {
             }
         },
         {
+            name: "the same usage again",
+            apply: () => {
+                view.usage = scene.usageOf("ok", scene.usageSummaryOf("2026-08-20", ["eth0"]), { lastUpdated: "2026-10-24T18:00" });
+            },
+            check: () => {
+                const panel = view.usagePanel;
+                if (panel.cellAt(0) !== scene.cellsBefore[0] || panel.cellAt(panel.cellCount - 1) !== scene.cellsBefore[1]) {
+                    return "same usage: the table cells were rebuilt";
+                }
+                return scene.usageProblem("same usage", ["Today", "Σ " + scene.totalText(30 * 1100000000)], []);
+            }
+        },
+        {
             name: "usage of incomplete periods",
             apply: () => {
                 view.usage = scene.usageOf("ok", scene.usageSummaryOf("2026-10-05", ["eth0"]), {});
             },
-            check: () => scene.usageProblem("usage incomplete", ["Today", "This period (incomplete)", "Last period (incomplete)"], ["vnstat last updated"])
+            check: () => {
+                const problem = scene.usageProblem("usage incomplete", ["Today", "This period", "Last period", scene.incompleteText], ["vnstat last updated", "(incomplete)"]);
+                if (problem !== "") {
+                    return problem;
+                }
+                if (scene.marks() !== 2) {
+                    return "usage incomplete: " + scene.marks() + " incomplete marks, expected 2";
+                }
+                return view.usagePanel.cellAt(0) === scene.cellsBefore[0] ? "" : "usage incomplete: the table cells were rebuilt";
+            }
         },
         {
             name: "cap at 50 %",
@@ -739,12 +781,21 @@ Item {
                     outdated: true
                 });
             },
-            check: () => scene.usageProblem("full usage", ["Today", "This period (incomplete)", scene.outdatedText, "vnstat does not track docker0", "Reading network data failed: boom"], [])
+            check: () => scene.usageProblem("full usage", ["Today", scene.incompleteText, scene.outdatedText, "vnstat does not track docker0", "Reading network data failed: boom"], [])
         },
         {
             name: "preferred size with the usage section",
             apply: () => {},
-            check: () => view.height >= view.Layout.minimumHeight ? scene.layoutProblem("preferred with usage") : "preferred with usage: the popup is " + view.height + " px high, below its minimum " + view.Layout.minimumHeight
+            check: () => {
+                const room = Kirigami.Units.gridUnit * 30 + view.usagePanel.implicitHeight;
+                if (view.Layout.preferredHeight < room) {
+                    return "preferred with usage: the preferred height " + view.Layout.preferredHeight + " leaves the section no room of its own (" + room + ")";
+                }
+                if (view.height < view.Layout.minimumHeight) {
+                    return "preferred with usage: the popup is " + view.height + " px high, below its minimum " + view.Layout.minimumHeight;
+                }
+                return scene.layoutProblem("preferred with usage");
+            }
         },
         {
             name: "minimum size with the usage section",
@@ -1040,5 +1091,15 @@ Item {
         onOpenSystemMonitor: scene.opened++
         onGraphMinutesPicked: minutes => scene.picked = minutes
         onUsageRefreshRequested: scene.usageRequests++
+    }
+
+    // A popup that Plasma creates while it is closed.
+    FullRepresentation {
+        id: closedView
+
+        provider: stub
+        formatOptions: Format.DEFAULT_FORMAT
+        active: false
+        visible: false
     }
 }

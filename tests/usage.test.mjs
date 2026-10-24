@@ -18,6 +18,8 @@ import {
   isOutdated,
   localNow,
   dateParts,
+  namesKey,
+  namesFromKey,
 } from "../package/contents/code/usage.mjs";
 
 const fixture = parseVnstat(readFileSync(new URL("./fixtures/vnstat-v2.json", import.meta.url), "utf8"));
@@ -540,4 +542,23 @@ test("dateParts rejects anything else", () => {
   ]) {
     assert.equal(dateParts(value), null, String(value));
   }
+});
+
+// --- namesKey and namesFromKey ------------------------------------------------
+
+test("namesKey joins the counted names, so equal selections give equal keys", () => {
+  const live = [
+    { name: "eth0", kind: "physical", included: true },
+    { name: "docker0", kind: "virtual", included: false },
+  ];
+  assert.equal(namesKey("auto", [], live, ["wlan0", "docker0"]), "eth0\nwlan0");
+  assert.equal(namesKey("auto", [], live.slice().reverse(), ["docker0", "wlan0"]), "eth0\nwlan0");
+  assert.equal(namesKey("manual", ["tun0", "eth0", "lo"], [], []), "eth0\ntun0");
+  assert.equal(namesKey("manual", [], live, ["eth0"]), "");
+});
+
+test("namesFromKey splits a key back into names", () => {
+  assert.deepEqual(namesFromKey("eth0\nwlan0"), ["eth0", "wlan0"]);
+  assert.deepEqual(namesFromKey(""), []);
+  assert.deepEqual(namesFromKey(null), []);
 });

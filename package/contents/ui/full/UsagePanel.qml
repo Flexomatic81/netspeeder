@@ -2,7 +2,8 @@
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
 // The usage section of the popup: down, up and the sum for today, yesterday,
-// the current and the last billing period from vnStat, the share of the data
+// the current and the last billing period from vnStat (a period vnStat does
+// not cover completely is marked with "*" and a footnote), the share of the data
 // cap as a bar, when vnStat last wrote its data, and a hint when vnStat is
 // missing, unsupported, failed or still loading. Hidden while disabled.
 
@@ -62,25 +63,57 @@ ColumnLayout {
     // Whether there are figures to show; a failure after a success keeps them.
     readonly property bool hasData: root.summary.status === "ok"
 
-    // The rows of the table, cell by cell: the name, then down, up and sum.
-    readonly property var cells: {
-        const s = root.summary;
-        const rows = [
-            { name: root.trc("@label", "Today"), usage: s.today, period: null },
-            { name: root.trc("@label", "Yesterday"), usage: s.yesterday, period: null },
-            { name: root.trc("@label", "This period"), usage: s.current, period: s.current },
-            { name: root.trc("@label", "Last period"), usage: s.previous, period: s.previous }
-        ];
+    // The number of table cells and one of them (for the smoke scene).
+    readonly property int cellCount: cellRepeater.count
+    function cellAt(index: int): Item {
+        return cellRepeater.itemAt(index);
+    }
+
+    // The rows of the table: name, figures and, for a billing period, its
+    // span and whether vnStat covers it completely.
+    readonly property var rows: [
+        { name: root.trc("@label", "Today"), usage: root.summary.today, period: null },
+        { name: root.trc("@label", "Yesterday"), usage: root.summary.yesterday, period: null },
+        { name: root.trc("@label", "This period"), usage: root.summary.current, period: root.summary.current },
+        { name: root.trc("@label", "Last period"), usage: root.summary.previous, period: root.summary.previous }
+    ]
+    // Whether a period is marked as incomplete (shows the footnote).
+    readonly property bool anyIncomplete: !root.summary.current.complete || !root.summary.previous.complete
+    // The cells as { row, column }: name, mark, down, up and sum. A constant
+    // model, so the cells (and an open tooltip) stay while the figures change.
+    readonly property var cellModel: {
         const cells = [];
-        for (const row of rows) {
-            const name = row.period !== null && !row.period.complete ? row.name + " " + root.trc("@info", "(incomplete)") : row.name;
-            const tip = row.period !== null ? name + "\n" + root.dayText(row.period.start) + " – " + root.dayText(row.period.end) : "";
-            cells.push({ text: name, tip: tip, first: true });
-            cells.push({ text: "↓ " + root.totalText(row.usage.down), tip: "", first: false });
-            cells.push({ text: "↑ " + root.totalText(row.usage.up), tip: "", first: false });
-            cells.push({ text: "Σ " + root.totalText(row.usage.total), tip: "", first: false });
+        for (let row = 0; row < 4; row++) {
+            for (let column = 0; column < 5; column++) {
+                cells.push({ row: row, column: column });
+            }
         }
         return cells;
+    }
+
+    function cellText(rowIndex: int, column: int): string {
+        const row = root.rows[rowIndex];
+        switch (column) {
+        case 0:
+            return row.name;
+        case 1:
+            return row.period !== null && !row.period.complete ? "*" : "";
+        case 2:
+            return "↓ " + root.totalText(row.usage.down);
+        case 3:
+            return "↑ " + root.totalText(row.usage.up);
+        default:
+            return "Σ " + root.totalText(row.usage.total);
+        }
+    }
+
+    // The name and the span of a billing period; "" for the other cells.
+    function cellTip(rowIndex: int, column: int): string {
+        const row = root.rows[rowIndex];
+        if (row.period === null || column > 1) {
+            return "";
+        }
+        return row.name + "\n" + root.dayText(row.period.start) + " – " + root.dayText(row.period.end);
     }
 
     function totalText(bytes: real): string {
@@ -130,40 +163,61 @@ ColumnLayout {
     visible: root.status !== "disabled"
     spacing: Kirigami.Units.smallSpacing
 
+    Kirigami.Heading {
+        Layout.fillWidth: true
+        level: 5
+        text: root.trc("@title:group", "Usage")
+        elide: Text.ElideRight
+    }
+
     GridLayout {
         Layout.fillWidth: true
         visible: root.hasData
-        columns: 4
-        columnSpacing: Kirigami.Units.largeSpacing
+        columns: 5
+        columnSpacing: Kirigami.Units.smallSpacing
         rowSpacing: 0
 
         Repeater {
-            model: root.cells
+            id: cellRepeater
+
+            model: root.cellModel
 
             delegate: QQC2.Label {
                 id: cell
 
                 required property var modelData
+                readonly property string tip: root.cellTip(cell.modelData.row, cell.modelData.column)
 
-                // The names give way to the figures on a narrow popup.
-                Layout.fillWidth: cell.modelData.first
-                Layout.minimumWidth: cell.modelData.first ? 0 : implicitWidth
-                text: cell.modelData.text
-                opacity: cell.modelData.first ? 0.7 : 1
+                // The names give way to the figures on a narrow popup; the
+                // mark keeps its width.
+                Layout.fillWidth: cell.modelData.column === 0
+                Layout.minimumWidth: cell.modelData.column === 0 ? 0 : implicitWidth
+                Layout.leftMargin: cell.modelData.column > 1 ? Kirigami.Units.smallSpacing : 0
+                text: root.cellText(cell.modelData.row, cell.modelData.column)
+                opacity: cell.modelData.column <= 1 ? 0.7 : 1
                 elide: Text.ElideRight
                 font.features: { "tnum": 1 }
 
                 HoverHandler {
                     id: hover
 
-                    enabled: cell.modelData.tip !== ""
+                    enabled: cell.tip !== ""
                 }
 
-                QQC2.ToolTip.text: cell.modelData.tip
-                QQC2.ToolTip.visible: hover.hovered
+                QQC2.ToolTip.text: cell.tip
+                QQC2.ToolTip.visible: hover.hovered && cell.tip !== ""
                 QQC2.ToolTip.delay: Kirigami.Units.toolTipDelay
             }
         }
+    }
+
+    QQC2.Label {
+        Layout.fillWidth: true
+        visible: root.hasData && root.anyIncomplete
+        text: root.tr("* incomplete: vnstat lacks some days of this period")
+        font: Kirigami.Theme.smallFont
+        opacity: 0.7
+        wrapMode: Text.WordWrap
     }
 
     QQC2.Label {

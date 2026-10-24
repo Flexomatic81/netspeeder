@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 // SPDX-FileCopyrightText: 2016 Daniel Faust <hessijames@gmail.com>
 
-// The applet: wires the settings to the NetworkProvider and the UsageSource,
+// The applet: wires the settings to the NetworkProvider and the UsageModel,
 // shows the compact view in the panel and builds the tooltip.
 
 pragma ComponentBehavior: Bound
@@ -21,7 +21,6 @@ import "../code/graph.mjs" as Graph
 import "../code/launchtext.mjs" as LaunchText
 import "../code/text.mjs" as TextTools
 import "../code/tooltip.mjs" as Tooltip
-import "../code/usage.mjs" as Usage
 import "../code/visibility.mjs" as Visibility
 
 PlasmoidItem {
@@ -53,19 +52,10 @@ PlasmoidItem {
             decimalPoint: Qt.locale().decimalPoint
         })
 
-    // The data usage of the interfaces that count, in the current billing
-    // period. Names vnStat knows count as well, so the history of a device
-    // that is gone stays in the sums.
-    readonly property var usageNames: Usage.usageNames(root.provider.interfaceSelection, root.provider.selectedInterfaces, root.provider.interfaces, Object.keys(usageSource.parsed?.interfaces ?? {}))
-    readonly property var summary: Usage.usageSummary(usageSource.parsed, root.usageNames, clock.now, root.billingDay)
-    // (configuration is created from main.xml at Plasma runtime)
-    readonly property int billingDay: Appearance.validInt(Plasmoid.configuration.billingDay, 1, 28, 1) // qmllint disable missing-property
-    readonly property real dataCapGiB: Appearance.validPositive(Plasmoid.configuration.dataCapGiB, 100) // qmllint disable missing-property
-    // The share of the data cap: { enabled, capBytes, percent, level }.
-    readonly property var cap: Object.assign({
-            enabled: Plasmoid.configuration.dataCapEnabled === true, // qmllint disable missing-property
-            capBytes: root.dataCapGiB * 1024 * 1024 * 1024
-        }, Usage.capState(root.summary.current.total, root.dataCapGiB, Appearance.validInt(Plasmoid.configuration.capWarnPercent, 1, 99, 80))) // qmllint disable missing-property
+    // The data usage of the current billing period and the share of the
+    // data cap (see UsageModel).
+    readonly property var summary: usageModel.summary
+    readonly property var cap: usageModel.cap
 
     // "1.5 KiB/s" for a rate in bytes per second.
     function speedText(bytesPerSecond: real): string {
@@ -122,16 +112,9 @@ PlasmoidItem {
         onGraphMinutesPicked: minutes => Plasmoid.configuration.graphMinutes = minutes // qmllint disable missing-property
         // Only a visible popup (or the desktop view) follows the provider.
         active: root.expanded || Plasmoid.formFactor === PlasmaCore.Types.Planar
-        usage: ({
-                summary: root.summary,
-                status: usageSource.status,
-                detail: usageSource.detail,
-                cap: root.cap,
-                lastUpdated: usageSource.lastUpdated,
-                outdated: Usage.isOutdated(usageSource.lastUpdated, clock.now, 60)
-            })
+        usage: usageModel.view
         onOpenSystemMonitor: monitorLauncher.launch()
-        onUsageRefreshRequested: usageSource.refresh()
+        onUsageRefreshRequested: usageModel.refresh()
     }
     compactRepresentation: CompactRepresentation {
         provider: root.provider
@@ -176,32 +159,18 @@ PlasmoidItem {
         idleSeconds: Appearance.validInt(Plasmoid.configuration.idleSeconds, 5, 3600, 30) // qmllint disable missing-property
     }
 
-    UsageSource {
-        id: usageSource
+    UsageModel {
+        id: usageModel
 
+        interfaceSelection: root.provider.interfaceSelection
+        selectedInterfaces: root.provider.selectedInterfaces
+        interfaces: root.provider.interfaces
         // (configuration is created from main.xml at Plasma runtime)
         enabled: Plasmoid.configuration.usageEnabled // qmllint disable missing-property
-        // A new result may come after midnight: the day is taken again.
-        onParsedChanged: clock.tick()
-    }
-
-    // The local day and time for the usage sums and the freshness of the
-    // vnStat data; taken every minute, so the sums move on at midnight.
-    QtObject {
-        id: clock
-
-        property var now: Usage.localNow(new Date())
-
-        function tick() {
-            clock.now = Usage.localNow(new Date());
-        }
-    }
-
-    Timer {
-        interval: 60000
-        repeat: true
-        running: usageSource.enabled
-        onTriggered: clock.tick()
+        billingDay: Appearance.validInt(Plasmoid.configuration.billingDay, 1, 28, 1) // qmllint disable missing-property
+        capEnabled: Plasmoid.configuration.dataCapEnabled === true // qmllint disable missing-property
+        capGiB: Appearance.validPositive(Plasmoid.configuration.dataCapGiB, 100) // qmllint disable missing-property
+        warnPercent: Appearance.validInt(Plasmoid.configuration.capWarnPercent, 1, 99, 80) // qmllint disable missing-property
     }
 
     Launcher {
