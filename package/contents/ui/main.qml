@@ -5,6 +5,8 @@
 // The applet: wires the settings to the NetworkProvider, shows the compact
 // view in the panel and builds the tooltip.
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
@@ -34,13 +36,11 @@ PlasmoidItem {
     property alias provider: provider
     // Options for formatSpeed(); the views format their numbers with them.
     readonly property var formatOptions: ({
-            // qmllint disable missing-property
             // (configuration is created from main.xml at Plasma runtime)
-            unitSystem: Plasmoid.configuration.unitSystem,
-            shortUnits: Plasmoid.configuration.shortUnits,
-            decimals: Plasmoid.configuration.decimals,
-            lowSpeedThreshold: Plasmoid.configuration.lowSpeedThreshold,
-            // qmllint enable missing-property
+            unitSystem: Plasmoid.configuration.unitSystem, // qmllint disable missing-property
+            shortUnits: Plasmoid.configuration.shortUnits, // qmllint disable missing-property
+            decimals: Plasmoid.configuration.decimals, // qmllint disable missing-property
+            lowSpeedThreshold: Plasmoid.configuration.lowSpeedThreshold, // qmllint disable missing-property
             decimalPoint: Qt.locale().decimalPoint
         })
 
@@ -106,13 +106,11 @@ PlasmoidItem {
         provider: root.provider
         formatOptions: root.formatOptions
         vertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
-        // qmllint disable missing-property
         // (configuration is created from main.xml at Plasma runtime)
-        layoutMode: Plasmoid.configuration.layout
-        uploadFirst: Plasmoid.configuration.uploadFirst
-        combined: Plasmoid.configuration.combined
-        fixedWidth: Plasmoid.configuration.fixedWidth
-        // qmllint enable missing-property
+        layoutMode: Plasmoid.configuration.layout // qmllint disable missing-property
+        uploadFirst: Plasmoid.configuration.uploadFirst // qmllint disable missing-property
+        combined: Plasmoid.configuration.combined // qmllint disable missing-property
+        fixedWidth: Plasmoid.configuration.fixedWidth // qmllint disable missing-property
     }
 
     toolTipMainText: root.provider.primaryLabel || root.tr("Network")
@@ -122,13 +120,11 @@ PlasmoidItem {
     NetworkProvider {
         id: provider
 
-        // qmllint disable missing-property
         // (configuration is created from main.xml at Plasma runtime)
-        dataSource: Plasmoid.configuration.dataSource
-        interfaceSelection: Plasmoid.configuration.interfaceSelection
-        selectedInterfaces: Plasmoid.configuration.selectedInterfaces
-        updateInterval: Plasmoid.configuration.updateInterval
-        // qmllint enable missing-property
+        dataSource: Plasmoid.configuration.dataSource // qmllint disable missing-property
+        interfaceSelection: Plasmoid.configuration.interfaceSelection // qmllint disable missing-property
+        selectedInterfaces: Plasmoid.configuration.selectedInterfaces // qmllint disable missing-property
+        updateInterval: Plasmoid.configuration.updateInterval // qmllint disable missing-property
     }
 
     Component.onCompleted: console.debug("netspeeder: loaded")

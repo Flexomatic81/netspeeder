@@ -31,5 +31,5 @@ if [ "${#files[@]}" -eq 0 ]; then
   exit 0
 fi
 
-"$qmllint" --unqualified disable --max-warnings 0 "${files[@]}"
+"$qmllint" --max-warnings 0 "${files[@]}"
 echo "lint: ${#files[@]} QML files OK"
