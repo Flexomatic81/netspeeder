@@ -48,11 +48,12 @@ First pre-release, stage "Kern" (core).
 - #46: DataSource error. It does not apply to the default data source any more,
   which reads `ksystemstats` instead of a DataSource engine.
 - #48: build failure with CMake 4. The new `CMakeLists.txt` requires CMake 3.16
-  and extra-cmake-modules 6.
+  and extra-cmake-modules 6. The CMake files were verified against a stub of
+  extra-cmake-modules only; the real build is to be verified before release.
 - #11 and #27: overlapping text and wrong margins. The panel view is built from
   Qt layouts with fixed-width slots instead of manual aspect ratio
   calculations.
 
 Upstream #24 (empty window when scrolling over the widget) and #47 (crash when
-deselecting an option) are covered by the design and checked by hand, see
-[docs/testing.md](docs/testing.md).
+deselecting an option) are addressed by the design; to be verified by hand
+before release, see [docs/testing.md](docs/testing.md).

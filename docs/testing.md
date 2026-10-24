@@ -62,3 +62,47 @@ kopieren; leere Spalten gelten als nicht geprüft.
 | vnstat fehlend: Hinweis statt Fehler | 0.4 | |
 | Datenlimit-Benachrichtigung: je Stufe einmal pro Abrechnungszeitraum, nicht erneut nach einem Neustart | 0.4 | |
 | Durchlauf aller Punkte auf Plasma 6.3 (Debian 13, VM) | vor 1.0 | |
+
+## Automatische Abnahme 0.1
+
+Datum: 2026-10-24, Stand `f4846c5`, auf dem Entwicklungsrechner (Node 24.22,
+Qt/qmllint 6.12, Plasma 6.8). Diese Läufe ersetzen die manuellen Prüfpunkte
+oben nicht. Dort bleibt „Ergebnis" leer, bis sie von Hand durchgegangen sind.
+
+Befehl (npm ist auf diesem Rechner nicht installiert, `pnpm test` führt dasselbe
+Skript `test` aus `package.json` aus):
+
+```
+pnpm test && scripts/lint.sh && scripts/smoke.sh && scripts/dev-install.sh \
+  && scripts/load-check.sh && scripts/build-plasmoid.sh 0.1.0
+```
+
+| Prüfung | Ergebnis |
+|---|---|
+| `pnpm test` | 86 Tests, 86 bestanden, 0 fehlgeschlagen |
+| `scripts/lint.sh` | `lint: 20 QML files OK`, keine Warnungen |
+| `scripts/smoke.sh` | `SMOKE OK` für runner, compact, combobox, parity, proc, provider, sensors, vertical |
+| `LC_ALL=C scripts/smoke.sh tests/qml/ParitySmoke.qml` | `SMOKE OK parity` |
+| `scripts/dev-install.sh` | Paket aktualisiert, Übersetzung kompiliert |
+| `scripts/load-check.sh` | `LOAD OK` |
+| `LANGUAGE=de scripts/load-check.sh` | `LOAD OK` |
+| `scripts/build-plasmoid.sh 0.1.0` | `dist/netspeeder-0.1.0.plasmoid` erzeugt (31 Einträge, mit deutscher `.mo`) |
+
+Jede Smoke-Szene lief zusätzlich einzeln ungefiltert
+(`QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen qml6 tests/qml/<Szene>.qml`),
+weil `smoke.sh` Warnungen ausblendet, solange `SMOKE OK` erscheint. Ergebnis: keine
+QML-Warnung aus `package/` oder `tests/qml/` (kein TypeError, ReferenceError,
+Bindungsschleife, „Cannot assign" oder Veraltet-Hinweis). Zu sehen sind nur die
+erwarteten Meldungen der `ProviderSmoke`-Szene (Laden der absichtlich fehlenden
+`Missing.qml` und `netspeeder:`-Warnungen zum Wechsel auf `/proc`). Ein
+ungefilterter Lauf von `plasmawindowed` zeigt zusätzlich nur `kf.*`-Meldungen des
+Systems und eine Zeile `qml: 0`, die `plasmawindowed` auch bei Uhr und
+Netzwerkmonitor von KDE ausgibt.
+
+Nicht automatisch geprüft:
+
+- Der echte CMake-Bau und die Installation per `cmake --install`: auf dem
+  Entwicklungsrechner fehlt `extra-cmake-modules`. Die CMake-Dateien sind nur
+  gegen eine Attrappe von ECM geprüft. Der echte Bau ist vor der Veröffentlichung
+  nachzuholen.
+- Alles aus den Tabellen oben (Panel, Netzwerk-Situationen, Einstellungen).
