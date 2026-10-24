@@ -29,6 +29,27 @@ test("fontPixelSize", () => {
   assert.equal(fontPixelSize(20, 200), 19); // capped at 95 % of row height
   assert.equal(fontPixelSize(0, 100), 1);
 });
+// A text line is about 1.36 times the pixel size high; the line must fit the row.
+test("fontPixelSize keeps the line of a scaled font within the row", () => {
+  assert.equal(fontPixelSize(22, 150, 1.36), 16);
+  assert.equal(fontPixelSize(44, 150, 1.36), 32);
+  assert.equal(fontPixelSize(20, 200, 1.4), 14);
+});
+test("fontPixelSize at 100 % is not limited by a usual line height", () => {
+  assert.equal(fontPixelSize(22, 100, 1.4), 15);
+  assert.equal(fontPixelSize(48, 100, 1.38), 34);
+  assert.equal(fontPixelSize(20, 100, 1.4), 14);
+});
+test("fontPixelSize ignores an unusable line height", () => {
+  assert.equal(fontPixelSize(20, 200, 0), 19);
+  assert.equal(fontPixelSize(20, 200, Number.NaN), 19);
+  assert.equal(fontPixelSize(20, 200, undefined), 19);
+});
+test("auto layout judges the rows by the line height", () => {
+  // 30 px: rows of 15 px give 14 px at 200 % by the old cap, but a 1.4 line allows only 10.
+  assert.equal(resolveLayout({ ...base, thickness: 30, fontScale: 200, minReadablePx: 11 }), "rows");
+  assert.equal(resolveLayout({ ...base, thickness: 30, fontScale: 200, minReadablePx: 11, lineRatio: 1.4 }), "columns");
+});
 test("fitPixelSize", () => {
   assert.equal(fitPixelSize(32, 160, 14), 14);
   assert.equal(fitPixelSize(32, 400, 14), 8);

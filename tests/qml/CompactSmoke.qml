@@ -267,6 +267,24 @@ Item {
     }
     property real boldWidth: 0
 
+    // A scaled view: every text stays inside the view and inside its own row,
+    // and nothing overlaps.
+    function scaledProblem(where, texts, labelCount) {
+        const problem = scene.textProblem(where, texts, labelCount, true) || scene.placementProblem(where, styled44, texts, false, 0);
+        if (problem !== "") {
+            return problem;
+        }
+        const rows = styled44.resolvedLayout === "rows" ? 2 : 1;
+        const rowHeight = styled44.height / rows;
+        for (const t of texts) {
+            const row = Math.min(rows - 1, Math.floor((t.y + t.height / 2) / rowHeight));
+            if (t.y < row * rowHeight - 0.01 || t.bottom > (row + 1) * rowHeight + 0.01) {
+                return where + ": '" + t.text + "' leaves its row of " + rowHeight + " px: " + scene.describe(texts);
+            }
+        }
+        return "";
+    }
+
     function styledProblem(where) {
         const texts = scene.shownTexts(styled44, styled44, []);
         return scene.textProblem(where, texts, 2, true) || scene.placementProblem(where, styled44, texts, false, 0);
@@ -691,10 +709,12 @@ Item {
             if (symbols !== "▼▲") {
                 return "combined triangles: symbols are '" + symbols + "'";
             }
+            const texts = scene.shownTexts(styled44, styled44, []);
+            const problem = scene.textProblem("combined triangles", texts, 1, true) || scene.placementProblem("combined triangles", styled44, texts, false, 0);
             styled44.combined = false;
             styled44.iconStyle = "arrows";
             styled44.fontScale = 150;
-            return "";
+            return problem;
         },
         () => {
             if (!(styled44.pixelSize > wide44.pixelSize)) {
@@ -702,7 +722,22 @@ Item {
             }
             const texts = scene.shownTexts(styled44, styled44, []);
             console.log("compact fontScale 150: pixelSize " + styled44.pixelSize + " | " + scene.describe(texts));
-            return scene.textProblem("fontScale 150", texts, 2, true);
+            const problem = scene.scaledProblem("fontScale 150 rows", texts, 2);
+            styled44.layoutMode = "columns";
+            return problem;
+        },
+        () => {
+            const texts = scene.shownTexts(styled44, styled44, []);
+            console.log("compact fontScale 150 columns: pixelSize " + styled44.pixelSize + " | " + scene.describe(texts));
+            const problem = styled44.resolvedLayout !== "columns" ? "fontScale 150: layout is " + styled44.resolvedLayout : scene.scaledProblem("fontScale 150 columns", texts, 2);
+            styled44.layoutMode = "auto";
+            styled44.combined = true;
+            return problem;
+        },
+        () => {
+            const texts = scene.shownTexts(styled44, styled44, []);
+            console.log("compact fontScale 150 single: pixelSize " + styled44.pixelSize + " | " + scene.describe(texts));
+            return styled44.resolvedLayout !== "single" ? "fontScale 150: layout is " + styled44.resolvedLayout : scene.scaledProblem("fontScale 150 single", texts, 1);
         }
     ]
     property int step: 0

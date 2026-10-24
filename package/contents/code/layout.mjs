@@ -10,8 +10,8 @@
 // with the pixel size, so one measurement per candidate is enough.
 export const REFERENCE_PX = 100;
 
-// Share of the row height a font of scale 100 % fills, and the hard cap that
-// keeps larger scales from overflowing the row.
+// Share of the row height a font of scale 100 % fills, and the cap for larger
+// scales when the line height of the font is not known.
 const ROW_FILL = 0.72;
 const ROW_CAP = 0.95;
 
@@ -23,22 +23,28 @@ function finiteOr(value, fallback) {
 }
 
 // Font pixel size for a row of the given height. `fontScale` is a percentage.
-export function fontPixelSize(rowHeight, fontScale) {
+// `lineRatio` is the height of a text line divided by the pixel size of its
+// font; the line must fit the row, however large the scale.
+export function fontPixelSize(rowHeight, fontScale, lineRatio) {
   const height = Math.max(0, finiteOr(rowHeight, 0));
   const scale = finiteOr(fontScale, 100);
-  const size = Math.min((height * ROW_FILL * scale) / 100, height * ROW_CAP);
+  const ratio = finiteOr(lineRatio, 0);
+  const cap = ratio > 0 ? height / ratio : height * ROW_CAP;
+  const size = Math.min((height * ROW_FILL * scale) / 100, cap);
   return Math.max(1, Math.floor(size));
 }
 
 // "single" (one combined value), "rows" (download above upload) or "columns"
 // (side by side). `mode` is the layout setting: "rows", "columns" or "auto";
 // anything else counts as "auto". In auto mode a vertical panel always stacks
-// and a horizontal one uses two rows as long as each row can hold readable text.
-export function resolveLayout({ mode, vertical, combined, thickness, fontScale, minReadablePx }) {
+// and a horizontal one uses two rows as long as each row can hold readable text
+// (`lineRatio` as for fontPixelSize).
+export function resolveLayout({ mode, vertical, combined, thickness, fontScale, minReadablePx, lineRatio }) {
   if (combined) return "single";
   if (mode === "rows" || mode === "columns") return mode;
   if (vertical) return "rows";
-  return fontPixelSize(finiteOr(thickness, 0) / 2, fontScale) >= finiteOr(minReadablePx, 0) ? "rows" : "columns";
+  const rowPx = fontPixelSize(finiteOr(thickness, 0) / 2, fontScale, lineRatio);
+  return rowPx >= finiteOr(minReadablePx, 0) ? "rows" : "columns";
 }
 
 // Largest pixel size (at most `maxPx`, at least 1) at which text that measures

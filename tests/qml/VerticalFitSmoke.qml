@@ -9,7 +9,7 @@
 // variant, measured again at the chosen size with a real Text, must fit in 32 px.
 // Then the panel view itself, 32 px wide, with the symbol styles that change
 // the measured symbol: none, theme icons, custom text and the single value with
-// both icons. Each must fit the panel; without symbols no space is reserved.
+// both arrows and with both icons. Each must fit the panel; without symbols no space is reserved.
 //
 // The text sizes are those of a stock Plasma at 96 dpi: 10 pt is 13 px and the
 // small font of 8 pt is 10 px (measured with the KDE platform theme). The
@@ -163,7 +163,7 @@ Item {
     }
 
     function checkStyles() {
-        for (const [name, view] of [["none", noneView], ["icons", iconsView], ["custom", customView], ["combined icons", combinedView]]) {
+        for (const [name, view] of [["none", noneView], ["icons", iconsView], ["custom", customView], ["combined arrows", combinedTextView], ["combined icons", combinedView]]) {
             const problem = scene.styleProblem(name, view);
             if (problem !== "") {
                 return problem;
@@ -233,6 +233,23 @@ Item {
                 iconStyle: "custom"
                 customDownIcon: "DL"
                 customUpIcon: "UL"
+                Layout.fillWidth: true
+            }
+        }
+
+        ColumnLayout {
+            width: scene.panelWidth
+            spacing: 0
+
+            CompactRepresentation {
+                id: combinedTextView
+
+                provider: stub
+                formatOptions: Format.DEFAULT_FORMAT
+                vertical: true
+                combined: true
+                minReadablePx: scene.smallPx
+                baseFontPx: scene.defaultPx
                 Layout.fillWidth: true
             }
         }

@@ -78,7 +78,8 @@ Item {
             combined: root.combined,
             thickness: root.vertical ? root.width : root.height,
             fontScale: root.fontScale,
-            minReadablePx: root.minReadablePx
+            minReadablePx: root.minReadablePx,
+            lineRatio: root.lineRatio
         })
     readonly property bool single: root.resolvedLayout === "single"
     readonly property string family: root.fontFamily !== "" ? root.fontFamily : Kirigami.Theme.defaultFont.family
@@ -96,7 +97,7 @@ Item {
             index: 0,
             pixelSize: 0
         })
-    readonly property int pixelSize: root.vertical ? root.verticalFit.pixelSize : LayoutLogic.fontPixelSize(root.rowHeight, root.fontScale)
+    readonly property int pixelSize: root.vertical ? root.verticalFit.pixelSize : LayoutLogic.fontPixelSize(root.rowHeight, root.fontScale, root.lineRatio)
     // The index is clamped: while the settings change, the variants may be
     // replaced a moment before the fit has been recalculated.
     readonly property var activeVariant: root.variants[Math.min(root.vertical ? root.verticalFit.index : 0, root.variants.length - 1)]
@@ -108,6 +109,7 @@ Item {
     readonly property var firstSpeed: root.single ? root.totalSpeed : (root.uploadFirst ? root.upSpeed : root.downSpeed)
     readonly property var secondSpeed: root.uploadFirst ? root.downSpeed : root.upSpeed
     readonly property string firstSymbol: root.uploadFirst && !root.single ? root.symbolSet.up : root.symbolSet.down
+    // The symbol of the second label (SpeedLabel's secondSymbol is pairedSymbol).
     readonly property string secondSymbol: root.uploadFirst ? root.symbolSet.down : root.symbolSet.up
     // The single value stands for both directions and shows both symbols.
     readonly property string pairedSymbol: root.single ? root.symbolSet.up : ""
@@ -224,6 +226,19 @@ Item {
     opacity: root.provider.stale ? 0.5 : 1
     Accessible.role: Accessible.StaticText
     Accessible.name: root.accessibleName
+
+    // The height of a text line per pixel of font size, laid out as SpeedLabel
+    // draws it; a line of a scaled font must still fit its row.
+    readonly property real lineRatio: lineProbe.implicitHeight / LayoutLogic.REFERENCE_PX
+
+    Text {
+        id: lineProbe
+
+        visible: false
+        text: "0"
+        font: referenceFont.font
+        renderType: Text.NativeRendering
+    }
 
     // Carries the font that the measuring below uses.
     Text {
