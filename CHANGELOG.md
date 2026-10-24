@@ -44,13 +44,13 @@ First pre-release, stage "Kern" (core).
 ### Development
 
 - Development checks: ESLint, Prettier, coverage floor, strict qmllint,
-  shellcheck, one check runner (`node tools/check.mjs`) used locally, as
-  pre-commit hook and in CI.
+  shellcheck, one check runner (`node tools/check.mjs`) used locally and by
+  the pre-commit hook and wired into the CI workflow.
 - Branch coverage of the logic modules is 100 %; the coverage floor for
   branches is 98 %.
 - Visible texts go through per-file translation helpers (`tr`, `trc`, `trp`)
   that call Plasma's i18n functions and fall back to English where they are
-  not available. The message catalog is unchanged, and texts in the `.mjs`
+  not available. The message keys are unchanged, and texts in the `.mjs`
   modules are now extracted as well.
 - The list synchronisation shared by the sensor source and the settings page
   lives in one tested module, and the tooltip text selection in another.
