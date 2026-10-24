@@ -45,13 +45,54 @@ Daniel Faust, see [Origin](#origin).
   interface with its kind and current speed.
 - **Translations:** English and German.
 
+## Popup and desktop view (0.2)
+
+A click on the panel view opens a popup (the left click by default). The same
+view can also sit directly on the desktop (Plasma's "Add Widgets" on the
+desktop); there it is always shown and has no popup. It contains:
+
+- **Header** with the live download and upload speed, the connection state
+  (online, offline, no data yet) and a hint when the data source has a problem.
+- **Traffic graph** with a time window of 1, 5 or 15 minutes. The selected
+  window is kept in the configuration and survives a restart. The graph needs
+  Qt Quick Charts; it is loaded in isolation, so without it only the graph is
+  replaced by a note and the rest of the popup works. The x axis is per
+  sample, not a wall-clock scale.
+- **Peaks and session totals** for download and upload.
+- **Interface list**, scrollable, with kind, state, totals per interface and
+  the IPv4 address, which you can copy with one click.
+- **Footer** with an "Open System Monitor" button and the active data source.
+
+The popup follows the data only while it is visible, so a closed popup costs
+nothing.
+
+## Click behavior and launch target (0.2)
+
+The settings page "Behavior" sets what the left and the middle click do:
+open the popup, start the launch target, or nothing (middle click default:
+nothing). The page warns when neither click opens the popup; the popup is then
+only reachable on the desktop.
+
+The launch target is either an **application** (pick a `.desktop` file in the
+file dialog; the desktop ID is stored, default System Monitor) or a **command**.
+The target is checked before it starts: an unknown application or a command
+that cannot be found gives a desktop notification instead of failing silently.
+
+Limitations:
+
+- Desktop IDs of launchers in subdirectories of the applications folders
+  (for example `kde/foo.desktop`) are not found.
+- A command is pre-checked only when its first word is a plain name or a path;
+  for anything else (shell syntax, variables) it is started unchecked.
+- A launch that fails after it started (the program crashes) is not detected.
+
 ## Planned releases
 
 | Version | Content |
 |---|---|
 | 0.1 "Kern" | Core: both data sources, interface selection, panel view, tooltip, settings for display and data, German |
-| 0.2 "Darstellung" | Complete appearance page: font, icons, color modes and thresholds, mini graph; automatic hiding |
-| 0.3 "Popup" | Popup with graph, key figures and interface list; desktop view; click actions; behavior page |
+| 0.2 "Popup" | Popup with graph, key figures and interface list; desktop view; click actions; behavior page |
+| 0.3 "Darstellung" | Complete appearance page: font, icons, color modes and thresholds, mini graph; automatic hiding |
 | 0.4 "Verbrauch" | Data usage through vnstat, billing period, data cap, notifications |
 | 1.0 | Fixes from the pre-releases, test on Plasma 6.3, screenshots, store text, guide for users of the Netspeed Widget |
 

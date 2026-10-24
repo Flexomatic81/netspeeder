@@ -29,7 +29,7 @@ kopieren; leere Spalten gelten als nicht geprüft.
 | Horizontales Panel in Standardhöhe: Download und Upload lesbar, die Werte wechseln, ohne dass das Panel springt oder Text überlappt (Upstream #11, #27) | 0.1 | |
 | Vertikales Panel: Richtungen untereinander, Wert und Einheit lesbar, keine Überlappung | 0.1 | |
 | Panelmaße: horizontal 20 px, 44 px und 96 px sowie vertikal ca. 32 px Breite – Anzeige lesbar, keine Überlappung, nichts abgeschnitten | 0.1 | |
-| Desktop-Platzierung (Planar, Widget direkt auf der Arbeitsfläche): zeigt in 0.1 etwas Sinnvolles; die eigene Popup-Ansicht für den Desktop folgt erst mit 0.3 | 0.1 | |
+| Desktop-Platzierung (Planar, Widget direkt auf der Arbeitsfläche): zeigt in 0.1 etwas Sinnvolles; die Popup-Ansicht für den Desktop gehört zu 0.2 (siehe unten) | 0.1 | |
 | Helles und dunkles Theme: Text in beiden gut lesbar | 0.1 | |
 | Schriftskalierung 150 %: Panelanzeige und Einstellungsseiten bleiben lesbar und werden nicht abgeschnitten | 0.1 | |
 | Tooltip in einem echten Panel: Verbindungsname, Download-Zeile, Upload-Zeile und IP-Adresse erscheinen | 0.1 | |
@@ -54,6 +54,26 @@ kopieren; leere Spalten gelten als nicht geprüft.
 | Seite „Anzeige": alle Optionen nach Anwenden/OK unverändert wieder da (Layout, Reihenfolge, nur Summe, Einheiten, Kurzformen, Nachkommastellen, Schwelle, Intervall) | 0.1 | |
 | Upstream #47: eine Option abwählen und speichern – kein Absturz, Wert bleibt abgewählt | 0.1 | |
 | Upstream #24: mit dem Mausrad über dem Widget scrollen – kein leeres Fenster | 0.1 | |
+
+## Popup und Klickverhalten
+
+| Prüfpunkt | Etappe | Ergebnis |
+|---|---|---|
+| Linksklick auf das Widget öffnet das Popup, ein weiterer Klick auf das Widget bei offenem Popup schließt es und öffnet es nicht sofort wieder; Klick außerhalb schließt es ebenfalls | 0.2 | |
+| Mittelklick auf „Popup öffnen“ stellen (Seite „Verhalten“): öffnet und schließt das Popup, ebenso ohne erneutes Öffnen bei offenem Popup | 0.2 | |
+| Popup zeigt Kopf mit Live-Werten, Status und bei Datenquellenproblem einen Fehlerhinweis | 0.2 | |
+| Diagramm-Fenster 1, 5 und 15 Minuten umschalten; nach plasmashell-Neustart ist das gewählte Fenster erhalten | 0.2 | |
+| Spitzenwerte und Sitzungssummen erscheinen und steigen bei Last (z. B. Download) | 0.2 | |
+| IP-Adresse in der Interface-Liste kopieren: „Kopiert“ erscheint, die Adresse steht in der Zwischenablage | 0.2 | |
+| „Systemmonitor öffnen“ startet den Systemmonitor | 0.2 | |
+| Popup mit 12 oder mehr Interfaces in einer echten Sitzung (z. B. mit Docker, VPN, virtuellen Brücken): die Liste scrollt, nichts wird abgeschnitten, das Popup bleibt bedienbar | 0.2 | |
+| Seite „Verhalten“, Startziel „Anwendung“ (über den Dateidialog gewählt) und Klickaktion „Starten“: die Anwendung startet wirklich | 0.2 | |
+| Startziel „Befehl“ (z. B. `konsole`): der Befehl startet wirklich | 0.2 | |
+| Unbekannte Desktop-ID bzw. fehlender Befehl (z. B. `gibtesnicht`): Benachrichtigung statt stillem Fehlschlag | 0.2 | |
+| Weder Links- noch Mittelklick auf „Popup öffnen“: Seite „Verhalten“ zeigt die Warnung | 0.2 | |
+| Desktop-Ansicht: Widget auf der Arbeitsfläche zeigt dieselbe Ansicht direkt, ohne Popup | 0.2 | |
+| Popup mit deutscher Systemsprache: alle Texte deutsch, nichts abgeschnitten (auch Seite „Verhalten“) | 0.2 | |
+| Ohne Qt Quick Charts (falls herstellbar): nur das Diagramm fehlt, mit Hinweis, der Rest des Popups funktioniert | 0.2 | |
 
 ## Spätere Etappen und Release-Kandidaten
 

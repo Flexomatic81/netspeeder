@@ -5,6 +5,40 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 
 # Changelog
 
+## 0.2.0 (unreleased)
+
+Second pre-release, stage "Popup".
+
+### Added
+
+- Popup (also used as the desktop view) with a header showing the live speeds,
+  the connection state and a hint on data source errors; a traffic graph with
+  1, 5 and 15 minute windows; peaks and session totals; a scrollable interface
+  list with kind, totals and a copyable IPv4 address; an "Open System Monitor"
+  button and the active data source.
+- The selected graph window is stored in the configuration and survives a
+  restart.
+- The graph is loaded in isolation: without Qt Quick Charts only the graph is
+  hidden, with a note, and the rest of the popup works.
+- Desktop view: placed on the desktop, the widget shows the popup view
+  directly.
+- Configurable clicks: left and middle click open the popup, start the launch
+  target or do nothing.
+- Launch target: an application (desktop ID chosen in a file dialog) or a
+  command. The target is pre-checked; an unknown application or a missing
+  command gives a notification, and a start that does not respond times out.
+- Settings page "Behavior" with a warning when neither click opens the popup.
+- The provider keeps a rolling traffic history with peaks and session totals;
+  it follows the data only while the popup or the desktop view is visible.
+- German translation of the new texts.
+
+### Known limitations
+
+- Desktop IDs in subdirectories of the applications folders are not found.
+- A command is pre-checked only when its first word is a plain name or a path.
+- A program that crashes after it started is not detected.
+- The x axis of the graph is per sample, not a wall-clock scale.
+
 ## 0.1.0 (unreleased)
 
 First pre-release, stage "Kern" (core).
