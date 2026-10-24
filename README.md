@@ -6,21 +6,36 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 # Netspeeder
 
 A network speed monitor for the KDE Plasma 6 panel. Netspeeder shows the
-current download and upload speed and does exactly that one thing: it counts
-the traffic of your real network devices once, without double-counting VPN and
-container interfaces, and it keeps the panel stable instead of jumping around.
+current download and upload speed: it counts the traffic of your real network
+devices once, without double-counting VPN and container interfaces, and it
+keeps the panel stable instead of jumping around. A click opens a popup with a
+traffic graph, peaks, totals and the interface list; with vnStat installed it
+also shows your daily and monthly data usage and can warn you before a data
+cap is reached.
 
 It is written in plain QML and JavaScript (no C++), so it installs like any
 other widget and needs no extra packages on a standard Plasma installation.
 
-**Status:** version 0.1 "Kern" (core) is a pre-release. It is not in the KDE
-Store yet. Screenshots follow with a later release.
-
-Netspeeder is based on the
+Netspeeder is the successor of the
 [Netspeed Widget](https://github.com/dfaust/plasma-applet-netspeed-widget) by
-Daniel Faust, see [Origin](#origin).
+Daniel Faust, see [Origin](#origin). If you used that widget, read
+[Coming from Netspeed Widget](#coming-from-netspeed-widget).
 
-## Features of 0.1
+## Screenshots
+
+The images are made from fixed demo data with `scripts/screenshots.sh` and
+live in [`docs/images/`](docs/images/).
+
+| | |
+|---|---|
+| ![Download and upload in two rows](docs/images/panel-rows.png) | `panel-rows.png`: two rows in a horizontal panel |
+| ![Download and upload side by side](docs/images/panel-single.png) | `panel-single.png`: both values side by side in one row |
+| ![Stacked values in a vertical panel](docs/images/panel-vertical.png) | `panel-vertical.png`: a vertical panel |
+| ![Values colored by speed](docs/images/panel-colors.png) | `panel-colors.png`: colors by speed |
+| ![Sparkline behind the values](docs/images/panel-sparkline.png) | `panel-sparkline.png`: the sparkline behind the values |
+| ![The popup](docs/images/popup.png) | `popup.png`: the popup with graph, interfaces and usage |
+
+## Features
 
 - **Panel view** with download and upload speed, as two rows or side by side.
   In automatic mode a horizontal panel uses two rows as long as each row can
@@ -35,17 +50,26 @@ Daniel Faust, see [Origin](#origin).
 - **Correct totals:** by default the sum covers the physical network devices
   only. VPN tunnels, Docker bridges and other virtual interfaces are not
   counted twice. You can also pick the interfaces by hand.
-- **Robust against change:** interfaces that disappear and come back (VPN
-  reconnect, Wi-Fi, USB tethering) and counter resets do not cause speed
-  spikes or stale values. Suspend/resume is guarded against in the `/proc`
-  source; to be verified by hand.
-- **Tooltip** with the connection name, download, upload and IP address, and a
-  note when the data source has a problem.
-- **Settings** pages "Display", "Data", (0.2) "Behavior", (0.3) "Appearance" and (0.4) "Usage". The data page lists every network
-  interface with its kind and current speed.
+- **Robust against change:** an interface that disappears and comes back (VPN
+  reconnect, Wi-Fi, USB tethering) starts again at 0 instead of a spike, and
+  jumps caused by counter resets are discarded. When the data stops coming,
+  the widget marks it as stale instead of showing frozen speeds.
+- **Tooltip** with the connection name, download, upload and IP address, the
+  traffic of the day (with vnStat), and a note when the data source has a
+  problem.
+- **Popup and desktop view** with a traffic graph, peaks, session totals and
+  the interface list.
+- **Appearance:** font, bold, text size, symbols, colors by direction or by
+  speed, a sparkline.
+- **Behavior:** configurable left and middle click, a launch target, and
+  automatic hiding when offline or idle.
+- **Data usage** per day and billing period from vnStat (optional), with a data
+  cap, a warning level and notifications.
+- **Settings** pages "Display", "Appearance", "Data", "Usage" and "Behavior".
+  The data page lists every network interface with its kind and current speed.
 - **Translations:** English and German.
 
-## Popup and desktop view (0.2)
+### Popup and desktop view
 
 A click on the panel view opens a popup (the left click by default). The same
 view can also sit directly on the desktop (Plasma's "Add Widgets" on the
@@ -60,15 +84,16 @@ desktop); there it is always shown and has no popup. It contains:
   replaced by a note and the rest of the popup works. The x axis is per
   sample, not a wall-clock scale.
 - **Peaks and session totals** for download and upload.
-- **Interface list**, scrollable, with markers for virtual and uncounted interfaces and the Wi-Fi signal,
-  totals per interface and the IPv4 address, which you can copy with one
-  click.
+- **Interface list**, scrollable, with markers for virtual and uncounted
+  interfaces and the Wi-Fi signal, totals per interface and the IPv4 address,
+  which you can copy with one click.
+- **Usage** from vnStat, see [Data usage and data cap](#data-usage-and-data-cap).
 - **Footer** with an "Open System Monitor" button and the active data source.
 
 The popup follows the data only while it is visible, so a closed popup costs
 nothing.
 
-## Appearance and auto-hide (0.3)
+### Appearance
 
 The settings page "Appearance" controls how the panel view looks:
 
@@ -79,26 +104,28 @@ The settings page "Appearance" controls how the panel view looks:
   the download and the upload symbol.
 - **Colors:** the theme color (default), a fixed color per direction, or
   colors by speed. By speed uses up to six levels, each with a minimum speed
-  and a color; the editor keeps the minimums distinct, and invalid stored
-  levels are dropped, and the defaults (0, 1, 10 and 100 MiB/s) apply only
-  when no level is usable. A level without a
-  color uses the theme color. Optionally the units and symbols take the
-  color too.
+  and a color; the editor keeps the minimums distinct, invalid stored levels
+  are dropped, and the defaults (0, 1, 10 and 100 MiB/s) apply only when no
+  level is usable. A level without a color uses the theme color. Optionally
+  the units and symbols take the color too.
 - **Fixed width:** on by default; the panel keeps the width of the widest
   value, also with bold or another font.
 - **Sparkline:** a small traffic graph, off by default, drawn behind the
   values or beside them. In a vertical panel "beside" behaves like "behind".
   Its scale starts at 0 and covers at least 1 KiB/s.
 
-The page "Behavior" gets an auto-hide setting: never (default), when offline,
-or when offline or idle. The connection counts as idle when the traffic stays
-below a threshold (default 1 KiB/s, 1 to 1024 KiB/s) for a duration (default 30 seconds, 5 to
-3600). A hidden widget is collapsed by the panel; in edit mode it shows as a
-dimmed network icon so that it can still be found. It never hides on the
-desktop, while the popup is open, before the first data has arrived, or while
-the data is stale (a frozen source keeps showing its dimmed values).
+### Auto-hide
 
-## Click behavior and launch target (0.2)
+The settings page "Behavior" has an auto-hide setting: never (default), when
+offline, or when offline or idle. The connection counts as idle when the
+traffic stays below a threshold (default 1 KiB/s, 1 to 1024 KiB/s) for a
+duration (default 30 seconds, 5 to 3600). A hidden widget is collapsed by the
+panel; in edit mode it shows as a dimmed network icon so that it can still be
+found. It never hides on the desktop, while the popup is open, before the
+first data has arrived, or while the data is stale (a frozen source keeps
+showing its dimmed values).
+
+### Click behavior and launch target
 
 The settings page "Behavior" sets what the left and the middle click do:
 open the popup, start the launch target, or nothing (middle click default:
@@ -112,13 +139,11 @@ that cannot be found gives a desktop notification instead of failing silently.
 
 Limitations:
 
-- Desktop IDs of launchers in subdirectories of the applications folders
-  (for example `kde/foo.desktop`) are not found.
 - A command is pre-checked only when its first word is a plain name or a path;
   for anything else (shell syntax, variables) it is started unchecked.
 - A launch that fails after it started (the program crashes) is not detected.
 
-## Data usage and data cap (0.4)
+### Data usage and data cap
 
 Netspeeder can show how much you have transferred per day and per billing
 period. The numbers come from [vnStat](https://humdi.net/vnstat/), which keeps
@@ -175,60 +200,87 @@ right after login cannot count a tunnel and report a level too early.
 The tooltip leaves out the "Today" line while vnStat tracks none of the
 interfaces that count.
 
-**Installing vnStat** (version 2.0 or newer, which writes JSON version 2):
-install the `vnstat` package with your distribution's package manager, then
-enable the service so that it collects data:
+## Coming from Netspeed Widget
 
-```sh
-systemctl enable --now vnstat
-```
+Netspeeder has its own widget ID (`io.github.flexomatic81.netspeeder`), so
+Plasma treats it as a different widget:
 
-It takes a day for the first daily figures to appear.
+- **Your settings are not taken over.** Add Netspeeder to the panel and set it
+  up once with the table below.
+- **Both widgets can run side by side.** Keep the Netspeed Widget until
+  Netspeeder is set up, then remove the old one from the panel.
 
-## Planned releases
+The table lists every setting of the Netspeed Widget by its configuration key
+and where to find it in Netspeeder (settings page › option).
 
-| Version | Content |
+| Netspeed Widget key | Netspeeder |
 |---|---|
-| 0.1 "Kern" | Core: both data sources, interface selection, panel view, tooltip, settings for display and data, German |
-| 0.2 "Popup" | Popup with graph, key figures and interface list; desktop view; click actions; behavior page |
-| 0.3 "Darstellung" | Appearance page: font, symbols, color modes and thresholds, sparkline; automatic hiding on the behavior page |
-| 0.4 "Verbrauch" | Data usage through vnstat, billing period, data cap, notifications |
-| 1.0 | Fixes from the pre-releases, test on Plasma 6.3, screenshots, store text, guide for users of the Netspeed Widget |
+| `showSeparately` | Display › "Show only the combined speed" (the sum of download and upload). Turn it on where `showSeparately` was off. |
+| `showLowSpeeds` | Display › "Show as 0 below:". "Off" shows every speed; a threshold such as 1 KiB/s shows lower speeds as 0. |
+| `speedLayout` | Display › "Layout:" Automatic, Two rows or Side by side. |
+| `swapDownUp` | Display › "Order:" Upload first. |
+| `showIcons` | Appearance › "Symbols:" Arrows, Triangles, Icons, None or Custom. |
+| `showUnits` | Not available: Netspeeder always shows the unit. Display › "Use short unit names" keeps it narrow. |
+| `speedUnits` | Display › "Units:" Bytes, binary (KiB/s); Bytes, decimal (kB/s); or Bits (Mbit/s). |
+| `shortUnits` | Display › "Use short unit names". |
+| `fontSize` | Appearance › "Text size:" 50 to 200 %. "Font:" and "Bold" are new. |
+| `updateInterval` | Display › "Update interval:" 0.5 to 10 seconds. |
+| `customColors` | Appearance › "Colors:" By speed. "By direction" (one color for download, one for upload) is new. |
+| `byteColor`, `kilobyteColor`, `megabyteColor`, `gigabyteColor` | Replaced by Appearance › "Speed levels:" up to six levels, each with a minimum speed and a color. Levels at 0 B/s, 1 KiB/s, 1 MiB/s and 1 GiB/s come close to the old colors per unit. |
+| `launchApplicationEnabled` | Behavior › "Left click:" Start the application or command. The middle click can do the same. |
+| `launchApplication` | Behavior › "Start:" Application, then "Application:" (the desktop ID, or "Choose…" to pick it). "Command" is new. |
+| `interfacesWhitelistEnabled` | Data › "Interfaces counted in the total:" Selected interfaces only. Often not needed any more: the automatic mode already leaves out VPN and container interfaces. |
+| `interfacesWhitelist` | Data › the interface list below that option; check the interfaces to count. |
 
 ## Requirements
 
-- KDE Plasma 6.3 or newer (the widget declares API 6.0 as its minimum, but
-  only 6.3 and newer are tested).
+- KDE Plasma 6.3 or newer, with KDE Frameworks 6.10 and Qt 6.8 or newer (see
+  [docs/compatibility.md](docs/compatibility.md)). The widget declares API 6.0
+  in its metadata; that value names the applet API generation, not the
+  minimum.
 - Nothing else for the default data source: it uses the system sensors
   (`ksystemstats`) that every Plasma installation ships.
-- Optional: vnStat 2.0 or newer for the usage statistics and the data cap
-  (see [Data usage and data cap](#data-usage-and-data-cap-04)).
+- Optional: vnStat 2.0 or newer for the usage statistics and the data cap, see
+  [Installing vnStat](#installing-vnstat-optional).
 
 ## Installation
 
 ### KDE Store
 
-Not available yet. Once it is, use "Get New Widgets" in the widget picker.
+Right-click the panel or the desktop, choose "Add Widgets…", then
+"Get New Widgets…" › "Download New Plasma Widgets", and search for
+"Netspeeder".
 
 ### Package file (`.plasmoid`)
 
-Download `netspeeder-<version>.plasmoid` from the releases page of the project
-(once releases exist), then install it:
+Download `netspeeder-1.0.0.plasmoid` from the releases page of the project.
+In "Add Widgets…" choose "Get New Widgets…" › "Install Widget From Local
+File…" and pick the file, or install it in a terminal:
 
 ```sh
-kpackagetool6 --type Plasma/Applet --install netspeeder-<version>.plasmoid
+kpackagetool6 -t Plasma/Applet -i netspeeder-1.0.0.plasmoid
 # update an existing installation:
-kpackagetool6 --type Plasma/Applet --upgrade netspeeder-<version>.plasmoid
+kpackagetool6 -t Plasma/Applet -u netspeeder-1.0.0.plasmoid
 ```
 
-Alternatively use "Install Widget From Local File" in the widget picker.
-Restart the panel afterwards if the widget does not show up:
+If the widget does not show up in the list, restart the panel:
 `systemctl --user restart plasma-plasmashell`.
 
-You can build the file yourself: `scripts/build-plasmoid.sh 0.1.0` writes
-`dist/netspeeder-0.1.0.plasmoid` (needs `gettext` and `libarchive`).
+You can build the file yourself: `scripts/build-plasmoid.sh 1.0.0` writes
+`dist/netspeeder-1.0.0.plasmoid` (needs `gettext` and `libarchive`).
+
+### Arch Linux (AUR)
+
+The package `plasma6-applets-netspeeder` is planned but does not exist yet.
+Once it is published, install it with your AUR helper, for example:
+
+```sh
+yay -S plasma6-applets-netspeeder
+```
 
 ### From source
+
+For a user installation:
 
 ```sh
 git clone https://github.com/Flexomatic81/netspeeder.git
@@ -241,19 +293,31 @@ The script compiles the translations and installs the widget into
 plasmashell restarts. `scripts/run.sh` opens the installed widget in its own
 window instead.
 
-### CMake (distribution packages)
-
-For packagers. Needs CMake, `extra-cmake-modules`, the Plasma and KDE
-Frameworks 6 development files (`libplasma`, `ki18n`) and `gettext`.
+For a system-wide installation (and distribution packages) use CMake. It needs
+CMake, `extra-cmake-modules`, the Plasma and KDE Frameworks 6 development
+files (`libplasma`, `ki18n`) and `gettext`.
 
 ```sh
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr
 cmake --build build
-cmake --install build   # honors DESTDIR
+sudo cmake --install build   # honors DESTDIR
 ```
 
 This installs the widget to `<prefix>/share/plasma/plasmoids/` and the
 translations to `<prefix>/share/locale/`.
+
+### Installing vnStat (optional)
+
+Only the usage statistics and the data cap need vnStat, version 2.0 or newer
+(it writes JSON version 2). Install the `vnstat` package with your
+distribution's package manager, then enable the service so that it collects
+data:
+
+```sh
+systemctl enable --now vnstat
+```
+
+It takes a day for the first daily figures to appear.
 
 ## Data sources and interface detection
 
@@ -317,6 +381,7 @@ msginit --no-translator --locale=fr --input=po/plasma_applet_io.github.flexomati
 | `scripts/smoke.sh` | QML smoke scenes with `qml6`; local only, needs `ksystemstats`, a connected network interface and a desktop session (`NETSPEEDER_SMOKE_SKIP_LIVE=1` skips the scenes that read the real network) |
 | `scripts/load-check.sh` | Starts the installed widget offscreen and checks that it loads; needs a desktop session |
 | `scripts/build-plasmoid.sh <version>` | Builds `dist/netspeeder-<version>.plasmoid` |
+| `scripts/screenshots.sh` | Renders the screenshots in `docs/images/` from demo data; opens windows on the desktop |
 
 Run `pnpm install --frozen-lockfile` once for the Node tools. `qmllint` needs
 the Qt 6 tool (`/usr/lib/qt6/bin/qmllint`); locally, steps that need Qt or a
@@ -327,7 +392,9 @@ run, and `smoke` and `load` are skipped. See
 Continuous integration (`.github/workflows/ci.yml`) runs the `fast` group on
 Node 22.13 and 24, shellcheck, actionlint and `qmllint`, and builds the `.plasmoid` for
 version tags. [docs/testing.md](docs/testing.md) is the manual checklist that
-is worked through before each release.
+is worked through before each release, and
+[docs/compatibility.md](docs/compatibility.md) lists what the oldest supported
+Plasma must provide.
 
 ## Origin
 

@@ -42,7 +42,7 @@ test("docs/compatibility.md lists every imported QML module", () => {
   assert.deepEqual(missing, []);
 });
 
-test("docs/compatibility.md states the minimum the metadata implies", () => {
+test("docs/compatibility.md states the supported minimum while the metadata keeps API 6.0", () => {
   const doc = readDoc();
   assert.equal(metadata["X-Plasma-API-Minimum-Version"], "6.0");
   assert.match(doc, /Plasma 6\.3 or newer/);

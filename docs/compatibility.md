@@ -18,6 +18,11 @@ The audit reads source files at release tags; it does not replace a run on a
 real Plasma 6.3 desktop. The [checklist at the end](#vm-checklist-debian-13-plasma-63)
 covers what only such a run can show.
 
+Debian 13 ships Plasma 6.3 and Qt 6.8, but a KDE Frameworks release newer than
+6.10. The VM run therefore tests the Plasma 6.3 and Qt 6.8 floor on a real
+desktop, not the Frameworks 6.10 floor; that one rests on the source audit
+alone.
+
 ### `X-Plasma-API-Minimum-Version` stays at `6.0`
 
 `package/metadata.json` sets `"X-Plasma-API-Minimum-Version": "6.0"`. That key
@@ -84,11 +89,11 @@ kcmutils, frameworkintegration), Qt `v6.8.0` (qtdeclarative).
 | --- | --- | --- | --- |
 | `pragma ComponentBehavior: Bound` | 7 files | Qt 6.4 | qtdeclarative `src/qml/compiler/qqmlirbuilder.cpp`: absent at v6.3.0, handled at v6.4.0; documented in `src/qml/doc/src/qmllanguageref/documents/structure.qdoc@v6.8.0` |
 | Typed function parameters and return types | all views | Qt 5.15; enforced at call time since Qt 6.7 | `src/qml/doc/src/javascript/hostenvironment.qdoc@v6.8.0`, "Type annotations and assertions" |
-| `as` type assertion (`graphLoader.item as Item`) | `FullRepresentation.qml` | documented at least since Qt 6.5 | `hostenvironment.qdoc@v6.5.0` and `@v6.8.0` |
+| `as` type assertion (`graphLoader.item as Item`) | `FullRepresentation.qml` | Qt 5.15 | parser rule `TypeAssertExpression` in qtdeclarative `src/qml/parser/qqmljs.g@v5.15.0` (`QSOperator::As`, also at v6.0.0); documented in `hostenvironment.qdoc` from v6.2.0 (not yet at v6.0.0), still at v6.8.0 |
 | `??` and `?.` (also `?.[...]` in `clicks.mjs`) | views and modules | `??` Qt 5.15, `?.` Qt 6.2 | `hostenvironment.qdoc@v6.8.0` |
 | Arrow functions, rest and spread arguments, template literals, `.mjs` modules imported into QML | everywhere | Qt 5.12 (ECMAScript 7th edition) | `hostenvironment.qdoc@v6.8.0` ("implements the 7th edition") |
 | `String.prototype.padStart` | `appearance.mjs` | present in Qt 6.8 | qtdeclarative `src/qml/jsruntime/qv4stringobject.cpp@v6.8.0` |
-| `Qt.alpha` | `TrafficGraph.qml`, `FullRepresentation.qml` | present at Qt 6.3 at the latest | qtdeclarative `src/qml/qml/qqmlbuiltinfunctions.cpp`@v6.3.0 and @v6.8.0 |
+| `Qt.alpha` | `TrafficGraph.qml`, `FullRepresentation.qml` | Qt 6.0 | qtdeclarative `src/qml/qml/v8/qqmlbuiltinfunctions.cpp@v6.0.0` (`QtObject::alpha`; absent at v5.15.0), moved to `src/qml/qml/qqmlbuiltinfunctions.cpp` by v6.3.0, still there at v6.8.0 |
 | `Qt.resolvedUrl`, `Qt.binding`, `Qt.callLater`, `Qt.fontFamilies`, `Qt.locale`, `Qt.openUrlExternally` | views | Qt 5.x | `qqmlbuiltinfunctions.cpp@v6.8.0` |
 | `required property`, `Connections` with `function onX()` handlers | delegates, views | Qt 5.15 | [Qt 6.8 QML object attributes](https://doc.qt.io/qt-6.8/qtqml-syntax-objectattributes.html) |
 | `Item.grabToImage` | `tools/screenshots` only, not shipped | Qt 5.4 | [Qt 6.8 Item](https://doc.qt.io/qt-6.8/qml-qtquick-item.html) |
@@ -106,7 +111,9 @@ Use a test user; note the result of every line.
 
 - [ ] Record the versions: `plasmashell --version`, `kpackagetool6 --version`
       (Frameworks) and `qtpaths6 --qt-version`. They must be at least Plasma
-      6.3, Frameworks 6.10 and Qt 6.8.
+      6.3, Frameworks 6.10 and Qt 6.8. `qtpaths6` is one of Qt's development
+      tools and is often missing on a plain desktop; the package versions
+      show the same: `dpkg-query -W plasma-workspace 'libkf6coreaddons6*' 'libqt6core6*'`.
 - [ ] Build the package on the development machine with
       `scripts/build-plasmoid.sh <version>`, copy `dist/netspeeder-<version>.plasmoid`
       to the VM and install it with

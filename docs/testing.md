@@ -201,7 +201,7 @@ QT_FORCE_STDERR_LOGGING=1 QT_LOGGING_RULES="qml.debug=true" QT_QPA_PLATFORM=offs
 - `plasmawindowed` (ends after 10 s through `timeout`, status 124, so the
   widget was running until then) showed, among others: `kf.windowsystem`,
   `kf.svg` and `kf.plasma.core` messages from the system (offscreen platform,
-  theme "GruvboxPlusDark" with an outdated `metadata.desktop`), the load line
+  a third-party theme with an outdated `metadata.desktop`), the load line
   `qml: netspeeder: loaded`, a line `qml: 0` and three times the line
   `This plugin does not support propagateSizeHints()`. The package itself
   contains no `console.log`; checked with `grep -rn "console.log" package/`
