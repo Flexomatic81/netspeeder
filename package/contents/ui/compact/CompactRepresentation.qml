@@ -68,6 +68,14 @@ Item {
     property var thresholds: Appearance.DEFAULT_THRESHOLDS
     // Symbol and unit take the colour of the value, too.
     property bool colorUnits: false
+    // The mini chart: "off", "background" (behind the text) or "beside" (to
+    // the right of the text; in a vertical panel, whose width is all the text
+    // has, it is drawn behind the text like "background").
+    property string sparkline: "off"
+    // The history object of the provider, for the mini chart.
+    property var history: null
+    // The chart file; only the smoke scenes set it.
+    property url sparklineSource: Qt.resolvedUrl("Sparkline.qml")
     // The smallest text size that is still readable, and the text size of a
     // vertical panel at fontScale 100. They follow the theme; only the smoke
     // scenes set them, because plain qml6 reports odd theme fonts.
@@ -240,7 +248,16 @@ Item {
         return root.resolvedLayout === "columns" ? 2 * label + 0.6 * LayoutLogic.REFERENCE_PX : label;
     })
 
-    implicitWidth: grid.implicitWidth
+    // The mini chart beside the text: as wide as two text rows, in a
+    // horizontal panel only.
+    readonly property bool sparkBeside: root.sparkline === "beside" && !root.vertical
+    readonly property bool sparkReady: sparkLoader.status === Loader.Ready
+    // A chart that failed to load takes no room.
+    readonly property real sparkWidth: root.sparkBeside && root.sparkReady ? 2 * root.rowHeight : 0
+    // The loader of the mini chart (for the smoke scenes).
+    readonly property Loader sparkLoaderItem: sparkLoader
+
+    implicitWidth: grid.implicitWidth + root.sparkWidth
     implicitHeight: grid.implicitHeight
     // The panel sizes the view along its own direction by what it needs.
     Layout.minimumWidth: root.vertical ? -1 : root.implicitWidth
@@ -367,12 +384,62 @@ Item {
         text: root.symbolSet.icons ? "" : root.symbolSet.down + root.symbolSet.up
     }
 
+    // The chart is loaded from its file instead of being a type of this file:
+    // without Qt Quick Charts only the chart is missing, the values stay.
+    Loader {
+        id: sparkLoader
+
+        active: root.sparkline !== "off"
+        source: root.sparklineSource
+        // Beside: right of the text; otherwise behind it over the whole area.
+        x: root.sparkBeside ? root.width - root.sparkWidth : 0
+        width: root.sparkBeside ? root.sparkWidth : root.width
+        height: root.height
+        opacity: root.sparkBeside ? 1 : 0.35
+        z: -1
+
+        Binding {
+            when: sparkLoader.status === Loader.Ready
+            target: sparkLoader.item
+            property: "history"
+            value: root.history
+        }
+
+        Binding {
+            when: sparkLoader.status === Loader.Ready
+            target: sparkLoader.item
+            property: "downColor"
+            value: root.combined ? root.totalColor : root.downColor
+        }
+
+        Binding {
+            when: sparkLoader.status === Loader.Ready
+            target: sparkLoader.item
+            property: "upColor"
+            value: root.upColor
+        }
+
+        Binding {
+            when: sparkLoader.status === Loader.Ready
+            target: sparkLoader.item
+            property: "combined"
+            value: root.combined
+        }
+
+        Binding {
+            when: sparkLoader.status === Loader.Ready
+            target: sparkLoader.item
+            property: "filled"
+            value: !root.sparkBeside
+        }
+    }
+
     GridLayout {
         id: grid
 
         // Centered, but never pushed out at the left when the view is narrower
         // than the content.
-        x: Math.max(0, Math.round((root.width - grid.implicitWidth) / 2))
+        x: Math.max(0, Math.round((root.width - root.sparkWidth - grid.implicitWidth) / 2))
         anchors.verticalCenter: root.verticalCenter
         columns: root.resolvedLayout === "columns" ? 2 : 1
         columnSpacing: 0.6 * root.pixelSize

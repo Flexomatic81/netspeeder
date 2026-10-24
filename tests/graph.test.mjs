@@ -7,6 +7,7 @@ import {
   axisLabelIndices,
   axisScale,
   graphWindow,
+  lastSamples,
   pickDistinct,
   validMinutes,
 } from "../package/contents/code/graph.mjs";
@@ -159,4 +160,24 @@ test("the label of the limit is a round number in every unit system", () => {
 
 test("axis labels do not use the low-speed threshold", () => {
   assert.deepEqual(formatSpeed(256, { lowSpeedThreshold: 0 }), { value: "256", unit: "B/s" });
+});
+
+test("lastSamples gives the newest points, fewer when there are not enough", () => {
+  const h = { down: [1, 2, 3, 4, 5], up: [10, 20, 30, 40, 50], times: [1, 2, 3, 4, 5] };
+  assert.deepEqual(lastSamples(h, 2), { down: [4, 5], up: [40, 50] });
+  assert.deepEqual(lastSamples(h, 5), { down: [1, 2, 3, 4, 5], up: [10, 20, 30, 40, 50] });
+  assert.deepEqual(lastSamples(h, 9), { down: [1, 2, 3, 4, 5], up: [10, 20, 30, 40, 50] });
+  assert.deepEqual(lastSamples({ down: [], up: [], times: [] }, 3), { down: [], up: [] });
+  assert.deepEqual(lastSamples(null, 3), { down: [], up: [] });
+});
+
+test("lastSamples takes 60 for an invalid count", () => {
+  const down = Array.from({ length: 80 }, (_, i) => i);
+  const h = { down, up: down.map((v) => v * 2), times: down };
+  for (const count of [0, -1, NaN, undefined, "x", 2.5]) {
+    const r = lastSamples(h, count);
+    assert.equal(r.down.length, 60, String(count));
+    assert.equal(r.down[0], 20);
+    assert.equal(r.up[59], 158);
+  }
 });

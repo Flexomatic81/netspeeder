@@ -14,6 +14,7 @@ const MINUTE_CHOICES = [1, 5, 15];
 const GRID_STEPS = 4;
 const LABEL_ROOM = 1.6;
 const MIN_DISTANCE = 0.3;
+const SPARKLINE_SAMPLES = 60;
 
 // The points of `history` that are at most `minutes` older than the newest
 // one. Selected by time, not by count, so a changed interval or a pause does
@@ -33,6 +34,15 @@ export function graphWindow(history, minutes) {
     }
   }
   return { down, up };
+}
+
+// The newest `count` points of the history (fewer when there are fewer); a
+// count that is not a positive whole number means 60.
+export function lastSamples(history, count) {
+  const down = history && history.down ? history.down : [];
+  const up = history && history.up ? history.up : [];
+  const n = Number.isInteger(count) && count > 0 ? count : SPARKLINE_SAMPLES;
+  return { down: down.slice(-n), up: up.slice(-n) };
 }
 
 // 1, 5 or 15; anything else (also a string) becomes 5.

@@ -115,6 +115,8 @@ PlasmoidItem {
         uploadColor: Plasmoid.configuration.uploadColor // qmllint disable missing-property
         thresholds: Appearance.parseThresholds(Plasmoid.configuration.colorThresholds) // qmllint disable missing-property
         colorUnits: Plasmoid.configuration.colorUnits // qmllint disable missing-property
+        sparkline: Appearance.validChoice(Plasmoid.configuration.sparkline, Appearance.SPARKLINE_MODES, "off") // qmllint disable missing-property
+        history: root.provider.history
         onPressed: root.wasExpanded = root.expanded
         onActivated: button => root.runAction(button === Qt.MiddleButton ? "middle" : "left")
     }

@@ -5,8 +5,9 @@
 // sizes (horizontal 44, 20 and 96 px high, vertical 32 px wide) with a stub
 // provider and checks sizes, placement and the "–" shown before the first data;
 // then the order, the single value, the natural width and the explicit layouts,
-// then the appearance settings (font, size and symbol style), and finally the
-// clicks: left and middle report pressed() then activated(), the right button
+// then the appearance settings (font, size and symbol style), the mini chart
+// (off, behind the text, beside it, combined, in a vertical panel), and finally
+// the clicks: left and middle report pressed() then activated(), the right button
 // reports nothing.
 // plasmawindowed does not instantiate the compact view of this plasmoid, so
 // this scene is the only runtime check of its bindings. It cannot see QML
@@ -353,9 +354,63 @@ Item {
         return scene.events.join(",");
     }
 
+    // A history of `count` samples: the download of sample i is
+    // 1000 * i + offset, the upload 10 * i.
+    function makeHistory(count, offset) {
+        const history = {
+            down: [],
+            up: [],
+            times: []
+        };
+        for (let i = 0; i < count; i++) {
+            history.down.push(1000 * i + offset);
+            history.up.push(10 * i);
+            history.times.push(i * 1000);
+        }
+        return history;
+    }
+
+    function lastOf(list, count) {
+        return JSON.stringify(list.slice(-count));
+    }
+
+    // "" when the chart of `view` is loaded with the given series, else what is
+    // wrong.
+    function sparkSeriesProblem(where, view, history, combined) {
+        const item = view.sparkLoaderItem.item;
+        if (!item) {
+            return where + ": the chart is not loaded";
+        }
+        const down = combined ? history.down.map((v, i) => v + history.up[i]) : history.down;
+        const gotDown = JSON.stringify(item.downSeries);
+        const gotUp = JSON.stringify(item.upSeries);
+        if (gotDown !== scene.lastOf(down, 60)) {
+            return where + ": downSeries " + gotDown + " is not the last 60 of " + JSON.stringify(down);
+        }
+        if (gotUp !== (combined ? "[]" : scene.lastOf(history.up, 60))) {
+            return where + ": upSeries " + gotUp;
+        }
+        return "";
+    }
+
+    // "" when the chart of `view` is ready and drawn in the colours of the
+    // values.
+    function sparkLookProblem(where, view) {
+        const item = view.sparkLoaderItem.item;
+        if (view.sparkLoaderItem.status !== Loader.Ready || !item) {
+            return where + ": the chart is not ready (status " + view.sparkLoaderItem.status + ")";
+        }
+        const down = view.combined ? view.totalColor : view.downColor;
+        if (!Qt.colorEqual(item.downColor, down) || !Qt.colorEqual(item.upColor, view.upColor)) {
+            return where + ": colours " + item.downColor + "/" + item.upColor + ", expected " + down + "/" + view.upColor;
+        }
+        return "";
+    }
+
     QtObject {
         id: stub
 
+        property var history: scene.makeHistory(80, 5)
         property bool hasData: true
         property real down: 1.5 * 1024 * 1024
         property real up: 130 * 1024
@@ -512,6 +567,73 @@ Item {
             minReadablePx: scene.plasmaSmallPx
             baseFontPx: scene.plasmaDefaultPx
             Layout.fillHeight: true
+        }
+    }
+
+    // The mini chart: a horizontal view whose mode the steps change, and two
+    // vertical panels, with and without the chart beside the text.
+    RowLayout {
+        id: hostSpark
+
+        x: 10
+        y: 400
+        width: 300
+        height: 44
+        spacing: 0
+
+        CompactRepresentation {
+            id: spark44
+
+            provider: stub
+            history: stub.history
+            formatOptions: Format.DEFAULT_FORMAT
+            minReadablePx: scene.plasmaSmallPx
+            baseFontPx: scene.plasmaDefaultPx
+            Layout.fillHeight: true
+        }
+    }
+
+    ColumnLayout {
+        id: hostSparkPlain
+
+        x: 450
+        y: 10
+        width: 32
+        height: 400
+        spacing: 0
+
+        CompactRepresentation {
+            id: narrowPlain
+
+            provider: stub
+            formatOptions: Format.DEFAULT_FORMAT
+            vertical: true
+            minReadablePx: scene.plasmaSmallPx
+            baseFontPx: scene.plasmaDefaultPx
+            Layout.fillWidth: true
+        }
+    }
+
+    ColumnLayout {
+        id: hostSparkVertical
+
+        x: 500
+        y: 10
+        width: 32
+        height: 400
+        spacing: 0
+
+        CompactRepresentation {
+            id: narrowSpark
+
+            provider: stub
+            history: stub.history
+            sparkline: "beside"
+            formatOptions: Format.DEFAULT_FORMAT
+            vertical: true
+            minReadablePx: scene.plasmaSmallPx
+            baseFontPx: scene.plasmaDefaultPx
+            Layout.fillWidth: true
         }
     }
 
@@ -832,6 +954,84 @@ Item {
             stub.down = 1.5 * 1024 * 1024;
             stub.up = 130 * 1024;
             return problem;
+        },
+        () => {
+            // The mini chart, off: nothing is loaded and the width is that of a view without it.
+            if (spark44.sparkLoaderItem.active || spark44.sparkLoaderItem.status !== Loader.Null) {
+                return "sparkline off: the chart is loaded";
+            }
+            if (Math.abs(spark44.implicitWidth - wide44.implicitWidth) > 0.01) {
+                return "sparkline off: width " + spark44.implicitWidth + " instead of " + wide44.implicitWidth;
+            }
+            spark44.sparkline = "beside";
+            return "";
+        },
+        () => {
+            const rowHeight = spark44.height / 2;
+            const item = spark44.sparkLoaderItem.item;
+            let problem = scene.sparkLookProblem("sparkline beside", spark44) || scene.sparkSeriesProblem("sparkline beside", spark44, stub.history, false);
+            if (problem !== "") {
+                return problem;
+            }
+            if (Math.abs(spark44.implicitWidth - (wide44.implicitWidth + 2 * rowHeight)) > 0.01) {
+                return "sparkline beside: width " + spark44.implicitWidth + ", expected " + wide44.implicitWidth + " + " + 2 * rowHeight;
+            }
+            if (Math.abs(spark44.Layout.preferredWidth - spark44.implicitWidth) > 0.01 || spark44.sparkLoaderItem.opacity !== 1 || item.filled) {
+                return "sparkline beside: preferred width " + spark44.Layout.preferredWidth + ", opacity " + spark44.sparkLoaderItem.opacity + ", filled " + item.filled;
+            }
+            // The chart takes the room right of the text and the text stays inside the rest.
+            const texts = scene.shownTexts(spark44, spark44, []);
+            problem = scene.textProblem("sparkline beside", texts, 2, true) || scene.placementProblem("sparkline beside", spark44, texts, false, 0);
+            if (problem === "" && (Math.abs(spark44.sparkLoaderItem.width - 2 * rowHeight) > 0.01 || texts.some(t => t.right > spark44.width - 2 * rowHeight + 1.5))) {
+                problem = "sparkline beside: the text reaches into the chart: " + scene.describe(texts);
+            }
+            console.log("compact sparkline beside: implicit " + spark44.implicitWidth.toFixed(1) + " | " + scene.describe(texts));
+            spark44.sparkline = "background";
+            return problem;
+        },
+        () => {
+            let problem = scene.sparkLookProblem("sparkline background", spark44) || scene.sparkSeriesProblem("sparkline background", spark44, stub.history, false);
+            if (problem !== "") {
+                return problem;
+            }
+            if (Math.abs(spark44.implicitWidth - wide44.implicitWidth) > 0.01 || spark44.sparkLoaderItem.opacity !== 0.35 || !spark44.sparkLoaderItem.item.filled) {
+                return "sparkline background: width " + spark44.implicitWidth + ", opacity " + spark44.sparkLoaderItem.opacity + ", filled " + spark44.sparkLoaderItem.item.filled;
+            }
+            if (spark44.sparkLoaderItem.width !== spark44.width || spark44.sparkLoaderItem.height !== spark44.height) {
+                return "sparkline background: the chart covers " + spark44.sparkLoaderItem.width + "x" + spark44.sparkLoaderItem.height + " of " + spark44.width + "x" + spark44.height;
+            }
+            const texts = scene.shownTexts(spark44, spark44, []);
+            problem = scene.textProblem("sparkline background", texts, 2, true) || scene.placementProblem("sparkline background", spark44, texts, false, 0);
+            // A new sample moves the window on: the oldest value drops out.
+            stub.history = scene.makeHistory(81, 5);
+            return problem;
+        },
+        () => {
+            const problem = scene.sparkSeriesProblem("sparkline new sample", spark44, stub.history, false);
+            spark44.combined = true;
+            return problem;
+        },
+        () => {
+            const problem = scene.sparkLookProblem("sparkline combined", spark44) || scene.sparkSeriesProblem("sparkline combined", spark44, stub.history, true);
+            spark44.combined = false;
+            spark44.sparkline = "off";
+            return problem;
+        },
+        () => {
+            // Back to off: the chart is unloaded again.
+            if (spark44.sparkLoaderItem.status !== Loader.Null || Math.abs(spark44.implicitWidth - wide44.implicitWidth) > 0.01) {
+                return "sparkline off again: status " + spark44.sparkLoaderItem.status + ", width " + spark44.implicitWidth;
+            }
+            // A vertical panel gives all of its width to the text: beside acts like background.
+            const loader = narrowSpark.sparkLoaderItem;
+            if (Math.abs(narrowSpark.implicitWidth - narrowPlain.implicitWidth) > 0.01 || Math.abs(narrowSpark.implicitHeight - narrowPlain.implicitHeight) > 0.01) {
+                return "vertical beside: size " + narrowSpark.implicitWidth + "x" + narrowSpark.implicitHeight + " instead of " + narrowPlain.implicitWidth + "x" + narrowPlain.implicitHeight;
+            }
+            if (narrowSpark.sparkWidth !== 0 || loader.opacity !== 0.35 || loader.width !== narrowSpark.width || !loader.item || !loader.item.filled) {
+                return "vertical beside: not drawn like background (opacity " + loader.opacity + ", width " + loader.width + ")";
+            }
+            const texts = scene.shownTexts(narrowSpark, narrowSpark, []);
+            return scene.sparkSeriesProblem("vertical beside", narrowSpark, stub.history, false) || scene.placementProblem("vertical beside", narrowSpark, texts, true, 32);
         }
     ]
     property int step: 0
