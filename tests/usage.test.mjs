@@ -309,6 +309,13 @@ test("capState rounds the percent to one decimal", () => {
   assert.equal(capState(GIB / 3, 1, 80).percent, 33.3);
 });
 
+test("capState rounds the percent down, so it never shows a level not reached", () => {
+  assert.deepEqual(capState(99.95 * GIB, 100, 80), { percent: 99.9, level: 1 });
+  assert.deepEqual(capState(99.96 * GIB, 100, 80), { percent: 99.9, level: 1 });
+  assert.deepEqual(capState(99.999 * GIB, 100, 80), { percent: 99.9, level: 1 });
+  assert.deepEqual(capState(79.96 * GIB, 100, 80), { percent: 79.9, level: 0 });
+});
+
 test("capState with an invalid cap is zero", () => {
   assert.deepEqual(capState(GIB, 0, 80), { percent: 0, level: 0 });
   assert.deepEqual(capState(GIB, -1, 80), { percent: 0, level: 0 });
@@ -378,6 +385,21 @@ test("capNotification does not repeat after a raised cap in the same period", ()
 test("capNotification never reports or stores while inactive", () => {
   const stored = { cycle: "2026-09-01", level: 1 };
   assert.deepEqual(capNotification(2, "2026-10-01", stored, false), { notify: 0, store: stored });
+});
+
+test("capNotification returns a normalized store while inactive", () => {
+  const off = { notify: 0, store: { cycle: "", level: 0 } };
+  assert.deepEqual(capNotification(2, "2026-10-01", null, false), off);
+  assert.deepEqual(capNotification(2, "2026-10-01", undefined, false), off);
+  assert.deepEqual(capNotification(2, "2026-10-01", { level: 7 }, false), off);
+  assert.deepEqual(capNotification(2, "2026-10-01", { cycle: 5, level: 1.5 }, false), {
+    notify: 0,
+    store: { cycle: "5", level: 0 },
+  });
+  assert.deepEqual(capNotification(2, "2026-10-01", { cycle: "2026-09-01", level: 2, extra: true }, false), {
+    notify: 0,
+    store: { cycle: "2026-09-01", level: 2 },
+  });
 });
 
 test("capNotification treats a malformed store as nothing reported", () => {

@@ -259,29 +259,35 @@ function isPositiveFinite(v) {
 
 // Share of the data cap used. level 2 from 100 %, 1 from `warnPercent`
 // (whole number 1..99, else 80), else 0. The level follows the exact share;
-// `percent` is rounded to one decimal for display.
+// `percent` is rounded down to one decimal for display, so it never shows a
+// threshold the level has not reached (99.96 % reads 99.9, not 100).
 export function capState(totalBytes, capGiB, warnPercent) {
   if (!isPositiveFinite(capGiB)) return { percent: 0, level: 0 };
   const total = isPositiveFinite(totalBytes) ? totalBytes : 0;
   const warn = isIntIn(warnPercent, 1, 99) ? warnPercent : DEFAULT_WARN_PERCENT;
   const exact = (total / (capGiB * GIB)) * 100;
   const level = exact >= 100 ? 2 : exact >= warn ? 1 : 0;
-  return { percent: Math.round(exact * 10) / 10, level: level };
+  return { percent: Math.floor(exact * 10) / 10, level: level };
 }
 
+// The stored { cycle, level } in a clean shape: the cycle as a string, the
+// level as a whole number 0..2, else 0.
 function storedLevel(notified) {
-  const valid = notified && typeof notified.cycle === "string" && isIntIn(notified.level, 0, 2);
-  return valid ? { cycle: notified.cycle, level: notified.level } : { cycle: "", level: 0 };
+  const known = notified !== null && typeof notified === "object";
+  const cycle = known && notified.cycle !== null && notified.cycle !== undefined ? String(notified.cycle) : "";
+  const level = known && isIntIn(notified.level, 0, 2) ? notified.level : 0;
+  return { cycle: cycle, level: level };
 }
 
 // Whether a cap notification is due. `cycle` is the start of the current
 // period and `notified` the last stored { cycle, level }. Only the highest
 // newly reached level is reported, once per period; a level that drops in
 // the same period (cap raised) keeps the stored one, so a renewed rise is
-// not reported again. While inactive nothing is reported or stored.
+// not reported again. While inactive nothing is reported and the stored
+// value is kept as it was.
 export function capNotification(level, cycle, notified, active) {
-  if (!active) return { notify: 0, store: notified };
   const stored = storedLevel(notified);
+  if (!active) return { notify: 0, store: stored };
   const before = stored.cycle === cycle ? stored.level : 0;
   const store = { cycle: cycle, level: Math.max(before, level) };
   return { notify: level > before ? level : 0, store: store };
@@ -317,7 +323,9 @@ function nowMinutes(now) {
 
 // True when `lastUpdated` ("YYYY-MM-DDTHH:MM", local time) lies more than
 // `maxMinutes` before `now`. An empty or invalid stamp is outdated; one in
-// the future is not.
+// the future is not. Both are local wall-clock times, so around a daylight
+// saving switch the result can be off by up to an hour; that is acceptable
+// for a one-hour freshness hint.
 export function isOutdated(lastUpdated, now, maxMinutes) {
   const limit = isIntIn(maxMinutes, 0, Number.MAX_SAFE_INTEGER) ? maxMinutes : DEFAULT_MAX_MINUTES;
   const last = stampMinutes(lastUpdated);
