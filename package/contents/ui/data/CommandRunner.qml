@@ -16,7 +16,8 @@ Item {
     // handler, so a handler may call run() to start the next run itself.
     readonly property bool busy: internals.activeSource !== ""
     // Longest time a run may take in milliseconds; 0 means no limit. A run
-    // that exceeds it is abandoned and reports exit code -2.
+    // that exceeds it is abandoned and reports exit code -2. The process
+    // itself is not killed; only its result is dropped.
     property int timeoutMs: 0
 
     signal finished(int exitCode, string stdout, string stderr)
@@ -37,6 +38,7 @@ Item {
         internals.activeSource = sourceName;
         executor.connectSource(sourceName);
         if (root.timeoutMs > 0) {
+            internals.activeTimeoutMs = root.timeoutMs;
             limit.interval = root.timeoutMs;
             limit.restart();
         }
@@ -48,6 +50,8 @@ Item {
         property string activeSource: ""
         property bool rerunPending: false
         property int runCount: 0
+        // timeoutMs as it was when the active run started.
+        property int activeTimeoutMs: 0
         // Keeps the source names of several CommandRunner instances apart.
         readonly property string instanceId: Math.random().toString(36).slice(2, 10)
 
@@ -74,7 +78,7 @@ Item {
     Timer {
         id: limit
 
-        onTriggered: internals.complete(-2, "", "timed out after " + root.timeoutMs + " ms")
+        onTriggered: internals.complete(-2, "", "timed out after " + internals.activeTimeoutMs + " ms")
     }
 
     Plasma5Support.DataSource {

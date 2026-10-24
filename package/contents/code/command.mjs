@@ -11,6 +11,7 @@
 // therefore the result of the check: 0 started, 127 target not found.
 
 const DESKTOP_ID = /^[A-Za-z0-9._-]+$/;
+const PLAIN_WORD = /^[A-Za-z0-9._+/-]+$/;
 const NOT_FOUND = 127;
 const TIMED_OUT = -2;
 
@@ -37,11 +38,13 @@ export function shellQuote(text) {
   return "'" + String(text).replace(/'/g, "'\\''") + "'";
 }
 
-// The word the shell would run, or "" when it cannot be told reliably
-// (variable assignment prefix, quoted word).
+// The first word, when it is a plain command name or path that the shell
+// would look up unchanged. Anything else (variables, quotes, "~", operators,
+// escapes, assignments, subshells) may expand to something different, so it
+// is not checked ("" = launch without a pre-check).
 function programToCheck(command) {
   const word = command.split(/\s/)[0];
-  return /[='"]/.test(word) ? "" : word;
+  return PLAIN_WORD.test(word) ? word : "";
 }
 
 function appLine(app) {

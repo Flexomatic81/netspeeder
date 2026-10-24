@@ -52,6 +52,18 @@ test("launchCommandLine skips the pre-check for assignments and quoted words", (
   }
 });
 
+test("launchCommandLine does not pre-check words the shell would expand", () => {
+  for (const command of ["$HOME/x prog", "~/bin/x", "a;b", "a&&b", "\\ls", "(cd /tmp && x)"]) {
+    const line = launchCommandLine({ kind: "command", command });
+    assert.ok(line.endsWith(` ${shellQuote(command)} ''`), command);
+  }
+});
+
+test("launchCommandLine pre-checks an absolute path", () => {
+  const line = launchCommandLine({ kind: "command", command: "/usr/bin/true x" });
+  assert.ok(line.endsWith(" '/usr/bin/true x' '/usr/bin/true'"));
+});
+
 test("launchFailure maps exit codes", () => {
   assert.equal(launchFailure(0), null);
   assert.equal(launchFailure(127), "not-found");
@@ -150,4 +162,12 @@ test("command launch: assignment prefix skips the pre-check", (t) => {
   const out = box.run(launchCommandLine({ kind: "command", command: "FOO=1 netspeeder-gibtsnicht" }));
   assert.equal(out.status, 0);
   assert.deepEqual(out.seen, ["-f", "sh", "-c", "FOO=1 netspeeder-gibtsnicht"]);
+});
+
+test("command launch: a $HOME path launches without a pre-check", (t) => {
+  const box = makeSandbox();
+  t.after(box.cleanup);
+  const out = box.run(launchCommandLine({ kind: "command", command: "$HOME/netspeeder-gibtsnicht" }));
+  assert.equal(out.status, 0);
+  assert.deepEqual(out.seen, ["-f", "sh", "-c", "$HOME/netspeeder-gibtsnicht"]);
 });
