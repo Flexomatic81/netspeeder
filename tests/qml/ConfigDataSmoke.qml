@@ -110,6 +110,30 @@ Item {
             selected.indexOf(scene.real) >= 0);
     }
 
+    readonly property string waitingText: "Waiting for network data…"
+    readonly property string point: Qt.locale().decimalPoint
+
+    // Whether a visible item below the page shows exactly `text`.
+    function textShown(text) {
+        const stack = [page];
+        while (stack.length > 0) {
+            const item = stack.pop();
+            if (item.text === text && item.visible) {
+                return true;
+            }
+            for (let i = 0; i < item.children.length; i++) {
+                stack.push(item.children[i]);
+            }
+        }
+        return false;
+    }
+
+    // The kind and speed line of the row of an interface.
+    function rateText(name) {
+        const row = scene.rowFor(name);
+        return row === null ? "no row" : row.children[1].text;
+    }
+
     function runStep() {
         switch (scene.step) {
         case 0:
@@ -150,6 +174,30 @@ Item {
         case 5:
             scene.checkRows("cleared", []);
             scene.expect("real delegate kept (4)", scene.rowFor(scene.real) === scene.kept, true);
+            // From here on the page reads a stub provider and fixed options.
+            stub.hasData = false;
+            page.providerOverride = stub;
+            break;
+        case 6:
+            scene.expect("waiting without error", scene.textShown(scene.waitingText), true);
+            stub.hasData = true;
+            stub.interfaces = [{ name: "eth0", label: "", kind: "physical", down: 2000, up: 0 }];
+            page.formatOptions = { unitSystem: "si" };
+            break;
+        case 7:
+            scene.expect("si rate", scene.rateText("eth0"), "physical – ↓ 2" + scene.point + "0 kB/s   ↑ 0 B/s");
+            page.formatOptions = { unitSystem: "iec" };
+            break;
+        case 8:
+            scene.expect("iec rate", scene.rateText("eth0"), "physical – ↓ 2" + scene.point + "0 KiB/s   ↑ 0 B/s");
+            stub.interfaces = [];
+            stub.hasData = false;
+            stub.errorCode = "source-failed";
+            stub.errorDetail = "boom";
+            break;
+        case 9:
+            scene.expect("no waiting text with an error", scene.textShown(scene.waitingText), false);
+            scene.expect("error shown", scene.textShown("Reading network data failed: boom"), true);
             if (scene.failures.length === 0) {
                 scene.finish(true, "SMOKE OK configdata");
             } else {
@@ -159,6 +207,16 @@ Item {
         }
         scene.step++;
         stepTimer.restart();
+    }
+
+    QtObject {
+        id: stub
+
+        property bool hasData: false
+        property var interfaces: []
+        property string errorCode: ""
+        property string errorDetail: ""
+        property string activeSource: "proc"
     }
 
     ConfigData {

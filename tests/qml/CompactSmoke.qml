@@ -21,6 +21,7 @@ import QtTest
 import org.kde.kirigami as Kirigami
 import "../../package/contents/ui/compact"
 import "../../package/contents/code/format.mjs" as Format
+import "../../package/contents/code/clicks.mjs" as Clicks
 
 Item {
     id: scene
@@ -729,6 +730,42 @@ Item {
             }
         }
         console.log("compact clicks: left and middle report pressed then activated, right nothing");
+        return scene.pressActionProblem();
+    }
+
+    // The press action of screen readers must report like a left click, and
+    // with the host's logic (remember the state at the press, toggle at the
+    // activation) the first one opens the popup and the second closes it.
+    function pressActionProblem() {
+        if (wide44.Accessible.role !== Accessible.Button) {
+            return "accessible role " + wide44.Accessible.role + " instead of Button";
+        }
+        scene.events = [];
+        let expanded = false;
+        let wasExpanded = false;
+        const states = [];
+        const press = () => {
+            wasExpanded = expanded;
+        };
+        const activate = () => {
+            expanded = Clicks.nextExpanded(wasExpanded);
+            states.push(expanded);
+        };
+        wide44.pressed.connect(press);
+        wide44.activated.connect(activate);
+        wide44.Accessible.pressAction();
+        wide44.Accessible.pressAction();
+        wide44.pressed.disconnect(press);
+        wide44.activated.disconnect(activate);
+        const left = String(Qt.LeftButton);
+        const want = ["pressed:" + left, "activated:" + left, "pressed:" + left, "activated:" + left].join(",");
+        if (scene.events.join(",") !== want) {
+            return "press action reported '" + scene.events.join(",") + "', expected '" + want + "'";
+        }
+        if (states.join(",") !== "true,false") {
+            return "press action popup states " + states.join(",") + ", expected true,false";
+        }
+        console.log("compact accessibility: button role, press action reports pressed then activated, opens then closes");
         return "";
     }
 

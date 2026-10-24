@@ -41,6 +41,25 @@ KCM.SimpleKCM {
     property string cfg_dataSource
     property string cfg_interfaceSelection
     property var cfg_selectedInterfaces: []
+    // The number format of the other pages. Plasma hands every saved value to
+    // every page as a cfg_ property (see open() in AppletConfiguration.qml)
+    // and writes back only the keys whose value differs, so declaring them
+    // here only reads them.
+    property string cfg_unitSystem: "iec"
+    property bool cfg_shortUnits: false
+    property int cfg_decimals: -1
+    property int cfg_lowSpeedThreshold: 1024
+
+    // Options for formatSpeed(); a smoke scene can replace them.
+    property var formatOptions: ({
+            unitSystem: root.cfg_unitSystem,
+            shortUnits: root.cfg_shortUnits,
+            decimals: root.cfg_decimals,
+            lowSpeedThreshold: root.cfg_lowSpeedThreshold
+        })
+    // A smoke scene sets this to replace the page's own provider.
+    property var providerOverride: null
+    readonly property var source: root.providerOverride ?? provider
 
     readonly property bool manual: root.cfg_interfaceSelection === "manual"
 
@@ -53,7 +72,7 @@ KCM.SimpleKCM {
     // and so stay alive between samples.
     readonly property var entryByName: {
         const map = Object.create(null);
-        for (const entry of provider.interfaces) {
+        for (const entry of root.source.interfaces) {
             map[entry.name] = entry;
         }
         return map;
@@ -64,7 +83,7 @@ KCM.SimpleKCM {
     // they can be taken out of the selection.
     readonly property var listedNames: {
         const names = [];
-        for (const entry of provider.interfaces) {
+        for (const entry of root.source.interfaces) {
             names.push(entry.name);
         }
         if (root.manual) {
@@ -107,13 +126,13 @@ KCM.SimpleKCM {
         root.cfg_selectedInterfaces = names;
     }
 
-    // A speed as shown in the list: always in the default unit system, and
-    // small values are not hidden.
+    // A speed as shown in the list: in the saved unit system, and small
+    // values are not hidden.
     function speedText(bytesPerSecond: real): string {
-        const speed = Format.formatSpeed(bytesPerSecond, {
+        const speed = Format.formatSpeed(bytesPerSecond, Object.assign({}, root.formatOptions, {
             lowSpeedThreshold: 0,
             decimalPoint: Qt.locale().decimalPoint
-        });
+        }));
         return speed.value + " " + speed.unit;
     }
 
@@ -227,8 +246,9 @@ KCM.SimpleKCM {
             Layout.fillWidth: true
 
             QQC2.Label {
-                visible: rowModel.count === 0
-                text: provider.hasData ? root.tr("No network interfaces found.") : root.tr("Waiting for network data…")
+                // An error explains the empty list; it takes precedence.
+                visible: rowModel.count === 0 && root.errorText(root.source.errorCode, root.source.errorDetail) === ""
+                text: root.source.hasData ? root.tr("No network interfaces found.") : root.tr("Waiting for network data…")
                 opacity: 0.7
             }
 
@@ -252,7 +272,7 @@ KCM.SimpleKCM {
                             return row.entry.kind === "physical" ? root.trc("@info interface kind", "physical") : root.trc("@info interface kind", "virtual");
                         }
                         // Before the first sample nothing is known yet.
-                        return provider.hasData ? root.trc("@info interface kind", "not available") : "";
+                        return root.source.hasData ? root.trc("@info interface kind", "not available") : "";
                     }
 
                     width: rowColumn.width
@@ -286,14 +306,14 @@ KCM.SimpleKCM {
 
         QQC2.Label {
             Layout.fillWidth: true
-            text: root.tr("Active source: %1", root.sourceText(provider.activeSource))
+            text: root.tr("Active source: %1", root.sourceText(root.source.activeSource))
         }
 
         QQC2.Label {
             Layout.fillWidth: true
             Layout.maximumWidth: Kirigami.Units.gridUnit * 25
             visible: text !== ""
-            text: root.errorText(provider.errorCode, provider.errorDetail)
+            text: root.errorText(root.source.errorCode, root.source.errorDetail)
             textFormat: Text.PlainText
             wrapMode: Text.WordWrap
             color: Kirigami.Theme.neutralTextColor

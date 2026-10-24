@@ -305,9 +305,15 @@ Item {
     Layout.maximumHeight: root.isHidden ? 0 : Number.POSITIVE_INFINITY
 
     opacity: root.provider.stale && root.isShown ? 0.5 : 1
-    Accessible.role: Accessible.StaticText
+    Accessible.role: Accessible.Button
     Accessible.ignored: root.isHidden
     Accessible.name: root.accessibleName
+    // Screen readers activate the panel view like a left click: the host
+    // remembers the popup state at the press and toggles at the activation.
+    Accessible.onPressAction: {
+        root.pressed(Qt.LeftButton);
+        root.activated(Qt.LeftButton);
+    }
 
     // The height of a text line per pixel of font size, laid out as SpeedLabel
     // draws it; a line of a scaled font must still fit its row.
