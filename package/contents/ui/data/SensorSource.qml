@@ -33,7 +33,7 @@ Item {
     // The sensor also signals once on creation, before it has a value.
     onHeartbeatValueChanged: {
         if (root.heartbeatValue !== undefined) {
-            internals.updateGate({ type: "heartbeat", now: Date.now() });
+            internals.updateGate({ type: "heartbeat", now: Date.now(), value: root.heartbeatValue });
         }
     }
 

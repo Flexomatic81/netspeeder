@@ -4,8 +4,10 @@
 // Smoke scene for the heartbeat check of SensorSource, through NetworkProvider
 // with the real ksystemstats and a heartbeat the scene drives
 // (ScriptedHeartbeatSource.qml), in four steps:
-//   1  the start-up probe ends without a heartbeat: the check is off and the
-//      values are fresh
+//   1  the heartbeat sensor reports one value that never changes (a
+//      placeholder) and the start-up probe ends: that value is no heartbeat,
+//      the check is off and the values stay fresh for longer than the
+//      heartbeat window plus the provider's three intervals
 //   2  a late heartbeat arrives and keeps coming: the values stay fresh
 //   3  the heartbeat stops: samples still pass for the heartbeat window, then
 //      none, and the provider turns stale after its three intervals
@@ -22,7 +24,11 @@ Item {
     readonly property int windowMs: SensorCode.heartbeatWindowMs(scene.intervalMs)
     // Three source intervals: the values count as settled once they have
     // been fresh this long.
-    readonly property int settleMs: 1500
+    readonly property int settleMs: 3 * scene.intervalMs
+    // Without a heartbeat the provider turns stale within the window plus its
+    // three intervals; this much on top covers its clock tick and the
+    // scene's.
+    readonly property int staleSlackMs: scene.intervalMs + 1000
     readonly property int stepTimeoutMs: 12000
     // Timer jitter allowed around the expected moments.
     readonly property int slackMs: 150
@@ -34,6 +40,8 @@ Item {
     property bool beating: false
     property double lastBeatAt: 0
     property double lastSampleAt: 0
+    property double holdAt: 0
+    property double freshAt: 0
     property bool done: false
 
     function finish(ok, message) {
@@ -101,7 +109,7 @@ Item {
     function tickStopped(now) {
         const windowEnd = scene.lastBeatAt + scene.windowMs;
         if (!provider.stale) {
-            const deadline = windowEnd + 3 * scene.intervalMs + scene.intervalMs + 1000;
+            const deadline = windowEnd + 3 * scene.intervalMs + scene.staleSlackMs;
             if (now > deadline) {
                 scene.fail("not stale " + (now - scene.lastBeatAt) + " ms after the last heartbeat ("
                     + scene.describe() + ")");
@@ -129,6 +137,25 @@ Item {
         scene.beat();
     }
 
+    // Step 1: one constant value since holdAt. True once the values have
+    // stayed fresh for longer than it takes to turn stale without a heartbeat.
+    function tickHeld(now) {
+        if (scene.freshAt === 0) {
+            if (provider.hasData && !provider.stale) {
+                scene.freshAt = now;
+            } else if (now - scene.stepStart > scene.stepTimeoutMs) {
+                scene.fail("no fresh values (" + scene.describe() + ")");
+            }
+            return false;
+        }
+        if (provider.stale || !provider.hasData) {
+            scene.fail("stale " + (now - scene.holdAt) + " ms after a single constant heartbeat value ("
+                + scene.describe() + ")");
+            return false;
+        }
+        return now - scene.freshAt > scene.windowMs + 3 * scene.intervalMs + scene.staleSlackMs;
+    }
+
     function tick() {
         if (scene.done) {
             return;
@@ -139,12 +166,14 @@ Item {
             scene.source = scene.findSource();
             if (scene.source !== null) {
                 scene.enter(1);
+                scene.holdAt = Date.now();
+                scene.source.hold();
             } else if (now - scene.stepStart > 2000) {
                 scene.fail("test double not found in the provider");
             }
             break;
         case 1:
-            if (scene.settledFresh(now)) {
+            if (scene.tickHeld(now)) {
                 scene.enter(2);
                 scene.beating = true;
                 scene.beat();

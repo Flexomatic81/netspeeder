@@ -121,40 +121,81 @@ test("heartbeat window", () => {
   assert.equal(isHeartbeatFresh(10000, 13000, 1000), true);
   assert.equal(isHeartbeatFresh(10000, 13001, 1000), false);
 });
+// Feeds heartbeat values to the gate: pairs of [now, value].
+function beats(state, pairs) {
+  let gate = state;
+  for (const [now, value] of pairs) gate = heartbeatGate(gate, { type: "heartbeat", now: now, value: value });
+  return gate;
+}
 test("heartbeat gate starts out requiring a heartbeat", () => {
   const gate = initialHeartbeatGate();
-  assert.deepEqual(gate, { required: true, lastHeartbeatAt: 0 });
+  assert.deepEqual(gate, { required: true, lastHeartbeatAt: 0, hasValue: false, lastValue: undefined });
   assert.equal(heartbeatAllows(gate, 1700000000000, 1000), false);
 });
-test("heartbeat gate records each heartbeat", () => {
-  const gate = heartbeatGate(initialHeartbeatGate(), { type: "heartbeat", now: 5000 });
-  assert.deepEqual(gate, { required: true, lastHeartbeatAt: 5000 });
+test("heartbeat gate does not arm on a single value, so the probe still switches it off", () => {
+  const one = beats(initialHeartbeatGate(), [[2000, 0]]);
+  assert.equal(one.lastHeartbeatAt, 0);
+  const off = heartbeatGate(one, { type: "probe-expired", sensorReady: false });
+  assert.equal(off.required, false);
+  assert.equal(heartbeatAllows(off, 99999, 1000), true);
+});
+test("heartbeat gate does not arm on the same value repeated", () => {
+  const same = beats(initialHeartbeatGate(), [
+    [2000, 7],
+    [3000, 7],
+    [4000, 7],
+  ]);
+  assert.equal(same.lastHeartbeatAt, 0);
+  assert.equal(heartbeatGate(same, { type: "heartbeat", now: 5000, value: 7 }), same);
+  assert.equal(heartbeatGate(same, { type: "probe-expired", sensorReady: false }).required, false);
+});
+test("heartbeat gate treats a repeated NaN as the same value", () => {
+  const nan = beats(initialHeartbeatGate(), [
+    [2000, NaN],
+    [3000, NaN],
+  ]);
+  assert.equal(nan.lastHeartbeatAt, 0);
+});
+test("heartbeat gate arms once the value changes, and records each change", () => {
+  const gate = beats(initialHeartbeatGate(), [
+    [4000, 10],
+    [5000, 11],
+  ]);
+  assert.deepEqual(gate, { required: true, lastHeartbeatAt: 5000, hasValue: true, lastValue: 11 });
   assert.equal(heartbeatAllows(gate, 8000, 1000), true);
   assert.equal(heartbeatAllows(gate, 8001, 1000), false);
+  // A repeat of the last value is no sign of life.
+  assert.equal(beats(gate, [[6000, 11]]), gate);
 });
 test("heartbeat gate switches off when the probe finds no heartbeat sensor", () => {
   const gate = heartbeatGate(initialHeartbeatGate(), { type: "probe-expired", sensorReady: false });
-  assert.deepEqual(gate, { required: false, lastHeartbeatAt: 0 });
+  assert.equal(gate.required, false);
+  assert.equal(gate.lastHeartbeatAt, 0);
   assert.equal(heartbeatAllows(gate, 99999, 1000), true);
 });
 test("heartbeat gate stays on when the probe finds the sensor", () => {
   const start = initialHeartbeatGate();
   assert.equal(heartbeatGate(start, { type: "probe-expired", sensorReady: true }), start);
 });
-test("heartbeat gate stays on after the probe once a heartbeat came", () => {
-  const seen = heartbeatGate(initialHeartbeatGate(), { type: "heartbeat", now: 2000 });
+test("heartbeat gate stays on after the probe once the heartbeat changed", () => {
+  const seen = beats(initialHeartbeatGate(), [
+    [1000, 1],
+    [2000, 2],
+  ]);
   assert.equal(heartbeatGate(seen, { type: "probe-expired", sensorReady: false }), seen);
   assert.equal(heartbeatAllows(seen, 20000, 1000), false);
 });
 test("heartbeat gate switches back on with a late heartbeat", () => {
   const off = heartbeatGate(initialHeartbeatGate(), { type: "probe-expired", sensorReady: false });
-  const late = heartbeatGate(off, { type: "heartbeat", now: 30000 });
-  assert.deepEqual(late, { required: true, lastHeartbeatAt: 30000 });
+  const first = beats(off, [[29000, 100]]);
+  assert.equal(first.required, false);
+  const late = beats(first, [[30000, 101]]);
+  assert.deepEqual(late, { required: true, lastHeartbeatAt: 30000, hasValue: true, lastValue: 101 });
   assert.equal(heartbeatAllows(late, 33000, 1000), true);
   // The heartbeat stops again: samples are held back after the window.
   assert.equal(heartbeatAllows(late, 33001, 1000), false);
   // It comes back: samples pass again.
-  const back = heartbeatGate(late, { type: "heartbeat", now: 40000 });
+  const back = beats(late, [[40000, 111]]);
   assert.equal(heartbeatAllows(back, 40500, 1000), true);
 });
 test("heartbeat gate ignores unknown events", () => {

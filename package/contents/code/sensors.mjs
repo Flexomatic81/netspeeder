@@ -34,26 +34,42 @@ export function isHeartbeatFresh(lastHeartbeatAt, now, intervalMs) {
   return now - lastHeartbeatAt <= heartbeatWindowMs(intervalMs);
 }
 
-// State of the heartbeat check: whether samples need a fresh heartbeat, and
-// the time of the last heartbeat (0 before the first). Samples wait for the
-// first heartbeat.
+// State of the heartbeat check: whether samples need a fresh heartbeat, the
+// time of the last heartbeat (0 before the first), and the last value the
+// heartbeat sensor reported. Samples wait for the first heartbeat.
 export function initialHeartbeatGate() {
-  return { required: true, lastHeartbeatAt: 0 };
+  return { required: true, lastHeartbeatAt: 0, hasValue: false, lastValue: undefined };
+}
+
+function copyGate(state, changes) {
+  const next = {
+    required: state.required,
+    lastHeartbeatAt: state.lastHeartbeatAt,
+    hasValue: state.hasValue,
+    lastValue: state.lastValue,
+  };
+  for (const key of Object.keys(changes)) next[key] = changes[key];
+  return next;
 }
 
 // Next state of the heartbeat check. Events:
-//   { type: "heartbeat", now }               the heartbeat sensor changed
+//   { type: "heartbeat", now, value }        the heartbeat sensor reported a value
 //   { type: "probe-expired", sensorReady }   the start-up probe is over
-// The probe switches the check off only when the sensor is missing and no
-// heartbeat has come so far (a Plasma version without it). Any later heartbeat
-// switches it on again, so a service that starts late, or stops after that,
-// is noticed. Returns the same object when nothing changes.
+// Only a change of the value is a heartbeat: the first value, or the same one
+// again, may be a placeholder of a sensor that does not work. A heartbeat
+// switches the check on, also again after the probe switched it off, so a
+// service that starts late, or stops after that, is noticed. The probe
+// switches the check off only when the sensor is missing and no heartbeat has
+// come so far (a Plasma version without it). Returns the same object when
+// nothing changes.
 export function heartbeatGate(state, event) {
   if (event.type === "heartbeat") {
-    return { required: true, lastHeartbeatAt: event.now };
+    if (!state.hasValue) return copyGate(state, { hasValue: true, lastValue: event.value });
+    if (Object.is(event.value, state.lastValue)) return state;
+    return copyGate(state, { required: true, lastHeartbeatAt: event.now, lastValue: event.value });
   }
-  if (event.type === "probe-expired" && !event.sensorReady && state.lastHeartbeatAt === 0 && state.required) {
-    return { required: false, lastHeartbeatAt: 0 };
+  if (event.type === "probe-expired" && !event.sensorReady && state.lastHeartbeatAt === 0) {
+    return copyGate(state, { required: false });
   }
   return state;
 }
