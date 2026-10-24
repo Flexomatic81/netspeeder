@@ -77,12 +77,13 @@ The settings page "Appearance" controls how the panel view looks:
   line still fits its row.
 - **Symbols:** arrows (default), triangles, icons, none, or custom text for
   the download and the upload symbol.
-- **Colours:** the theme colour (default), a fixed colour per direction, or
-  colours by speed. By speed uses up to six levels, each with a minimum speed
-  and a colour; the editor keeps the minimums distinct, and invalid stored
-  levels fall back to the defaults (0, 1, 10 and 100 MiB/s). A level without a
-  colour uses the theme colour. Optionally the units and symbols take the
-  colour too.
+- **Colors:** the theme color (default), a fixed color per direction, or
+  colors by speed. By speed uses up to six levels, each with a minimum speed
+  and a color; the editor keeps the minimums distinct, and invalid stored
+  levels are dropped, and the defaults (0, 1, 10 and 100 MiB/s) apply only
+  when no level is usable. A level without a
+  color uses the theme color. Optionally the units and symbols take the
+  color too.
 - **Fixed width:** on by default; the panel keeps the width of the widest
   value, also with bold or another font.
 - **Sparkline:** a small traffic graph, off by default, drawn behind the
@@ -91,10 +92,11 @@ The settings page "Appearance" controls how the panel view looks:
 
 The page "Behavior" gets an auto-hide setting: never (default), when offline,
 or when offline or idle. The connection counts as idle when the traffic stays
-below a threshold (default 1 KiB/s) for a duration (default 30 seconds, 5 to
+below a threshold (default 1 KiB/s, 1 to 1024 KiB/s) for a duration (default 30 seconds, 5 to
 3600). A hidden widget is collapsed by the panel; in edit mode it shows as a
 dimmed network icon so that it can still be found. It never hides on the
-desktop, while the popup is open, or before the first data has arrived.
+desktop, while the popup is open, before the first data has arrived, or while
+the data is stale (a frozen source keeps showing its dimmed values).
 
 ## Click behavior and launch target (0.2)
 

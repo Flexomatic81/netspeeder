@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
-// Settings page "Appearance": font, direction symbols, colours, width and
+// Settings page "Appearance": font, direction symbols, colors, width and
 // sparkline of the panel view. Plasma opens the page with the saved values in
 // the cfg_ properties and writes the changed ones back when the user applies.
 // Every control shows its cfg_ property and writes it only on a choice of the
-// user; a colour only when its dialog is accepted.
+// user; a color only when its dialog is accepted.
 
 import QtQuick
 import QtQuick.Controls as QQC2
@@ -89,7 +89,7 @@ KCM.SimpleKCM {
     onCfg_fontFamilyChanged: root.noteMissingFont()
     Component.onCompleted: root.noteMissingFont()
 
-    // The colour a button shows for a setting; "" is the theme's text colour.
+    // The color a button shows for a setting; "" is the theme's text color.
     function shownColor(value: string): color {
         return value !== "" ? value : Kirigami.Theme.textColor;
     }
@@ -175,9 +175,9 @@ KCM.SimpleKCM {
         ConfigComboBox {
             id: colorModeChoice
 
-            Kirigami.FormData.label: root.tr("Colours:")
+            Kirigami.FormData.label: root.tr("Colors:")
             options: [
-                { text: root.tr("Theme colour"), value: "theme" },
+                { text: root.tr("Theme color"), value: "theme" },
                 { text: root.tr("By direction"), value: "direction" },
                 { text: root.tr("By speed"), value: "thresholds" }
             ]
@@ -186,14 +186,14 @@ KCM.SimpleKCM {
         }
 
         RowLayout {
-            Kirigami.FormData.label: root.tr("Download colour:")
+            Kirigami.FormData.label: root.tr("Download color:")
             enabled: root.cfg_colorMode === "direction"
 
             KQuickControls.ColorButton {
                 id: downloadColorButton
 
                 showAlphaChannel: false
-                dialogTitle: root.tr("Choose a colour")
+                dialogTitle: root.tr("Choose a color")
                 color: root.shownColor(root.cfg_downloadColor)
                 onAccepted: chosen => root.cfg_downloadColor = root.hexColor(chosen)
             }
@@ -201,26 +201,26 @@ KCM.SimpleKCM {
             QQC2.Button {
                 id: downloadThemeColorButton
 
-                text: root.tr("Use theme colour")
+                text: root.tr("Use theme color")
                 onClicked: root.cfg_downloadColor = ""
             }
         }
 
         RowLayout {
-            Kirigami.FormData.label: root.tr("Upload colour:")
+            Kirigami.FormData.label: root.tr("Upload color:")
             enabled: root.cfg_colorMode === "direction"
 
             KQuickControls.ColorButton {
                 id: uploadColorButton
 
                 showAlphaChannel: false
-                dialogTitle: root.tr("Choose a colour")
+                dialogTitle: root.tr("Choose a color")
                 color: root.shownColor(root.cfg_uploadColor)
                 onAccepted: chosen => root.cfg_uploadColor = root.hexColor(chosen)
             }
 
             QQC2.Button {
-                text: root.tr("Use theme colour")
+                text: root.tr("Use theme color")
                 onClicked: root.cfg_uploadColor = ""
             }
         }
@@ -237,7 +237,7 @@ KCM.SimpleKCM {
         QQC2.CheckBox {
             id: colorUnitsCheck
 
-            text: root.tr("Colour units and symbols too")
+            text: root.tr("Color units and symbols too")
             enabled: root.cfg_colorMode !== "theme"
             checked: root.cfg_colorUnits
             onToggled: root.cfg_colorUnits = colorUnitsCheck.checked

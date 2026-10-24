@@ -12,16 +12,16 @@ Third pre-release, stage "Darstellung" (appearance).
 ### Added
 
 - Settings page "Appearance": font and bold, text size (50 to 200 %), symbol
-  style (arrows, triangles, icons, none, custom), colour mode (theme, by
-  direction, by speed with up to six levels), optional colouring of units and
+  style (arrows, triangles, icons, none, custom), color mode (theme, by
+  direction, by speed with up to six levels), optional coloring of units and
   symbols, fixed width and a sparkline (off, behind or beside the values).
-- Threshold editor that keeps the levels distinct; invalid stored levels fall
-  back to the defaults.
+- Threshold editor that keeps the levels distinct; invalid stored levels are
+  dropped, and the defaults apply only when no level is usable.
 - Auto-hide on the page "Behavior": never, when offline, or when offline or
-  idle, with a threshold in KiB/s and a duration in seconds. The panel
+  idle, with a threshold of 1 to 1024 KiB/s and a duration in seconds. The panel
   collapses a hidden widget; in edit mode it shows a dimmed network icon. It
-  never hides on the desktop, while the popup is open, or before the first
-  data arrives.
+  never hides on the desktop, while the popup is open, before the first
+  data arrives, or while the data is stale.
 - German translation of the new texts.
 
 ### Notes

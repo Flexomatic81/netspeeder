@@ -82,17 +82,17 @@ because the checker compares it against the German interface.
 
 | Check | Stage | Result |
 |---|---|---|
-| Every option on the page "Appearance" (German: “Darstellung”) shows in the panel after Apply: font, bold, text size, symbol style (arrows, triangles, icons, none, custom), colour mode, colouring of units, sparkline | 0.3 | |
+| Every option on the page "Appearance" (German: “Darstellung”) shows in the panel after Apply: font, bold, text size, symbol style (arrows, triangles, icons, none, custom), color mode, coloring of units, sparkline | 0.3 | |
 | Fixed width: the panel does not jump when the values change, also with bold text and with a different font | 0.3 | |
-| Colour mode "Theme colour", "By direction" and "By speed": the values take the expected colours under load and at rest | 0.3 | |
-| Real colour dialog for the download and upload colour: accepting sets the colour, cancelling keeps the old one, "Use theme colour" (German: “Designfarbe verwenden”) resets it | 0.3 | |
+| Color mode "Theme color", "By direction" and "By speed": the values take the expected colors under load and at rest | 0.3 | |
+| Real color dialog for the download and upload color: accepting sets the color, cancelling keeps the old one, "Use theme color" (German: “Designfarbe verwenden”) resets it | 0.3 | |
 | Threshold editor: add, change and remove levels (up to six); Apply/OK saves them; after a plasmashell restart the levels are unchanged | 0.3 | |
 | Sparkline "Behind the values" and "Beside the values": both draw, the values stay readable; in a vertical panel "beside" looks like "behind" | 0.3 | |
 | Auto-hide "When offline": disconnect the network (e.g. `nmcli networking off`): the widget disappears from the panel; reconnecting brings it back | 0.3 | |
 | Auto-hide "When offline or idle": with traffic below the threshold for the set time the widget disappears; traffic above it brings it back | 0.3 | |
 | A hidden widget leaves no gap in the panel | 0.3 | |
 | In panel edit mode a hidden widget shows the dimmed network icon placeholder and can be selected | 0.3 | |
-| A hidden widget never hides on the desktop, while its popup is open, or before the first data has arrived | 0.3 | |
+| A hidden widget never hides on the desktop, while its popup is open, before the first data has arrived, or while the data is stale | 0.3 | |
 | German system language: all texts of the pages "Appearance" and "Behavior" are German and nothing is cut off | 0.3 | |
 | Restart with the symbol style "Icons" after at least 30 minutes of uptime, using the restart command that detects a hang: `bash -c 'systemctl --user stop --no-block plasma-plasmashell; sleep 5; p=$(pgrep -x plasmashell) && { kill -ABRT $p; sleep 5; }; systemctl --user start plasma-plasmashell'` | 0.3 | |
 

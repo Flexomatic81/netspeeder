@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
-// Editor for the speed levels of the colour mode "By speed": one row per
-// level with its minimum (a number and a unit), its colour and a button to
+// Editor for the speed levels of the color mode "By speed": one row per
+// level with its minimum (a number and a unit), its color and a button to
 // remove it. The first level starts at 0 and stays. Shows the levels of
 // `value` (JSON, as stored) and sends every change of the user as complete,
 // valid JSON through `edited`; it never writes `value` itself.
@@ -202,7 +202,7 @@ Column {
                 id: levelColorButton
 
                 showAlphaChannel: false
-                dialogTitle: root.tr("Choose a colour")
+                dialogTitle: root.tr("Choose a color")
                 color: levelRow.levelColor !== "" ? levelRow.levelColor : Kirigami.Theme.textColor
                 onAccepted: chosen => root.setColor(levelRow.index, Appearance.toHexColor(chosen.r, chosen.g, chosen.b))
             }
@@ -210,7 +210,7 @@ Column {
             QQC2.Button {
                 id: levelThemeButton
 
-                text: root.trc("@action:button use the colour of the theme", "Theme")
+                text: root.trc("@action:button use the color of the theme", "Theme")
                 enabled: levelRow.levelColor !== ""
                 onClicked: root.setColor(levelRow.index, "")
             }

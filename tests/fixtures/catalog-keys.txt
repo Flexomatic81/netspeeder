@@ -102,21 +102,21 @@
 	Custom	
 	Download symbol:	
 	Upload symbol:	
-	Colours:	
-	Theme colour	
+	Colors:	
+	Theme color	
 	By direction	
 	By speed	
-	Download colour:	
-	Choose a colour	
-	Use theme colour	
-	Upload colour:	
+	Download color:	
+	Choose a color	
+	Use theme color	
+	Upload color:	
 	Speed levels:	
-	Colour units and symbols too	
+	Color units and symbols too	
 	Keep a fixed width	
 	Sparkline:	
 	Behind the values	
 	Beside the values	
-@action:button use the colour of the theme	Theme	
+@action:button use the color of the theme	Theme	
 	Remove level	
 	Add level	
 	%1 (not installed)	
