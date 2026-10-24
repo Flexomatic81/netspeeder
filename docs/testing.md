@@ -3,143 +3,146 @@ SPDX-License-Identifier: GPL-2.0-or-later
 SPDX-FileCopyrightText: 2026 Flexomatic81
 -->
 
-# Manuelle Tests
+# Manual tests
 
-Diese Checkliste wird vor jeder Veröffentlichung abgearbeitet. Die
-automatischen Tests (`node tools/check.mjs`, in CI laufen davon die Schritte der Gruppe `fast`,
-`shellcheck` und `qmllint`) ersetzen sie
-nicht: Sie prüfen Logik und einzelne Szenen, nicht das Verhalten in einem
-echten Panel.
+This checklist is worked through before every release. The
+automatic tests (`node tools/check.mjs`; CI runs the steps of the group `fast`,
+`shellcheck` and `qmllint`) do not replace it: they check logic and single
+scenes, not the behavior in a real panel.
 
-Vorgehen: die aktuelle Fassung installieren (`scripts/dev-install.sh`),
-plasmashell neu starten (`systemctl --user restart plasma-plasmashell`), die
-Punkte der jeweiligen Etappe durchgehen und in der Spalte „Ergebnis" eintragen:
-„OK", „Fehler" mit Verweis auf die Beobachtung, oder „entfällt" mit Grund. Pro
-Durchlauf oben Version, Datum und Plasma-Version notieren oder die Tabelle
-kopieren; leere Spalten gelten als nicht geprüft.
+Procedure: install the current version (`scripts/dev-install.sh`), restart
+plasmashell (`systemctl --user restart plasma-plasmashell`), go through the
+items of the respective stage and enter the result in the "Result" column:
+"OK", "Fail" with a reference to the observation, or "n/a" with the reason.
+Note version, date and Plasma version at the top for each run, or copy the
+table; empty cells count as not checked.
+
+Where a check names a text of the interface, the German wording is given too,
+because the checker compares it against the German interface.
 
 - Version:
-- Datum:
-- Plasma-Version:
+- Date:
+- Plasma version:
 
-## Darstellung im Panel
+## Panel appearance
 
-| Prüfpunkt | Etappe | Ergebnis |
+| Check | Stage | Result |
 |---|---|---|
-| Horizontales Panel in Standardhöhe: Download und Upload lesbar, die Werte wechseln, ohne dass das Panel springt oder Text überlappt (Upstream #11, #27) | 0.1 | |
-| Vertikales Panel: Richtungen untereinander, Wert und Einheit lesbar, keine Überlappung | 0.1 | |
-| Panelmaße: horizontal 20 px, 44 px und 96 px sowie vertikal ca. 32 px Breite – Anzeige lesbar, keine Überlappung, nichts abgeschnitten | 0.1 | |
-| Desktop-Platzierung (Planar, Widget direkt auf der Arbeitsfläche): zeigt in 0.1 etwas Sinnvolles; die Popup-Ansicht für den Desktop gehört zu 0.2 (siehe unten) | 0.1 | |
-| Helles und dunkles Theme: Text in beiden gut lesbar | 0.1 | |
-| Schriftskalierung 150 %: Panelanzeige und Einstellungsseiten bleiben lesbar und werden nicht abgeschnitten | 0.1 | |
-| Tooltip in einem echten Panel: Verbindungsname, Download-Zeile, Upload-Zeile und IP-Adresse erscheinen | 0.1 | |
+| Horizontal panel at default height: download and upload readable, the values change without the panel jumping or text overlapping (upstream #11, #27) | 0.1 | |
+| Vertical panel: directions stacked, value and unit readable, no overlap | 0.1 | |
+| Panel sizes: horizontal 20 px, 44 px and 96 px and vertical about 32 px wide: display readable, no overlap, nothing cut off | 0.1 | |
+| Desktop placement (planar, widget directly on the desktop): shows something sensible in 0.1; the popup view for the desktop belongs to 0.2 (see below) | 0.1 | |
+| Light and dark theme: text easy to read in both | 0.1 | |
+| Font scaling 150 %: panel view and settings pages stay readable and are not cut off | 0.1 | |
+| Tooltip in a real panel: connection name, download line, upload line and IP address appear | 0.1 | |
 
-## Netzwerk-Situationen
+## Network situations
 
-| Prüfpunkt | Etappe | Ergebnis |
+| Check | Stage | Result |
 |---|---|---|
-| VPN aktiv: der Verkehr im Tunnel wird in der automatischen Summe nicht doppelt gezählt | 0.1 | |
-| Docker aktiv (docker0, veth, Bridges): Containerverkehr steht nicht in der automatischen Summe | 0.1 | |
-| Datenquelle „Kernel-Zähler" (`proc`) erzwungen: Werte plausibel, VPN und Docker als virtuell gekennzeichnet, nicht in der Summe; Rückwechsel auf „Automatisch" funktioniert | 0.1 | |
-| Suspend/Resume: nach dem Aufwachen kein Geschwindigkeits-Ausschlag, keine stehengebliebenen Altwerte | 0.1 | |
-| USB-Tethering ein- und ausstecken, auch als letztes Interface: Anzeige geht auf 0 bzw. „Offline" und kehrt ohne Ausschlag zurück | 0.1 | |
-| Sonderfall Geräteart: ein Interface ohne `/sys/class/net/<name>/device` (z. B. ppp-Modem) gilt als virtuell und fehlt in der automatischen Summe; über die manuelle Auswahl lässt es sich aufnehmen | 0.1 | |
+| VPN active: the traffic inside the tunnel is not counted twice in the automatic total | 0.1 | |
+| Docker active (docker0, veth, bridges): container traffic is not in the automatic total | 0.1 | |
+| Data source "Kernel counters" (`proc`) forced (German: “Kernel-Zähler”): values plausible, VPN and Docker marked as virtual and not in the total; switching back to "Automatic" (German: “Automatisch”) works | 0.1 | |
+| Suspend/resume: no speed spike after waking up, no stale old values | 0.1 | |
+| Plug and unplug USB tethering, also as the last interface: the display goes to 0 or "Offline" and returns without a spike | 0.1 | |
+| Special case device kind: an interface without `/sys/class/net/<name>/device` (e.g. a ppp modem) counts as virtual and is missing from the automatic total; the manual selection can include it | 0.1 | |
 
-## Einstellungen
+## Settings
 
-| Prüfpunkt | Etappe | Ergebnis |
+| Check | Stage | Result |
 |---|---|---|
-| Einstellungen → Daten: bei geöffneter Seite die Datenquelle von „Automatisch" auf „Kernel-Zähler" und weiter auf „Systemsensoren" umschalten; die Interface-Zeilen kommen und gehen, plasmashell stürzt nicht ab | 0.1 | |
-| Manuelle Interface-Auswahl ein- und ausschalten, Anwenden/OK, Einstellungen erneut öffnen: Auswahl und Modus sind erhalten (Upstream #36) | 0.1 | |
-| Seite „Anzeige": alle Optionen nach Anwenden/OK unverändert wieder da (Layout, Reihenfolge, nur Summe, Einheiten, Kurzformen, Nachkommastellen, Schwelle, Intervall) | 0.1 | |
-| Upstream #47: eine Option abwählen und speichern – kein Absturz, Wert bleibt abgewählt | 0.1 | |
-| Upstream #24: mit dem Mausrad über dem Widget scrollen – kein leeres Fenster | 0.1 | |
+| Settings → Data (German: “Einstellungen → Daten”): with the page open, switch the data source from "Automatic" to "Kernel counters" and on to "System sensors" (German: “Systemsensoren”); the interface rows come and go, plasmashell does not crash | 0.1 | |
+| Switch the manual interface selection on and off, Apply/OK, reopen the settings: selection and mode are kept (upstream #36) | 0.1 | |
+| Page "Display" (German: “Anzeige”): all options are unchanged after Apply/OK (layout, order, sum only, units, short forms, decimal places, threshold, interval) | 0.1 | |
+| Upstream #47: deselect an option and save: no crash, the value stays deselected | 0.1 | |
+| Upstream #24: scroll over the widget with the mouse wheel: no empty window | 0.1 | |
 
-## Popup und Klickverhalten
+## Popup and click behavior
 
-| Prüfpunkt | Etappe | Ergebnis |
+| Check | Stage | Result |
 |---|---|---|
-| Linksklick auf das Widget öffnet das Popup, ein weiterer Klick auf das Widget bei offenem Popup schließt es und öffnet es nicht sofort wieder; Klick außerhalb schließt es ebenfalls | 0.2 | |
-| Mittelklick auf „Popup öffnen“ stellen (Seite „Verhalten“): öffnet und schließt das Popup, ebenso ohne erneutes Öffnen bei offenem Popup | 0.2 | |
-| Popup zeigt Kopf mit Live-Werten, Status und bei Datenquellenproblem einen Fehlerhinweis | 0.2 | |
-| Diagramm-Fenster 1, 5 und 15 Minuten umschalten; nach plasmashell-Neustart ist das gewählte Fenster erhalten | 0.2 | |
-| Spitzenwerte und Sitzungssummen erscheinen und steigen bei Last (z. B. Download) | 0.2 | |
-| IP-Adresse in der Interface-Liste kopieren: „Kopiert“ erscheint, die Adresse steht in der Zwischenablage | 0.2 | |
-| „Systemmonitor öffnen“ startet den Systemmonitor | 0.2 | |
-| Popup mit 12 oder mehr Interfaces in einer echten Sitzung (z. B. mit Docker, VPN, virtuellen Brücken): die Liste scrollt, nichts wird abgeschnitten, das Popup bleibt bedienbar | 0.2 | |
-| Seite „Verhalten“, Startziel „Anwendung“ (über den Dateidialog gewählt) und Klickaktion „Starten“: die Anwendung startet wirklich | 0.2 | |
-| Startziel „Befehl“ (z. B. `konsole`): der Befehl startet wirklich | 0.2 | |
-| Unbekannte Desktop-ID bzw. fehlender Befehl (z. B. `gibtesnicht`): Benachrichtigung statt stillem Fehlschlag | 0.2 | |
-| Weder Links- noch Mittelklick auf „Popup öffnen“: Seite „Verhalten“ zeigt die Warnung | 0.2 | |
-| Desktop-Ansicht: Widget auf der Arbeitsfläche zeigt dieselbe Ansicht direkt, ohne Popup | 0.2 | |
-| Popup mit deutscher Systemsprache: alle Texte deutsch, nichts abgeschnitten (auch Seite „Verhalten“) | 0.2 | |
-| Ohne Qt Quick Charts (falls herstellbar): nur das Diagramm fehlt, mit Hinweis, der Rest des Popups funktioniert | 0.2 | |
+| Left click on the widget opens the popup; another click on the widget while the popup is open closes it and does not reopen it right away; a click outside closes it as well | 0.2 | |
+| Set the middle click to "Open the popup" (German: “Popup öffnen”) on the page "Behavior" (German: “Verhalten”): it opens and closes the popup, and with the popup open it closes it without reopening | 0.2 | |
+| The popup shows the header with live values, the status and, on a data source problem, an error hint | 0.2 | |
+| Switch the graph window between 1, 5 and 15 minutes; after a plasmashell restart the chosen window is kept | 0.2 | |
+| Peaks and session totals appear and rise under load (e.g. a download) | 0.2 | |
+| Copy an IP address in the interface list: "Copied" (German: “Kopiert”) appears and the address is on the clipboard | 0.2 | |
+| "Open System Monitor" (German: “Systemmonitor öffnen”) starts the system monitor | 0.2 | |
+| Popup with 12 or more interfaces in a real session (e.g. with Docker, VPN, virtual bridges): the list scrolls, nothing is cut off, the popup stays usable | 0.2 | |
+| Page "Behavior", launch target "Application" (chosen through the file dialog) and click action "Start the application or command" (German: “Anwendung oder Befehl starten”): the application really starts | 0.2 | |
+| Launch target "Command" (e.g. `konsole`): the command really starts | 0.2 | |
+| Unknown desktop ID or missing command (e.g. `doesnotexist`): a notification instead of a silent failure | 0.2 | |
+| Neither left nor middle click set to "Open the popup": the page "Behavior" shows the warning | 0.2 | |
+| Desktop view: the widget on the desktop shows the same view directly, without a popup | 0.2 | |
+| Popup with a German system language: all texts German, nothing cut off (also on the page "Behavior") | 0.2 | |
+| Without Qt Quick Charts (if it can be arranged): only the graph is missing, with a note, the rest of the popup works | 0.2 | |
 
-## Spätere Etappen und Release-Kandidaten
+## Later stages and release candidates
 
-| Prüfpunkt | Etappe | Ergebnis |
+| Check | Stage | Result |
 |---|---|---|
-| vnstat vorhanden: Tages- und Monatsverbrauch erscheinen | 0.4 | |
-| vnstat fehlend: Hinweis statt Fehler | 0.4 | |
-| Datenlimit-Benachrichtigung: je Stufe einmal pro Abrechnungszeitraum, nicht erneut nach einem Neustart | 0.4 | |
-| Durchlauf aller Punkte auf Plasma 6.3 (Debian 13, VM) | vor 1.0 | |
+| vnstat present: daily and monthly usage appear | 0.4 | |
+| vnstat missing: a hint instead of an error | 0.4 | |
+| Data cap notification: once per level and billing period, not again after a restart | 0.4 | |
+| Run through all items on Plasma 6.3 (Debian 13, VM) | before 1.0 | |
 
-## Automatische Abnahme 0.1
+## Automatic acceptance 0.1
 
-Datum: 2026-10-24, Stand `f4846c5`, auf dem Entwicklungsrechner (Node 24.22,
-Qt/qmllint 6.12, Plasma 6.8). Diese Läufe ersetzen die manuellen Prüfpunkte
-oben nicht. Dort bleibt „Ergebnis" leer, bis sie von Hand durchgegangen sind.
+Date: 2026-10-24, state `f4846c5`, on the development machine (Node 24.22,
+Qt/qmllint 6.12, Plasma 6.8). These runs do not replace the manual checks
+above. There the "Result" column stays empty until they have been worked
+through by hand.
 
-Befehl (npm ist auf diesem Rechner nicht installiert, `pnpm test` führt dasselbe
-Skript `test` aus `package.json` aus):
+Command (npm is not installed on this machine; `pnpm test` runs the same
+script `test` from `package.json`):
 
 ```
 pnpm test && scripts/lint.sh && scripts/smoke.sh && scripts/dev-install.sh \
   && scripts/load-check.sh && scripts/build-plasmoid.sh 0.1.0
 ```
 
-| Prüfung | Ergebnis |
+| Check | Result |
 |---|---|
-| `pnpm test` | 86 Tests, 86 bestanden, 0 fehlgeschlagen |
-| `scripts/lint.sh` | `lint: 20 QML files OK`, keine Warnungen |
-| `scripts/smoke.sh` | `SMOKE OK` für runner, compact, combobox, parity, proc, provider, sensors, vertical |
+| `pnpm test` | 86 tests, 86 passed, 0 failed |
+| `scripts/lint.sh` | `lint: 20 QML files OK`, no warnings |
+| `scripts/smoke.sh` | `SMOKE OK` for runner, compact, combobox, parity, proc, provider, sensors, vertical |
 | `LC_ALL=C scripts/smoke.sh tests/qml/ParitySmoke.qml` | `SMOKE OK parity` |
-| `scripts/dev-install.sh` | Paket aktualisiert, Übersetzung kompiliert |
+| `scripts/dev-install.sh` | package updated, translation compiled |
 | `scripts/load-check.sh` | `LOAD OK` |
 | `LANGUAGE=de scripts/load-check.sh` | `LOAD OK` |
-| `scripts/build-plasmoid.sh 0.1.0` | `dist/netspeeder-0.1.0.plasmoid` erzeugt (31 Einträge, mit deutscher `.mo`) |
+| `scripts/build-plasmoid.sh 0.1.0` | `dist/netspeeder-0.1.0.plasmoid` created (31 entries, with the German `.mo`) |
 
-Ungefilterte Läufe, weil `smoke.sh` in diesem Stand Warnungen ausblendete,
-solange `SMOKE OK` erschien (inzwischen sind die Läufe strikt):
+Unfiltered runs, because in that state `smoke.sh` hid warnings as long as
+`SMOKE OK` appeared (the runs are strict by now):
 
 ```
-QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 40 qml6 tests/qml/<Szene>.qml
+QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 40 qml6 tests/qml/<scene>.qml
 QT_FORCE_STDERR_LOGGING=1 QT_LOGGING_RULES="qml.debug=true" QT_QPA_PLATFORM=offscreen \
   timeout 10 plasmawindowed io.github.flexomatic81.netspeeder
 ```
 
-- Smoke-Szenen: jede der acht Szenen einzeln. Keine unerwartete QML-Warnung
-  (kein TypeError, ReferenceError, Bindungsschleife, „Cannot assign" oder
-  Veraltet-Hinweis). Zu sehen sind nur die erwarteten Meldungen der
-  `ProviderSmoke`-Szene: der Fehler beim Laden der absichtlich fehlenden
-  `Missing.qml` sowie `netspeeder:`-Warnungen zum Wechsel auf `/proc`, dazu die
-  Diagnosezeilen der Szenen selbst.
-- `plasmawindowed` (endet nach 10 s durch `timeout`, Status 124, das Widget
-  lief also bis dahin) zeigte unter anderem: `kf.windowsystem`-,
-  `kf.svg`- und `kf.plasma.core`-Meldungen des Systems (offscreen-Plattform,
-  Theme „GruvboxPlusDark" mit veralteter `metadata.desktop`), die Ladezeile
-  `qml: netspeeder: loaded`, eine Zeile `qml: 0` und dreimal die Zeile
-  `This plugin does not support propagateSizeHints()`. Das Paket selbst
-  enthält kein `console.log`; geprüft mit `grep -rn "console.log" package/`
-  (keine Treffer, auch nicht im Stand `f4846c5`). Dieselben Aufrufe mit
-  `org.kde.plasma.digitalclock` und `org.kde.plasma.systemmonitor.net` geben
-  ebenfalls `qml: 0` und die `propagateSizeHints()`-Zeile (fünfmal bzw.
-  zweimal) aus, die beiden Zeilen stammen also nicht vom Netspeeder.
+- Smoke scenes: each of the eight scenes on its own. No unexpected QML warning
+  (no TypeError, ReferenceError, binding loop, "Cannot assign" or deprecation
+  notice). Only the expected messages of the `ProviderSmoke` scene appear: the
+  error when loading the deliberately missing `Missing.qml` and `netspeeder:`
+  warnings about the switch to `/proc`, plus the diagnostic lines of the
+  scenes themselves.
+- `plasmawindowed` (ends after 10 s through `timeout`, status 124, so the
+  widget was running until then) showed, among others: `kf.windowsystem`,
+  `kf.svg` and `kf.plasma.core` messages from the system (offscreen platform,
+  theme "GruvboxPlusDark" with an outdated `metadata.desktop`), the load line
+  `qml: netspeeder: loaded`, a line `qml: 0` and three times the line
+  `This plugin does not support propagateSizeHints()`. The package itself
+  contains no `console.log`; checked with `grep -rn "console.log" package/`
+  (no hits, also not in state `f4846c5`). The same calls with
+  `org.kde.plasma.digitalclock` and `org.kde.plasma.systemmonitor.net` also
+  print `qml: 0` and the `propagateSizeHints()` line (five and two times), so
+  the two lines do not come from Netspeeder.
 
-Nicht automatisch geprüft:
+Not checked automatically:
 
-- Der echte CMake-Bau und die Installation per `cmake --install`: auf dem
-  Entwicklungsrechner fehlt `extra-cmake-modules`. Die CMake-Dateien sind nur
-  gegen eine Attrappe von ECM geprüft. Der echte Bau ist vor der Veröffentlichung
-  nachzuholen.
-- Alles aus den Tabellen oben (Panel, Netzwerk-Situationen, Einstellungen).
+- The real CMake build and the installation through `cmake --install`:
+  `extra-cmake-modules` is missing on the development machine. The CMake files
+  were checked against a stub of ECM only. The real build is to be done before
+  release.
+- Everything in the tables above (panel, network situations, settings).

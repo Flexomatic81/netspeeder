@@ -22,8 +22,8 @@ Second pre-release, stage "Popup".
   hidden, with a note, and the rest of the popup works.
 - Desktop view: placed on the desktop, the widget shows the popup view
   directly.
-- Configurable clicks: left and middle click open the popup, start the launch
-  target or do nothing.
+- Configurable clicks: the left click opens the popup or starts the launch
+  target; the middle click can also do nothing.
 - Launch target: an application (desktop ID chosen in a file dialog) or a
   command. The target is pre-checked; an unknown application or a missing
   command gives a notification, and a start that does not respond times out.

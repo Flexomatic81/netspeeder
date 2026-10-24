@@ -41,7 +41,7 @@ Daniel Faust, see [Origin](#origin).
   source; to be verified by hand.
 - **Tooltip** with the connection name, download, upload and IP address, and a
   note when the data source has a problem.
-- **Settings** pages "Display" and "Data". The data page lists every network
+- **Settings** pages "Display", "Data" and (0.2) "Behavior". The data page lists every network
   interface with its kind and current speed.
 - **Translations:** English and German.
 
@@ -52,15 +52,17 @@ view can also sit directly on the desktop (Plasma's "Add Widgets" on the
 desktop); there it is always shown and has no popup. It contains:
 
 - **Header** with the live download and upload speed, the connection state
-  (online, offline, no data yet) and a hint when the data source has a problem.
+  (online, offline, no data yet, no current data) and a hint when the data
+  source has a problem.
 - **Traffic graph** with a time window of 1, 5 or 15 minutes. The selected
   window is kept in the configuration and survives a restart. The graph needs
   Qt Quick Charts; it is loaded in isolation, so without it only the graph is
   replaced by a note and the rest of the popup works. The x axis is per
   sample, not a wall-clock scale.
 - **Peaks and session totals** for download and upload.
-- **Interface list**, scrollable, with kind, state, totals per interface and
-  the IPv4 address, which you can copy with one click.
+- **Interface list**, scrollable, with markers for virtual and uncounted interfaces and the Wi-Fi signal,
+  totals per interface and the IPv4 address, which you can copy with one
+  click.
 - **Footer** with an "Open System Monitor" button and the active data source.
 
 The popup follows the data only while it is visible, so a closed popup costs
