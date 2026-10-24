@@ -6,9 +6,10 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 # Manuelle Tests
 
 Diese Checkliste wird vor jeder Veröffentlichung abgearbeitet. Die
-automatischen Tests (`npm test`, `scripts/lint.sh`, `scripts/smoke.sh`)
-ersetzen sie nicht: Sie prüfen Logik und einzelne Szenen, nicht das Verhalten
-in einem echten Panel.
+automatischen Tests (`npm test`, in CI so aufgerufen und lokal gleichwertig
+`pnpm test`, sowie `scripts/lint.sh` und `scripts/smoke.sh`) ersetzen sie
+nicht: Sie prüfen Logik und einzelne Szenen, nicht das Verhalten in einem
+echten Panel.
 
 Vorgehen: die aktuelle Fassung installieren (`scripts/dev-install.sh`),
 plasmashell neu starten (`systemctl --user restart plasma-plasmashell`), die
@@ -69,8 +70,8 @@ Datum: 2026-10-24, Stand `f4846c5`, auf dem Entwicklungsrechner (Node 24.22,
 Qt/qmllint 6.12, Plasma 6.8). Diese Läufe ersetzen die manuellen Prüfpunkte
 oben nicht. Dort bleibt „Ergebnis" leer, bis sie von Hand durchgegangen sind.
 
-Befehl (npm ist auf diesem Rechner nicht installiert, `pnpm test` führt dasselbe
-Skript `test` aus `package.json` aus):
+Befehl (in CI läuft `npm test`; auf diesem Rechner ist npm nicht installiert,
+`pnpm test` führt dasselbe Skript `test` aus `package.json` aus):
 
 ```
 pnpm test && scripts/lint.sh && scripts/smoke.sh && scripts/dev-install.sh \
@@ -88,16 +89,31 @@ pnpm test && scripts/lint.sh && scripts/smoke.sh && scripts/dev-install.sh \
 | `LANGUAGE=de scripts/load-check.sh` | `LOAD OK` |
 | `scripts/build-plasmoid.sh 0.1.0` | `dist/netspeeder-0.1.0.plasmoid` erzeugt (31 Einträge, mit deutscher `.mo`) |
 
-Jede Smoke-Szene lief zusätzlich einzeln ungefiltert
-(`QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen qml6 tests/qml/<Szene>.qml`),
-weil `smoke.sh` Warnungen ausblendet, solange `SMOKE OK` erscheint. Ergebnis: keine
-QML-Warnung aus `package/` oder `tests/qml/` (kein TypeError, ReferenceError,
-Bindungsschleife, „Cannot assign" oder Veraltet-Hinweis). Zu sehen sind nur die
-erwarteten Meldungen der `ProviderSmoke`-Szene (Laden der absichtlich fehlenden
-`Missing.qml` und `netspeeder:`-Warnungen zum Wechsel auf `/proc`). Ein
-ungefilterter Lauf von `plasmawindowed` zeigt zusätzlich nur `kf.*`-Meldungen des
-Systems und eine Zeile `qml: 0`, die `plasmawindowed` auch bei Uhr und
-Netzwerkmonitor von KDE ausgibt.
+Ungefilterte Läufe, weil `smoke.sh` Warnungen ausblendet, solange `SMOKE OK`
+erscheint:
+
+```
+QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 40 qml6 tests/qml/<Szene>.qml
+QT_FORCE_STDERR_LOGGING=1 QT_LOGGING_RULES="qml.debug=true" QT_QPA_PLATFORM=offscreen \
+  timeout 10 plasmawindowed io.github.flexomatic81.netspeeder
+```
+
+- Smoke-Szenen: jede der acht Szenen einzeln, alle mit Exitstatus 0. Keine
+  unerwartete QML-Warnung (kein TypeError, ReferenceError, Bindungsschleife,
+  „Cannot assign" oder Veraltet-Hinweis). Zu sehen sind nur die erwarteten
+  Meldungen der `ProviderSmoke`-Szene: der Fehler beim Laden der absichtlich
+  fehlenden `Missing.qml` sowie `netspeeder:`-Warnungen zum Wechsel auf `/proc`,
+  dazu die Diagnosezeilen der Szenen selbst.
+- `plasmawindowed` (endet nach 10 s durch `timeout`, Status 124, das Widget
+  lief also bis dahin) zeigte genau diese Ausgabe: `kf.windowsystem`-,
+  `kf.svg`- und `kf.plasma.core`-Meldungen des Systems (offscreen-Plattform,
+  Theme „GruvboxPlusDark" mit veralteter `metadata.desktop`), die Ladezeile
+  `qml: netspeeder: loaded`, eine Zeile `qml: 0` und dreimal die Zeile
+  `This plugin does not support propagateSizeHints()`. Das Paket selbst
+  enthält kein `console.log`. Dieselben Aufrufe mit
+  `org.kde.plasma.digitalclock` und `org.kde.plasma.systemmonitor.net` geben
+  ebenfalls `qml: 0` und die `propagateSizeHints()`-Zeile (fünfmal bzw.
+  zweimal) aus, die beiden Zeilen stammen also nicht vom Netspeeder.
 
 Nicht automatisch geprüft:
 

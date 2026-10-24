@@ -44,15 +44,20 @@ First pre-release, stage "Kern" (core).
 - #36: settings jump back to their old values. Selection lists share one
   component that sets the index only on creation and on a change of the bound
   value, and writes back only on a user action. List settings are replaced as a
-  whole, never changed in place.
-- #46: DataSource error. It does not apply to the default data source any more,
-  which reads `ksystemstats` instead of a DataSource engine.
+  whole, never changed in place. Addressed (ConfigComboBox syncs after
+  creation, smoke-tested); to be verified in the real settings dialog before
+  release.
+- #46: DataSource error. Mitigated: the default path reads `ksystemstats`
+  instead of a DataSource engine; Plasma5Support is still used for device
+  classification and the `/proc` fallback.
 - #48: build failure with CMake 4. The new `CMakeLists.txt` requires CMake 3.16
   and extra-cmake-modules 6. The CMake files were verified against a stub of
   extra-cmake-modules only; the real build is to be verified before release.
 - #11 and #27: overlapping text and wrong margins. The panel view is built from
   Qt layouts with fixed-width slots instead of manual aspect ratio
-  calculations.
+  calculations. Addressed by the new layout; to be verified in a real panel
+  before release (the automated smoke scenes cover the sizes, not a real
+  panel).
 
 Upstream #24 (empty window when scrolling over the widget) and #47 (crash when
 deselecting an option) are addressed by the design; to be verified by hand
