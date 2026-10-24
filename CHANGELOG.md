@@ -37,9 +37,9 @@ First pre-release, stage "Kern" (core).
   their kind and current speed.
 - German translation.
 - Build and release tooling: CMake installation for distribution packages,
-  `scripts/build-plasmoid.sh` for the `.plasmoid` file, continuous integration
-  (tests on Node 22 and 24, QML lint, `.plasmoid` as release asset for version
-  tags).
+  `scripts/build-plasmoid.sh` for the `.plasmoid` file, a continuous integration
+  workflow (tests on Node 22.13 and 24, QML lint, shellcheck, `.plasmoid` as
+  release asset for version tags), which has not run yet.
 
 ### Development
 

@@ -53,7 +53,7 @@ pinned in `tools/requirements-dev.txt` through [uv](https://docs.astral.sh/uv/),
 `PATH` after `python3 -m pip install -r tools/requirements-dev.txt`.
 
 The unit tests have a coverage floor; please add tests for new behaviour and for bug fixes. Code is
-formatted with Prettier (`pnpm exec prettier --write .`).
+formatted with Prettier (`pnpm run format`, which is `prettier --write "**/*.mjs"`).
 
 ## Ground rules
 
@@ -69,6 +69,9 @@ formatted with Prettier (`pnpm exec prettier --write .`).
 User-facing texts go through the `tr`, `trc` and `trp` wrappers. After changing texts, run
 `scripts/Messages.sh` and translate the new entries in every `po/<language>/*.po`. How to add a new
 language is described in the [README](README.md#translating).
+
+When visible texts are added or changed, run `scripts/Messages.sh`, translate the entries in
+`po/*/…po` and update `tests/fixtures/catalog-keys.txt` (the test pins the message keys on purpose).
 
 ## Commit messages
 

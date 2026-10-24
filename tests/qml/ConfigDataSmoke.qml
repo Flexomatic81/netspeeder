@@ -18,8 +18,10 @@ Item {
     width: 600
     height: 800
 
-    // Name of a real interface on the machine and one that cannot exist.
-    readonly property string real: "enp7s0"
+    // Name of a real interface on the machine (the first listed one the
+    // page knows, taken once the provider has delivered) and one that
+    // cannot exist.
+    property string real: ""
     readonly property string ghost: "ghost0"
 
     property var failures: []
@@ -66,6 +68,17 @@ Item {
         return list.map(row => row.interfaceName);
     }
 
+    // Name of the first listed row that is a real interface, or "".
+    function firstKnown() {
+        const list = scene.rows();
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].known === true) {
+                return list[i].interfaceName;
+            }
+        }
+        return "";
+    }
+
     function rowFor(name) {
         const list = scene.rows();
         for (let i = 0; i < list.length; i++) {
@@ -103,6 +116,11 @@ Item {
             if (scene.rows().length === 0) {
                 // The provider has not delivered yet; try again next tick.
                 stepTimer.restart();
+                return;
+            }
+            scene.real = scene.firstKnown();
+            if (scene.real === "") {
+                scene.finish(false, "SMOKE FAIL configdata: no real interface listed");
                 return;
             }
             scene.expect("manual before", page.manual, false);

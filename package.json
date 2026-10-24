@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "node --test 'tests/*.test.mjs'",
-    "check": "node tools/check.mjs"
+    "check": "node tools/check.mjs",
+    "format": "prettier --write \"**/*.mjs\""
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

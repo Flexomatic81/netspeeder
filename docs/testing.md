@@ -70,18 +70,18 @@ Datum: 2026-10-24, Stand `f4846c5`, auf dem Entwicklungsrechner (Node 24.22,
 Qt/qmllint 6.12, Plasma 6.8). Diese Läufe ersetzen die manuellen Prüfpunkte
 oben nicht. Dort bleibt „Ergebnis" leer, bis sie von Hand durchgegangen sind.
 
-Befehl (der Check-Runner führt `eslint`, `format`, `test`, `qmllint`,
-`shellcheck`, `smoke` und `load` aus; `pnpm test` ist nur der Testschritt;
-`load` prüft die installierte Fassung, daher zuerst installieren):
+Befehl (npm ist auf diesem Rechner nicht installiert, `pnpm test` führt dasselbe
+Skript `test` aus `package.json` aus):
 
 ```
-scripts/dev-install.sh && node tools/check.mjs && scripts/build-plasmoid.sh 0.1.0
+pnpm test && scripts/lint.sh && scripts/smoke.sh && scripts/dev-install.sh \
+  && scripts/load-check.sh && scripts/build-plasmoid.sh 0.1.0
 ```
 
 | Prüfung | Ergebnis |
 |---|---|
 | `pnpm test` | 86 Tests, 86 bestanden, 0 fehlgeschlagen |
-| `node tools/check.mjs qmllint` | alle QML-Dateien ohne Warnungen |
+| `scripts/lint.sh` | `lint: 20 QML files OK`, keine Warnungen |
 | `scripts/smoke.sh` | `SMOKE OK` für runner, compact, combobox, parity, proc, provider, sensors, vertical |
 | `LC_ALL=C scripts/smoke.sh tests/qml/ParitySmoke.qml` | `SMOKE OK parity` |
 | `scripts/dev-install.sh` | Paket aktualisiert, Übersetzung kompiliert |
@@ -89,8 +89,8 @@ scripts/dev-install.sh && node tools/check.mjs && scripts/build-plasmoid.sh 0.1.
 | `LANGUAGE=de scripts/load-check.sh` | `LOAD OK` |
 | `scripts/build-plasmoid.sh 0.1.0` | `dist/netspeeder-0.1.0.plasmoid` erzeugt (31 Einträge, mit deutscher `.mo`) |
 
-Ungefilterte Läufe, weil `smoke.sh` Warnungen ausblendet, solange `SMOKE OK`
-erscheint:
+Ungefilterte Läufe, weil `smoke.sh` in diesem Stand Warnungen ausblendete,
+solange `SMOKE OK` erschien (inzwischen sind die Läufe strikt):
 
 ```
 QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 40 qml6 tests/qml/<Szene>.qml
