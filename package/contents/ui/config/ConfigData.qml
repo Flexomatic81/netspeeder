@@ -17,9 +17,25 @@ import org.kde.kcmutils as KCM
 import "../data"
 import "../../code/format.mjs" as Format
 import "../../code/selection.mjs" as Selection
+import "../../code/text.mjs" as TextTools
 
 KCM.SimpleKCM {
     id: root
+
+    // Translation helpers: the only place that calls Plasma's i18n functions.
+    // Plain qml6 (the smoke scenes) has none and gets the English text.
+    function tr(text: string, ...args): string {
+        // Plasma context function, not declared for qmllint
+        return typeof i18n === "function" ? i18n(text, ...args) : TextTools.substitute(text, args); // qmllint disable unqualified
+    }
+    function trc(context: string, text: string, ...args): string {
+        // Plasma context function, not declared for qmllint
+        return typeof i18nc === "function" ? i18nc(context, text, ...args) : TextTools.substitute(text, args); // qmllint disable unqualified
+    }
+    function trp(singular: string, plural: string, n: int, ...args): string {
+        // Plasma context function, not declared for qmllint
+        return typeof i18np === "function" ? i18np(singular, plural, n, ...args) : TextTools.substitute(n === 1 ? singular : plural, [n, ...args]); // qmllint disable unqualified
+    }
 
     property string cfg_dataSource
     property string cfg_interfaceSelection
@@ -124,9 +140,9 @@ KCM.SimpleKCM {
     function sourceText(source: string): string {
         switch (source) {
         case "sensors":
-            return i18n("System sensors");
+            return root.tr("System sensors");
         case "proc":
-            return i18n("Kernel counters");
+            return root.tr("Kernel counters");
         default:
             return "–";
         }
@@ -137,11 +153,11 @@ KCM.SimpleKCM {
     function errorText(code: string, detail: string): string {
         switch (code) {
         case "sensors-unavailable":
-            return i18n("System sensors are not available.");
+            return root.tr("System sensors are not available.");
         case "no-interfaces":
-            return i18n("System sensors report no network interfaces.");
+            return root.tr("System sensors report no network interfaces.");
         case "source-failed":
-            return i18n("Reading network data failed: %1", detail.replace(/[\r\n]+/g, " ").slice(0, 200));
+            return root.tr("Reading network data failed: %1", detail.replace(/[\r\n]+/g, " ").slice(0, 200));
         default:
             return "";
         }
@@ -172,11 +188,11 @@ KCM.SimpleKCM {
         ConfigComboBox {
             id: sourceBox
 
-            Kirigami.FormData.label: i18n("Data source:")
+            Kirigami.FormData.label: root.tr("Data source:")
             options: [
-                { text: i18n("Automatic (recommended)"), value: "auto" },
-                { text: i18n("System sensors (ksystemstats)"), value: "sensors" },
-                { text: i18n("Kernel counters (/proc/net/dev)"), value: "proc" }
+                { text: root.tr("Automatic (recommended)"), value: "auto" },
+                { text: root.tr("System sensors (ksystemstats)"), value: "sensors" },
+                { text: root.tr("Kernel counters (/proc/net/dev)"), value: "proc" }
             ]
             configValue: root.cfg_dataSource
             onPicked: value => root.cfg_dataSource = value
@@ -185,7 +201,7 @@ KCM.SimpleKCM {
         QQC2.Label {
             Layout.fillWidth: true
             Layout.maximumWidth: Kirigami.Units.gridUnit * 25
-            text: i18n("Kernel counters also show VPN and container interfaces, but start a small process at every update.")
+            text: root.tr("Kernel counters also show VPN and container interfaces, but start a small process at every update.")
             wrapMode: Text.WordWrap
             font: Kirigami.Theme.smallFont
             opacity: 0.7
@@ -198,9 +214,9 @@ KCM.SimpleKCM {
         QQC2.RadioButton {
             id: automaticButton
 
-            Kirigami.FormData.label: i18n("Interfaces counted in the total:")
+            Kirigami.FormData.label: root.tr("Interfaces counted in the total:")
             QQC2.ButtonGroup.group: selectionGroup
-            text: i18n("Automatic (physical network devices)")
+            text: root.tr("Automatic (physical network devices)")
             checked: root.cfg_interfaceSelection !== "manual"
             onToggled: {
                 if (automaticButton.checked) {
@@ -213,7 +229,7 @@ KCM.SimpleKCM {
             id: manualButton
 
             QQC2.ButtonGroup.group: selectionGroup
-            text: i18n("Selected interfaces only")
+            text: root.tr("Selected interfaces only")
             checked: root.manual
             onToggled: {
                 if (manualButton.checked) {
@@ -232,7 +248,7 @@ KCM.SimpleKCM {
 
             QQC2.Label {
                 visible: rowModel.count === 0
-                text: provider.hasData ? i18n("No network interfaces found.") : i18n("Waiting for network data…")
+                text: provider.hasData ? root.tr("No network interfaces found.") : root.tr("Waiting for network data…")
                 opacity: 0.7
             }
 
@@ -253,10 +269,10 @@ KCM.SimpleKCM {
                     readonly property bool hasLabel: row.known && typeof row.entry.label === "string" && row.entry.label !== "" && row.entry.label !== row.interfaceName
                     readonly property string kindText: {
                         if (row.known) {
-                            return row.entry.kind === "physical" ? i18nc("@info interface kind", "physical") : i18nc("@info interface kind", "virtual");
+                            return row.entry.kind === "physical" ? root.trc("@info interface kind", "physical") : root.trc("@info interface kind", "virtual");
                         }
                         // Before the first sample nothing is known yet.
-                        return provider.hasData ? i18nc("@info interface kind", "not available") : "";
+                        return provider.hasData ? root.trc("@info interface kind", "not available") : "";
                     }
 
                     width: rowColumn.width
@@ -275,7 +291,7 @@ KCM.SimpleKCM {
                     QQC2.Label {
                         Layout.fillWidth: true
                         Layout.leftMargin: check.leftPadding + check.indicator.width + check.spacing
-                        text: row.known ? i18nc("@info interface kind, download and upload speed", "%1 – ↓ %2   ↑ %3", row.kindText, root.speedText(row.entry.down), root.speedText(row.entry.up)) : row.kindText
+                        text: row.known ? root.trc("@info interface kind, download and upload speed", "%1 – ↓ %2   ↑ %3", row.kindText, root.speedText(row.entry.down), root.speedText(row.entry.up)) : row.kindText
                         elide: Text.ElideRight
                         font.features: { "tnum": 1 }
                         opacity: 0.7
@@ -290,7 +306,7 @@ KCM.SimpleKCM {
 
         QQC2.Label {
             Layout.fillWidth: true
-            text: i18n("Active source: %1", root.sourceText(provider.activeSource))
+            text: root.tr("Active source: %1", root.sourceText(provider.activeSource))
         }
 
         QQC2.Label {

@@ -1,0 +1,56 @@
+	1 KiB/s	
+	10 KiB/s	
+	100 KiB/s	
+	512 B/s	
+	Active source: %1	
+	Automatic	
+	Automatic (physical network devices)	
+	Automatic (recommended)	
+	Bits (Mbit/s)	
+	Bytes, binary (KiB/s)	
+	Bytes, decimal (kB/s)	
+	Data	
+	Data source:	
+	Decimal places:	
+	Display	
+	Download first	
+	Interfaces counted in the total:	
+	Kernel counters	
+	Kernel counters (/proc/net/dev)	
+	Kernel counters also show VPN and container interfaces, but start a small process at every update.	
+	Layout:	
+	Network	
+	No current data	
+	No network interfaces found.	
+	No selected network interface available	
+	Off	
+	Offline	
+	Order:	
+	Preview:	
+	Reading network data failed: %1	
+	Selected interfaces only	
+	Show as 0 below:	
+	Show only the combined speed	
+	Side by side	
+	System sensors	
+	System sensors (ksystemstats)	
+	System sensors are not available.	
+	System sensors are not available. Choose another data source in the settings.	
+	System sensors report no network interfaces.	
+	Two rows	
+	Units:	
+	Update interval:	
+	Upload first	
+	Use short unit names	
+	Using kernel counters because system sensors are not available.	
+	Using kernel counters because system sensors report no network interfaces.	
+	Waiting for network data…	
+@info accessible	Download %1, upload %2	
+@info interface kind	not available	
+@info interface kind	physical	
+@info interface kind	virtual	
+@info interface kind, download and upload speed	%1 – ↓ %2   ↑ %3	
+@info:tooltip	Download: %1	
+@info:tooltip	IP address: %1	
+@info:tooltip	Upload: %1	
+@item:valuesuffix %1 is a number of seconds	%1 s	

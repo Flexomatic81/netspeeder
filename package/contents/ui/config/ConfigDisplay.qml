@@ -11,9 +11,25 @@ import QtQuick.Controls as QQC2
 import org.kde.kirigami as Kirigami
 import org.kde.kcmutils as KCM
 import "../../code/format.mjs" as Format
+import "../../code/text.mjs" as TextTools
 
 KCM.SimpleKCM {
     id: root
+
+    // Translation helpers: the only place that calls Plasma's i18n functions.
+    // Plain qml6 (the smoke scenes) has none and gets the English text.
+    function tr(text: string, ...args): string {
+        // Plasma context function, not declared for qmllint
+        return typeof i18n === "function" ? i18n(text, ...args) : TextTools.substitute(text, args); // qmllint disable unqualified
+    }
+    function trc(context: string, text: string, ...args): string {
+        // Plasma context function, not declared for qmllint
+        return typeof i18nc === "function" ? i18nc(context, text, ...args) : TextTools.substitute(text, args); // qmllint disable unqualified
+    }
+    function trp(singular: string, plural: string, n: int, ...args): string {
+        // Plasma context function, not declared for qmllint
+        return typeof i18np === "function" ? i18np(singular, plural, n, ...args) : TextTools.substitute(n === 1 ? singular : plural, [n, ...args]); // qmllint disable unqualified
+    }
 
     property string cfg_layout
     property bool cfg_uploadFirst
@@ -47,11 +63,11 @@ KCM.SimpleKCM {
         ConfigComboBox {
             id: layoutBox
 
-            Kirigami.FormData.label: i18n("Layout:")
+            Kirigami.FormData.label: root.tr("Layout:")
             options: [
-                { text: i18n("Automatic"), value: "auto" },
-                { text: i18n("Two rows"), value: "rows" },
-                { text: i18n("Side by side"), value: "columns" }
+                { text: root.tr("Automatic"), value: "auto" },
+                { text: root.tr("Two rows"), value: "rows" },
+                { text: root.tr("Side by side"), value: "columns" }
             ]
             configValue: root.cfg_layout
             onPicked: value => root.cfg_layout = value
@@ -60,10 +76,10 @@ KCM.SimpleKCM {
         ConfigComboBox {
             id: orderBox
 
-            Kirigami.FormData.label: i18n("Order:")
+            Kirigami.FormData.label: root.tr("Order:")
             options: [
-                { text: i18n("Download first"), value: false },
-                { text: i18n("Upload first"), value: true }
+                { text: root.tr("Download first"), value: false },
+                { text: root.tr("Upload first"), value: true }
             ]
             configValue: root.cfg_uploadFirst
             onPicked: value => root.cfg_uploadFirst = value
@@ -72,7 +88,7 @@ KCM.SimpleKCM {
         QQC2.CheckBox {
             id: combinedBox
 
-            text: i18n("Show only the combined speed")
+            text: root.tr("Show only the combined speed")
             checked: root.cfg_combined
             onToggled: root.cfg_combined = combinedBox.checked
         }
@@ -80,11 +96,11 @@ KCM.SimpleKCM {
         ConfigComboBox {
             id: unitsBox
 
-            Kirigami.FormData.label: i18n("Units:")
+            Kirigami.FormData.label: root.tr("Units:")
             options: [
-                { text: i18n("Bytes, binary (KiB/s)"), value: "iec" },
-                { text: i18n("Bytes, decimal (kB/s)"), value: "si" },
-                { text: i18n("Bits (Mbit/s)"), value: "bits" }
+                { text: root.tr("Bytes, binary (KiB/s)"), value: "iec" },
+                { text: root.tr("Bytes, decimal (kB/s)"), value: "si" },
+                { text: root.tr("Bits (Mbit/s)"), value: "bits" }
             ]
             configValue: root.cfg_unitSystem
             onPicked: value => root.cfg_unitSystem = value
@@ -93,7 +109,7 @@ KCM.SimpleKCM {
         QQC2.CheckBox {
             id: shortUnitsBox
 
-            text: i18n("Use short unit names")
+            text: root.tr("Use short unit names")
             checked: root.cfg_shortUnits
             onToggled: root.cfg_shortUnits = shortUnitsBox.checked
         }
@@ -101,9 +117,9 @@ KCM.SimpleKCM {
         ConfigComboBox {
             id: decimalsBox
 
-            Kirigami.FormData.label: i18n("Decimal places:")
+            Kirigami.FormData.label: root.tr("Decimal places:")
             options: [
-                { text: i18n("Automatic"), value: -1 },
+                { text: root.tr("Automatic"), value: -1 },
                 { text: root.numberText(0), value: 0 },
                 { text: root.numberText(1), value: 1 },
                 { text: root.numberText(2), value: 2 }
@@ -116,13 +132,13 @@ KCM.SimpleKCM {
         ConfigComboBox {
             id: thresholdBox
 
-            Kirigami.FormData.label: i18n("Show as 0 below:")
+            Kirigami.FormData.label: root.tr("Show as 0 below:")
             options: [
-                { text: i18n("Off"), value: 0 },
-                { text: i18n("512 B/s"), value: 512 },
-                { text: i18n("1 KiB/s"), value: 1024 },
-                { text: i18n("10 KiB/s"), value: 10240 },
-                { text: i18n("100 KiB/s"), value: 102400 }
+                { text: root.tr("Off"), value: 0 },
+                { text: root.tr("512 B/s"), value: 512 },
+                { text: root.tr("1 KiB/s"), value: 1024 },
+                { text: root.tr("10 KiB/s"), value: 10240 },
+                { text: root.tr("100 KiB/s"), value: 102400 }
             ]
             configValue: root.cfg_lowSpeedThreshold
             onPicked: value => root.cfg_lowSpeedThreshold = value
@@ -132,12 +148,12 @@ KCM.SimpleKCM {
         QQC2.SpinBox {
             id: intervalBox
 
-            Kirigami.FormData.label: i18n("Update interval:")
+            Kirigami.FormData.label: root.tr("Update interval:")
             from: 5
             to: 100
             stepSize: 5
             value: Math.round(root.cfg_updateInterval * 10)
-            textFromValue: (value, locale) => i18nc("@item:valuesuffix %1 is a number of seconds", "%1 s", Number(value / 10).toLocaleString(locale, "f", 1))
+            textFromValue: (value, locale) => root.trc("@item:valuesuffix %1 is a number of seconds", "%1 s", Number(value / 10).toLocaleString(locale, "f", 1))
             onValueModified: root.cfg_updateInterval = intervalBox.value / 10
         }
 
@@ -146,7 +162,7 @@ KCM.SimpleKCM {
         }
 
         QQC2.Label {
-            Kirigami.FormData.label: i18n("Preview:")
+            Kirigami.FormData.label: root.tr("Preview:")
             text: root.previewText
             font.features: { "tnum": 1 }
         }

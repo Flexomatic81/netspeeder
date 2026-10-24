@@ -14,9 +14,25 @@ import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import "../../code/format.mjs" as Format
 import "../../code/layout.mjs" as LayoutLogic
+import "../../code/text.mjs" as TextTools
 
 Item {
     id: root
+
+    // Translation helpers: the only place that calls Plasma's i18n functions.
+    // Plain qml6 (the smoke scenes) has none and gets the English text.
+    function tr(text: string, ...args): string {
+        // Plasma context function, not declared for qmllint
+        return typeof i18n === "function" ? i18n(text, ...args) : TextTools.substitute(text, args); // qmllint disable unqualified
+    }
+    function trc(context: string, text: string, ...args): string {
+        // Plasma context function, not declared for qmllint
+        return typeof i18nc === "function" ? i18nc(context, text, ...args) : TextTools.substitute(text, args); // qmllint disable unqualified
+    }
+    function trp(singular: string, plural: string, n: int, ...args): string {
+        // Plasma context function, not declared for qmllint
+        return typeof i18np === "function" ? i18np(singular, plural, n, ...args) : TextTools.substitute(n === 1 ? singular : plural, [n, ...args]); // qmllint disable unqualified
+    }
 
     // The NetworkProvider whose down, up, hasData and stale values are shown.
     required property var provider
@@ -81,8 +97,7 @@ Item {
     readonly property string accessibleName: {
         const down = root.plainSpeed(root.provider.down);
         const up = root.plainSpeed(root.provider.up);
-        // i18nc exists only inside Plasma; plain qml6 (the smoke scenes) gets English.
-        return typeof i18nc === "function" ? i18nc("@info accessible", "Download %1, upload %2", down, up) : "Download " + down + ", upload " + up;
+        return root.trc("@info accessible", "Download %1, upload %2", down, up);
     }
 
     // Value and unit for a rate; "–" without a unit before the first data.

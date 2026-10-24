@@ -7,9 +7,10 @@
 # (po/<lang>/<domain>.po). Run it after every change to a visible string and
 # commit the result.
 #
-# QML is read as JavaScript: the i18n calls are plain call expressions, also
-# inside the `typeof i18nc === "function" ? ... : ...` guards, so xgettext's
-# JavaScript parser finds them without preprocessing.
+# QML is read as JavaScript. The visible texts are passed to the per-file
+# helpers tr/trc/trp (member calls such as root.trc(...)), which xgettext finds
+# as keywords; the i18n calls inside the helpers have no literal text and add
+# nothing. Texts in the .mjs modules are extracted as well.
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
@@ -21,10 +22,11 @@ work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
 # The sorted file list keeps the template identical across file systems.
-find package -name '*.qml' | LC_ALL=C sort > "$work/files"
+find package \( -name '*.qml' -o -path 'package/contents/code/*.mjs' \) | LC_ALL=C sort > "$work/files"
 
 xgettext --from-code=UTF-8 --language=JavaScript \
   --keyword=i18n:1 --keyword=i18nc:1c,2 --keyword=i18np:1,2 --keyword=i18ncp:1c,2,3 \
+  --keyword=tr:1 --keyword=trc:1c,2 --keyword=trp:1,2 \
   --package-name=netspeeder \
   --msgid-bugs-address=https://github.com/Flexomatic81/netspeeder/issues \
   --files-from="$work/files" \

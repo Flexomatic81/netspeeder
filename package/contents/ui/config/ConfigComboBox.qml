@@ -11,7 +11,7 @@
 //   }
 //
 // The values keep their JS type (boolean, number, string), as the settings are
-// typed. Needs no i18n: the caller translates the texts.
+// typed. Needs no translation: the caller translates the texts.
 //
 // The index is set by hand, never through a binding `currentIndex:
 // indexOfValue(...)`: while the component is being created, such a binding

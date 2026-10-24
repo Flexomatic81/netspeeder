@@ -11,9 +11,25 @@ import org.kde.plasma.core as PlasmaCore
 import "compact"
 import "data"
 import "../code/format.mjs" as Format
+import "../code/text.mjs" as TextTools
 
 PlasmoidItem {
     id: root
+
+    // Translation helpers: the only place that calls Plasma's i18n functions.
+    // Plain qml6 (the smoke scenes) has none and gets the English text.
+    function tr(text: string, ...args): string {
+        // Plasma context function, not declared for qmllint
+        return typeof i18n === "function" ? i18n(text, ...args) : TextTools.substitute(text, args); // qmllint disable unqualified
+    }
+    function trc(context: string, text: string, ...args): string {
+        // Plasma context function, not declared for qmllint
+        return typeof i18nc === "function" ? i18nc(context, text, ...args) : TextTools.substitute(text, args); // qmllint disable unqualified
+    }
+    function trp(singular: string, plural: string, n: int, ...args): string {
+        // Plasma context function, not declared for qmllint
+        return typeof i18np === "function" ? i18np(singular, plural, n, ...args) : TextTools.substitute(n === 1 ? singular : plural, [n, ...args]); // qmllint disable unqualified
+    }
 
     property alias provider: provider
     // Options for formatSpeed(); the views format their numbers with them.
@@ -45,20 +61,20 @@ PlasmoidItem {
     function statusLines(): var {
         const p = root.provider;
         if (!p.hasData) {
-            return [i18n("Waiting for network data…")];
+            return [root.tr("Waiting for network data…")];
         }
         if (p.stale) {
-            return [i18n("No current data")];
+            return [root.tr("No current data")];
         }
         if (p.includedCount === 0 && p.interfaceSelection === "manual") {
-            return [i18n("No selected network interface available")];
+            return [root.tr("No selected network interface available")];
         }
         if (p.includedCount === 0 || !p.online) {
-            return [i18n("Offline")];
+            return [root.tr("Offline")];
         }
-        const lines = [i18nc("@info:tooltip", "Download: %1", root.speedText(p.down)), i18nc("@info:tooltip", "Upload: %1", root.speedText(p.up))];
+        const lines = [root.trc("@info:tooltip", "Download: %1", root.speedText(p.down)), root.trc("@info:tooltip", "Upload: %1", root.speedText(p.up))];
         if (p.primaryIp !== "") {
-            lines.push(i18nc("@info:tooltip", "IP address: %1", root.escapeHtml(p.primaryIp)));
+            lines.push(root.trc("@info:tooltip", "IP address: %1", root.escapeHtml(p.primaryIp)));
         }
         return lines;
     }
@@ -70,12 +86,12 @@ PlasmoidItem {
         const fellBack = p.fallbackNote !== "";
         switch (p.errorCode) {
         case "sensors-unavailable":
-            return [fellBack ? i18n("Using kernel counters because system sensors are not available.") : i18n("System sensors are not available. Choose another data source in the settings.")];
+            return [fellBack ? root.tr("Using kernel counters because system sensors are not available.") : root.tr("System sensors are not available. Choose another data source in the settings.")];
         case "no-interfaces":
-            return [fellBack ? i18n("Using kernel counters because system sensors report no network interfaces.") : i18n("System sensors report no network interfaces.")];
+            return [fellBack ? root.tr("Using kernel counters because system sensors report no network interfaces.") : root.tr("System sensors report no network interfaces.")];
         case "source-failed":
             // Cut first, escape second: a cut must not split an entity.
-            return [i18n("Reading network data failed: %1", root.escapeHtml(p.errorDetail.replace(/[\r\n]+/g, " ").slice(0, 120)))];
+            return [root.tr("Reading network data failed: %1", root.escapeHtml(p.errorDetail.replace(/[\r\n]+/g, " ").slice(0, 120)))];
         default:
             return [];
         }
@@ -99,7 +115,7 @@ PlasmoidItem {
         // qmllint enable missing-property
     }
 
-    toolTipMainText: root.provider.primaryLabel || i18n("Network")
+    toolTipMainText: root.provider.primaryLabel || root.tr("Network")
     toolTipSubText: root.statusLines().concat(root.hintLines()).join("<br>")
     toolTipTextFormat: Text.StyledText
 

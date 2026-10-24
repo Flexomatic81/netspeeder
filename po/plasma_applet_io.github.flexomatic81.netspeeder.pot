@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: netspeeder\n"
 "Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
-"POT-Creation-Date: 2026-10-24 01:44+0200\n"
+"POT-Creation-Date: 2026-10-24 12:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,243 +14,243 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: package/contents/config/config.qml:11
+#: package/contents/config/config.qml:29
 msgid "Display"
 msgstr ""
 
-#: package/contents/config/config.qml:16
+#: package/contents/config/config.qml:34
 msgid "Data"
 msgstr ""
 
-#: package/contents/ui/compact/CompactRepresentation.qml:85
+#: package/contents/ui/compact/CompactRepresentation.qml:100
 msgctxt "@info accessible"
 msgid "Download %1, upload %2"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:127
+#: package/contents/ui/config/ConfigData.qml:143
 msgid "System sensors"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:129
+#: package/contents/ui/config/ConfigData.qml:145
 msgid "Kernel counters"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:140
+#: package/contents/ui/config/ConfigData.qml:156
 msgid "System sensors are not available."
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:142
-#: package/contents/ui/main.qml:75
+#: package/contents/ui/config/ConfigData.qml:158
+#: package/contents/ui/main.qml:91
 msgid "System sensors report no network interfaces."
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:144
-#: package/contents/ui/main.qml:78
+#: package/contents/ui/config/ConfigData.qml:160
+#: package/contents/ui/main.qml:94
 msgid "Reading network data failed: %1"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:175
+#: package/contents/ui/config/ConfigData.qml:191
 msgid "Data source:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:177
+#: package/contents/ui/config/ConfigData.qml:193
 msgid "Automatic (recommended)"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:178
+#: package/contents/ui/config/ConfigData.qml:194
 msgid "System sensors (ksystemstats)"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:179
+#: package/contents/ui/config/ConfigData.qml:195
 msgid "Kernel counters (/proc/net/dev)"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:188
+#: package/contents/ui/config/ConfigData.qml:204
 msgid ""
 "Kernel counters also show VPN and container interfaces, but start a small "
 "process at every update."
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:201
+#: package/contents/ui/config/ConfigData.qml:217
 msgid "Interfaces counted in the total:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:203
+#: package/contents/ui/config/ConfigData.qml:219
 msgid "Automatic (physical network devices)"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:216
+#: package/contents/ui/config/ConfigData.qml:232
 msgid "Selected interfaces only"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:235
+#: package/contents/ui/config/ConfigData.qml:251
 msgid "No network interfaces found."
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:235
-#: package/contents/ui/main.qml:48
+#: package/contents/ui/config/ConfigData.qml:251
+#: package/contents/ui/main.qml:64
 msgid "Waiting for network data…"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:256
+#: package/contents/ui/config/ConfigData.qml:272
 msgctxt "@info interface kind"
 msgid "physical"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:256
+#: package/contents/ui/config/ConfigData.qml:272
 msgctxt "@info interface kind"
 msgid "virtual"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:259
+#: package/contents/ui/config/ConfigData.qml:275
 msgctxt "@info interface kind"
 msgid "not available"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:278
+#: package/contents/ui/config/ConfigData.qml:294
 msgctxt "@info interface kind, download and upload speed"
 msgid "%1 – ↓ %2   ↑ %3"
 msgstr ""
 
-#: package/contents/ui/config/ConfigData.qml:293
+#: package/contents/ui/config/ConfigData.qml:309
 msgid "Active source: %1"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:50
+#: package/contents/ui/config/ConfigDisplay.qml:66
 msgid "Layout:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:52
-#: package/contents/ui/config/ConfigDisplay.qml:106
+#: package/contents/ui/config/ConfigDisplay.qml:68
+#: package/contents/ui/config/ConfigDisplay.qml:122
 msgid "Automatic"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:53
+#: package/contents/ui/config/ConfigDisplay.qml:69
 msgid "Two rows"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:54
+#: package/contents/ui/config/ConfigDisplay.qml:70
 msgid "Side by side"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:63
+#: package/contents/ui/config/ConfigDisplay.qml:79
 msgid "Order:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:65
+#: package/contents/ui/config/ConfigDisplay.qml:81
 msgid "Download first"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:66
+#: package/contents/ui/config/ConfigDisplay.qml:82
 msgid "Upload first"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:75
+#: package/contents/ui/config/ConfigDisplay.qml:91
 msgid "Show only the combined speed"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:83
+#: package/contents/ui/config/ConfigDisplay.qml:99
 msgid "Units:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:85
+#: package/contents/ui/config/ConfigDisplay.qml:101
 msgid "Bytes, binary (KiB/s)"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:86
+#: package/contents/ui/config/ConfigDisplay.qml:102
 msgid "Bytes, decimal (kB/s)"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:87
+#: package/contents/ui/config/ConfigDisplay.qml:103
 msgid "Bits (Mbit/s)"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:96
+#: package/contents/ui/config/ConfigDisplay.qml:112
 msgid "Use short unit names"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:104
+#: package/contents/ui/config/ConfigDisplay.qml:120
 msgid "Decimal places:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:119
+#: package/contents/ui/config/ConfigDisplay.qml:135
 msgid "Show as 0 below:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:121
+#: package/contents/ui/config/ConfigDisplay.qml:137
 msgid "Off"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:122
+#: package/contents/ui/config/ConfigDisplay.qml:138
 msgid "512 B/s"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:123
+#: package/contents/ui/config/ConfigDisplay.qml:139
 msgid "1 KiB/s"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:124
+#: package/contents/ui/config/ConfigDisplay.qml:140
 msgid "10 KiB/s"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:125
+#: package/contents/ui/config/ConfigDisplay.qml:141
 msgid "100 KiB/s"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:135
+#: package/contents/ui/config/ConfigDisplay.qml:151
 msgid "Update interval:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:140
+#: package/contents/ui/config/ConfigDisplay.qml:156
 msgctxt "@item:valuesuffix %1 is a number of seconds"
 msgid "%1 s"
 msgstr ""
 
-#: package/contents/ui/config/ConfigDisplay.qml:149
+#: package/contents/ui/config/ConfigDisplay.qml:165
 msgid "Preview:"
 msgstr ""
 
-#: package/contents/ui/main.qml:51
+#: package/contents/ui/main.qml:67
 msgid "No current data"
 msgstr ""
 
-#: package/contents/ui/main.qml:54
+#: package/contents/ui/main.qml:70
 msgid "No selected network interface available"
 msgstr ""
 
-#: package/contents/ui/main.qml:57
+#: package/contents/ui/main.qml:73
 msgid "Offline"
 msgstr ""
 
-#: package/contents/ui/main.qml:59
+#: package/contents/ui/main.qml:75
 msgctxt "@info:tooltip"
 msgid "Download: %1"
 msgstr ""
 
-#: package/contents/ui/main.qml:59
+#: package/contents/ui/main.qml:75
 msgctxt "@info:tooltip"
 msgid "Upload: %1"
 msgstr ""
 
-#: package/contents/ui/main.qml:61
+#: package/contents/ui/main.qml:77
 msgctxt "@info:tooltip"
 msgid "IP address: %1"
 msgstr ""
 
-#: package/contents/ui/main.qml:73
+#: package/contents/ui/main.qml:89
 msgid "Using kernel counters because system sensors are not available."
 msgstr ""
 
-#: package/contents/ui/main.qml:73
+#: package/contents/ui/main.qml:89
 msgid ""
 "System sensors are not available. Choose another data source in the settings."
 msgstr ""
 
-#: package/contents/ui/main.qml:75
+#: package/contents/ui/main.qml:91
 msgid ""
 "Using kernel counters because system sensors report no network interfaces."
 msgstr ""
 
-#: package/contents/ui/main.qml:98
+#: package/contents/ui/main.qml:118
 msgid "Network"
 msgstr ""
