@@ -55,8 +55,12 @@ function defaultSteps() {
 function parseJson(text) {
   try {
     return JSON.parse(text);
-  } catch {
-    return null;
+  } catch (error) {
+    // Text that is not JSON; anything else is a real fault.
+    if (error instanceof SyntaxError) {
+      return null;
+    }
+    throw error;
   }
 }
 
