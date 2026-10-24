@@ -53,8 +53,9 @@ Item {
         }
         smooth: true
         lineWidth: 1
-        // Full inside the layer that the view dims to 35 %
-        fillOpacity: root.filled ? 1 : 0
+        // Half opaque inside the layer that the view dims to 35 %, so that
+        // overlapping areas stay readable; the lines themselves are opaque.
+        fillOpacity: root.filled ? 0.5 : 0
         colorSource: Charts.ArraySource {
             array: root.combined ? [root.downColor] : [root.downColor, root.upColor]
         }

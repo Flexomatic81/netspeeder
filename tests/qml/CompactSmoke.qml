@@ -928,6 +928,22 @@ Item {
                 return "style custom: symbols are '" + symbols + "'";
             }
             const problem = scene.styledProblem("style custom");
+            styled44.customDownIcon = "D";
+            styled44.customUpIcon = "UUU";
+            return problem;
+        },
+        () => {
+            // Symbols of different widths share one column: the values line up.
+            const symbols = scene.symbolTexts(styled44).join(",");
+            if (symbols !== "D,UUU") {
+                return "custom widths: symbols are '" + symbols + "'";
+            }
+            const texts = scene.shownTexts(styled44, styled44, []);
+            const values = texts.filter(t => /^[0-9]/.test(t.text));
+            if (values.length !== 2 || Math.abs(values[0].x - values[1].x) > 0.01) {
+                return "custom widths: values at x " + values.map(t => t.x) + ", expected equal: " + scene.describe(texts);
+            }
+            const problem = scene.styledProblem("custom widths");
             styled44.iconStyle = "triangles";
             styled44.combined = true;
             return problem;
@@ -1077,8 +1093,8 @@ Item {
             if (problem !== "") {
                 return problem;
             }
-            if (Math.abs(spark44.implicitWidth - wide44.implicitWidth) > 0.01 || Math.abs(spark44.sparkLoaderItem.opacity * spark44.sparkLoaderItem.item.fillOpacity - 0.35) > 0.001 || !spark44.sparkLoaderItem.item.filled) {
-                return "sparkline background: width " + spark44.implicitWidth + ", opacity " + spark44.sparkLoaderItem.opacity + ", filled " + spark44.sparkLoaderItem.item.filled;
+            if (Math.abs(spark44.implicitWidth - wide44.implicitWidth) > 0.01 || Math.abs(spark44.sparkLoaderItem.opacity - 0.35) > 0.001 || Math.abs(spark44.sparkLoaderItem.item.fillOpacity - 0.5) > 0.001 || !spark44.sparkLoaderItem.item.filled) {
+                return "sparkline background: width " + spark44.implicitWidth + ", layer opacity " + spark44.sparkLoaderItem.opacity + ", fill " + spark44.sparkLoaderItem.item.fillOpacity + ", filled " + spark44.sparkLoaderItem.item.filled;
             }
             if (spark44.sparkLoaderItem.width !== spark44.width || spark44.sparkLoaderItem.height !== spark44.height) {
                 return "sparkline background: the chart covers " + spark44.sparkLoaderItem.width + "x" + spark44.sparkLoaderItem.height + " of " + spark44.width + "x" + spark44.height;
@@ -1110,7 +1126,7 @@ Item {
             if (Math.abs(narrowSpark.implicitWidth - narrowPlain.implicitWidth) > 0.01 || Math.abs(narrowSpark.implicitHeight - narrowPlain.implicitHeight) > 0.01) {
                 return "vertical beside: size " + narrowSpark.implicitWidth + "x" + narrowSpark.implicitHeight + " instead of " + narrowPlain.implicitWidth + "x" + narrowPlain.implicitHeight;
             }
-            if (narrowSpark.sparkWidth !== 0 || loader.opacity !== 0.35 || loader.width !== narrowSpark.width || !loader.item || Math.abs(loader.opacity * loader.item.fillOpacity - 0.35) > 0.001) {
+            if (narrowSpark.sparkWidth !== 0 || loader.opacity !== 0.35 || loader.width !== narrowSpark.width || !loader.item || Math.abs(loader.item.fillOpacity - 0.5) > 0.001) {
                 return "vertical beside: not drawn like background (opacity " + loader.opacity + ", width " + loader.width + ")";
             }
             const texts = scene.shownTexts(narrowSpark, narrowSpark, []);

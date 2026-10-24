@@ -113,7 +113,7 @@ Item {
             scene.expect("seconds at start", secondsBox.value, 30);
             scene.expect("threshold disabled for never", thresholdBox.enabled, false);
             scene.expect("seconds disabled for never", secondsBox.enabled, false);
-            scene.expect("threshold range", thresholdBox.from + "-" + thresholdBox.to, "0-1024");
+            scene.expect("threshold range", thresholdBox.from + "-" + thresholdBox.to, "1-1024");
             scene.expect("seconds range", secondsBox.from + "-" + secondsBox.to, "5-3600");
             page.cfg_autoHide = "offline";
             break;

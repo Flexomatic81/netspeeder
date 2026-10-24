@@ -135,9 +135,23 @@ export function speedColors(mode, rates, cfg) {
   return { down: "", up: "", total: "" };
 }
 
+// The first `count` code points of a string. An explicit loop over UTF-16
+// units, so that Node and the QML engine cut alike and never inside a
+// surrogate pair.
+function firstCodePoints(value, count) {
+  let end = 0;
+  for (let n = 0; n < count && end < value.length; n++) {
+    const unit = value.charCodeAt(end);
+    const pair = unit >= 0xd800 && unit <= 0xdbff && end + 1 < value.length;
+    const low = pair ? value.charCodeAt(end + 1) : 0;
+    end += low >= 0xdc00 && low <= 0xdfff ? 2 : 1;
+  }
+  return value.slice(0, end);
+}
+
 // A custom symbol cut to three characters; empty or not a string gives the fallback.
 function customSymbol(value, fallback) {
-  const text = typeof value === "string" ? Array.from(value).slice(0, MAX_SYMBOL_LENGTH).join("") : "";
+  const text = typeof value === "string" ? firstCodePoints(value, MAX_SYMBOL_LENGTH) : "";
   return text === "" ? fallback : text;
 }
 

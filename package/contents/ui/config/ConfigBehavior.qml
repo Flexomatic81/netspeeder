@@ -174,7 +174,7 @@ KCM.SimpleKCM {
             Kirigami.FormData.label: root.tr("Idle below:")
             editable: true
             enabled: root.cfg_autoHide === "idle"
-            from: 0
+            from: 1
             to: 1024
             value: Math.round(root.cfg_idleThreshold / 1024)
             valueFromText: (text, locale) => TextTools.parseSpinText(text, locale, 0, idleThresholdBox.value)

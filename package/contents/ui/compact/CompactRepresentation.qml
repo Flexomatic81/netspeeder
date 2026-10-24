@@ -209,6 +209,8 @@ Item {
         }
         return root.single ? symbolBoth.advanceWidth : Math.max(symbolDown.advanceWidth, symbolUp.advanceWidth);
     }
+    // The symbol column of both labels, at the size in use.
+    readonly property real symbolSlot: root.symbolWidth * root.pixelSize / LayoutLogic.REFERENCE_PX
     readonly property real symbolGap: root.symbolSet.down !== "" ? 0.25 * LayoutLogic.REFERENCE_PX : 0
 
     // The ways a vertical panel can show the speeds, from the most to the least
@@ -492,6 +494,7 @@ Item {
             unitText: root.firstSpeed.unit
             valueWidth: root.valueSlot
             unitWidth: root.unitSlot
+            symbolWidth: root.symbolSlot
             pixelSize: root.pixelSize
             stacked: root.vertical
             symbolBelow: root.activeVariant.symbolBelow
@@ -513,6 +516,7 @@ Item {
             unitText: root.secondSpeed.unit
             valueWidth: root.valueSlot
             unitWidth: root.unitSlot
+            symbolWidth: root.symbolSlot
             pixelSize: root.pixelSize
             stacked: root.vertical
             symbolBelow: root.activeVariant.symbolBelow

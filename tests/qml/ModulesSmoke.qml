@@ -32,6 +32,9 @@ Item {
     function check() {
         const results = [
             Appearance.parseThresholds("").length === 4,
+            // The cut works by code points in the QML engine, too.
+            Appearance.symbols("custom", { down: "a\u{1F600}bc" }).down === "a\u{1F600}b",
+            Appearance.symbols("custom", { down: "ab\u{1F600}c" }).down === "ab\u{1F600}",
             Clicks.popupReachable({}) !== undefined,
             Command.shellQuote("a") === "'a'",
             Format.formatTotal(0, Format.DEFAULT_FORMAT).value === "0",

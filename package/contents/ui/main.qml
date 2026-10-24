@@ -148,7 +148,7 @@ PlasmoidItem {
         interfaceSelection: Plasmoid.configuration.interfaceSelection // qmllint disable missing-property
         selectedInterfaces: Plasmoid.configuration.selectedInterfaces // qmllint disable missing-property
         updateInterval: Plasmoid.configuration.updateInterval // qmllint disable missing-property
-        idleThreshold: Appearance.validInt(Plasmoid.configuration.idleThreshold, 0, 2147483647, 1024) // qmllint disable missing-property
+        idleThreshold: Appearance.validInt(Plasmoid.configuration.idleThreshold, 1024, 2147483647, 1024) // qmllint disable missing-property
         idleSeconds: Appearance.validInt(Plasmoid.configuration.idleSeconds, 5, 3600, 30) // qmllint disable missing-property
     }
 

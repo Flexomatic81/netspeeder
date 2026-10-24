@@ -28,6 +28,9 @@ GridLayout {
     // Width of the value and unit slots; 0 uses the natural width of the text.
     property real valueWidth: 0
     property real unitWidth: 0
+    // Width of the symbol slot, shared by all labels so that custom symbols of
+    // different widths keep the values aligned; 0 uses the natural width.
+    property real symbolWidth: 0
     // Empty uses the font of the Plasma theme.
     property string fontFamily: ""
     property int pixelSize: Kirigami.Theme.defaultFont.pixelSize
@@ -48,7 +51,7 @@ GridLayout {
     readonly property real unitGap: 0.2 * root.pixelSize
 
     // The widths the parts ask for.
-    readonly property real symbolSlot: root.iconSymbol ? iconBox.implicitWidth : symbolText.implicitWidth
+    readonly property real symbolSlot: root.symbolWidth > 0 ? root.symbolWidth : (root.iconSymbol ? iconBox.implicitWidth : symbolText.implicitWidth)
     readonly property real valueSlot: root.valueWidth > 0 ? root.valueWidth : valueLabel.implicitWidth
     readonly property real unitSlot: root.unitWidth > 0 ? root.unitWidth : unitLabel.implicitWidth
 

@@ -198,6 +198,12 @@ test("symbols for every style", () => {
   assert.deepEqual(symbols("bogus", custom), { down: "↓", up: "↑", icons: false });
 });
 
+test("custom symbols are cut by code points, never inside a surrogate pair", () => {
+  assert.equal(symbols("custom", { down: "a😀bc" }).down, "a😀b");
+  assert.equal(symbols("custom", { down: "ab😀c" }).down, "ab😀");
+  assert.equal(symbols("custom", { down: "😀😀😀😀" }).down, "😀😀😀");
+});
+
 test("custom symbols are cut to three characters, empty falls back to arrows", () => {
   assert.deepEqual(symbols("custom", { down: "abcde", up: "x" }), { down: "abc", up: "x", icons: false });
   assert.deepEqual(symbols("custom", { down: "", up: "" }), { down: "↓", up: "↑", icons: false });

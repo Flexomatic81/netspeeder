@@ -129,10 +129,10 @@
     <entry name="autoHide" type="String">
       <default>never</default>
     </entry>
-    <!-- Bytes per second below which the connection counts as idle. -->
+    <!-- Bytes per second below which the connection counts as idle (at least 1 KiB/s). -->
     <entry name="idleThreshold" type="Int">
       <default>1024</default>
-      <min>0</min>
+      <min>1024</min>
     </entry>
     <!-- Seconds below the threshold before the connection counts as idle. -->
     <entry name="idleSeconds" type="Int">
