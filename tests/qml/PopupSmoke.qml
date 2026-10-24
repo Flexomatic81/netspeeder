@@ -93,6 +93,10 @@ Item {
                 return where + ": missing '" + wanted + "' in [" + texts.join(" | ") + "]";
             }
         }
+        const glued = texts.find(t => t.startsWith("·") || t.endsWith("·"));
+        if (glued !== undefined) {
+            return where + ": '" + glued + "' starts or ends with a separator";
+        }
         for (const unwanted of absent) {
             if (texts.some(t => t.indexOf(unwanted) >= 0)) {
                 return where + ": unexpected '" + unwanted + "' in [" + texts.join(" | ") + "]";
@@ -222,7 +226,7 @@ Item {
         return view.height === view.Layout.preferredHeight ? "" : "interfaces: the popup is " + view.height + " px high";
     }
 
-    // "" when the popup at its preferred size gives the graph at least six
+    // "" when the popup at its preferred size gives the graph at least seven
     // grid units, shows the row of `name` completely (second line included)
     // at the top of the list, and every label of the speed axis is round.
     function roomProblem(where: string, name: string): string {
@@ -231,8 +235,8 @@ Item {
         if (graph === null) {
             return where + ": the graph is not loaded";
         }
-        if (graph.height < unit * 6) {
-            return where + ": the graph is " + graph.height + " px high, expected at least " + unit * 6;
+        if (graph.height < unit * 7) {
+            return where + ": the graph is " + graph.height + " px high, expected at least " + unit * 7;
         }
         const list = view.interfaceList;
         const row = list.rowFor(name);
@@ -334,7 +338,7 @@ Item {
                 stub.primaryLabel = "Ethernet";
                 stub.primaryIp = "192.168.1.5";
             },
-            check: () => scene.textProblem("selection", ["Ethernet", "192.168.1.5"], [])
+            check: () => scene.textProblem("selection", ["Ethernet", "192.168.1.5 · Online"], [])
         },
         {
             name: "size",
@@ -489,6 +493,28 @@ Item {
             check: () => view.height === view.Layout.preferredHeight ? "" : "restore: the popup is " + view.height + " px high"
         },
         {
+            name: "a stored popup height of 361 px",
+            apply: () => {
+                // Plasma keeps a stored size, but never goes below the minimum.
+                view.width = 560;
+                view.height = Math.max(361, view.Layout.minimumHeight);
+            },
+            check: () => {
+                if (view.height < view.Layout.minimumHeight) {
+                    return "361 px: the popup is " + view.height + " px high, below its minimum " + view.Layout.minimumHeight;
+                }
+                return scene.layoutProblem("361 px");
+            }
+        },
+        {
+            name: "back to the preferred size again",
+            apply: () => {
+                view.width = Qt.binding(() => view.Layout.preferredWidth);
+                view.height = Qt.binding(() => view.Layout.preferredHeight);
+            },
+            check: () => view.height === view.Layout.preferredHeight ? "" : "restore: the popup is " + view.height + " px high"
+        },
+        {
             name: "a very long name",
             apply: () => {
                 stub.primaryLabel = "N".repeat(120);
@@ -530,7 +556,7 @@ Item {
     function minimumProblem(where: string): string {
         const unit = Kirigami.Units.gridUnit;
         const graph = view.graphItem;
-        if (graph === null || view.Layout.minimumHeight < unit * 20 || view.Layout.minimumWidth < unit * 18) {
+        if (graph === null || view.Layout.minimumHeight < unit * 24 || view.Layout.minimumWidth < unit * 18) {
             return where + ": no graph or the minimum is " + view.Layout.minimumWidth + "x" + view.Layout.minimumHeight;
         }
         view.width = view.Layout.minimumWidth;
@@ -543,11 +569,12 @@ Item {
         const graph = view.graphItem;
         const list = view.interfaceList;
         const footer = view.footer;
-        if (graph.height < unit * 6 - 0.5) {
+        if (graph.height < unit * 7 - 0.5) {
             return where + ": the graph is " + graph.height + " px high at the minimum size";
         }
-        if (list.height < list.twoRowsHeight - 0.5) {
-            return where + ": the list is " + list.height + " px high, below " + list.twoRowsHeight;
+        const tallest = scene.tallestRow();
+        if (list.oneRowHeight < tallest - 0.5 || list.height < tallest - 0.5) {
+            return where + ": the list is " + list.height + " px high (minimum " + list.oneRowHeight + "), below one full row of " + tallest;
         }
         const items = [graph, list, footer];
         let previousBottom = 0;
@@ -564,10 +591,22 @@ Item {
         return "";
     }
 
+    // The implicit height of the tallest row of the list.
+    function tallestRow(): real {
+        let tallest = 0;
+        for (const name of ["eth0", "wlan0", "veth0"]) {
+            const row = view.interfaceList.rowFor(name);
+            if (row !== null) {
+                tallest = Math.max(tallest, row.implicitHeight);
+            }
+        }
+        return tallest;
+    }
+
     function sizeProblem(): string {
         const unit = Kirigami.Units.gridUnit;
-        if (view.Layout.minimumWidth < unit * 18 || view.Layout.minimumHeight < unit * 20) {
-            return "size: minimum is " + view.Layout.minimumWidth + "x" + view.Layout.minimumHeight + ", expected at least " + unit * 18 + "x" + unit * 20;
+        if (view.Layout.minimumWidth < unit * 18 || view.Layout.minimumHeight < unit * 24) {
+            return "size: minimum is " + view.Layout.minimumWidth + "x" + view.Layout.minimumHeight + ", expected at least " + unit * 18 + "x" + unit * 24;
         }
         if (view.Layout.preferredWidth !== unit * 22 || view.Layout.preferredHeight !== unit * 30) {
             return "size: preferred is " + view.Layout.preferredWidth + "x" + view.Layout.preferredHeight;

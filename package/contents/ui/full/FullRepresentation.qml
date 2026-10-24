@@ -72,7 +72,7 @@ Item {
     // implicit size) plus the gaps and margins, so the footer never overflows,
     // with or without the hint.
     Layout.minimumWidth: Kirigami.Units.gridUnit * 18
-    Layout.minimumHeight: Math.max(Kirigami.Units.gridUnit * 20, root.contentMinimum())
+    Layout.minimumHeight: Math.max(Kirigami.Units.gridUnit * 24, root.contentMinimum())
 
     // The least height the shown children of the column need.
     function contentMinimum(): real {
@@ -252,10 +252,11 @@ Item {
             }
         }
 
-        // Name, address and status in one line; the name gives way first.
+        // The name on the left, "address · status" on the right; the name
+        // gives way first.
         RowLayout {
             Layout.fillWidth: true
-            spacing: Kirigami.Units.smallSpacing
+            spacing: Kirigami.Units.largeSpacing
 
             QQC2.Label {
                 Layout.fillWidth: true
@@ -268,32 +269,11 @@ Item {
             }
 
             QQC2.Label {
-                visible: root.shown.primaryLabel !== "" && root.shown.primaryIp !== ""
-                text: "·"
-                font: Kirigami.Theme.smallFont
-                opacity: 0.7
-            }
+                id: details
 
-            QQC2.Label {
                 Layout.minimumWidth: 0
                 visible: text !== ""
-                text: root.shown.primaryIp
-                font: Kirigami.Theme.smallFont
-                opacity: 0.7
-                elide: Text.ElideRight
-            }
-
-            QQC2.Label {
-                visible: root.shown.primaryLabel !== "" || root.shown.primaryIp !== ""
-                text: "·"
-                font: Kirigami.Theme.smallFont
-                opacity: 0.7
-            }
-
-            QQC2.Label {
-                Layout.fillWidth: root.shown.primaryLabel === ""
-                Layout.minimumWidth: 0
-                text: root.statusText(root.shown)
+                text: TextTools.headerDetails(root.shown.primaryIp, root.statusText(root.shown))
                 font: Kirigami.Theme.smallFont
                 opacity: 0.7
                 elide: Text.ElideRight
@@ -333,7 +313,7 @@ Item {
 
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight: Kirigami.Units.gridUnit * 6
+            Layout.minimumHeight: Kirigami.Units.gridUnit * 7
             source: root.graphSource
 
             QQC2.Label {
@@ -425,7 +405,7 @@ Item {
 
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight: list.twoRowsHeight
+            Layout.minimumHeight: list.oneRowHeight
             interfaces: root.shown.interfaces
             formatOptions: root.formatOptions
         }

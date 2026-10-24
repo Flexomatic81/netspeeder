@@ -3,7 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { pluralFallback, substitute } from "../package/contents/code/text.mjs";
+import { headerDetails, pluralFallback, substitute } from "../package/contents/code/text.mjs";
 
 test("a missing argument leaves its placeholder", () => {
   assert.equal(substitute("a %1 %2", ["x"]), "a x %2");
@@ -42,4 +42,12 @@ test("pluralFallback uses the plural for zero and for more than one", () => {
 
 test("pluralFallback passes the count as %1 and shifts the other arguments", () => {
   assert.equal(pluralFallback("%1 file in %2", "%1 files in %2", 3, ["dir"]), "3 files in dir");
+});
+
+test("headerDetails joins address and status with one separator", () => {
+  assert.equal(headerDetails("192.168.1.121", "Online"), "192.168.1.121 · Online");
+  assert.equal(headerDetails("", "Online"), "Online");
+  assert.equal(headerDetails("192.168.1.121", ""), "192.168.1.121");
+  assert.equal(headerDetails("", ""), "");
+  assert.equal(headerDetails(undefined, "Offline"), "Offline");
 });

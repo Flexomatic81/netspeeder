@@ -135,10 +135,10 @@ test("axisLabelIndices keeps every label when there is room", () => {
   assert.deepEqual(axisLabelIndices(5, 5 * 14 * 1.6, 14), [0, 1, 2, 3, 4, 5]);
 });
 
-test("axisLabelIndices thins to every second label and keeps 0 and the top", () => {
-  assert.deepEqual(axisLabelIndices(4, 80, 14), [0, 2, 4]);
-  assert.deepEqual(axisLabelIndices(5, 80, 14), [0, 2, 5]);
-  assert.deepEqual(axisLabelIndices(5, 0, 14), [0, 2, 5]);
+test("axisLabelIndices keeps only 0 and the top when the labels do not all fit", () => {
+  assert.deepEqual(axisLabelIndices(4, 80, 14), [0, 4]);
+  assert.deepEqual(axisLabelIndices(5, 80, 14), [0, 5]);
+  assert.deepEqual(axisLabelIndices(5, 0, 14), [0, 5]);
 });
 
 test("the label of the limit is a round number in every unit system", () => {

@@ -47,9 +47,21 @@ Item {
     // The height of all rows and of the visible part (for the smoke scene).
     readonly property real contentHeight: column.implicitHeight
     readonly property real viewportHeight: scroll.availableHeight
-    // The height of two rows (or of all, when there are fewer), so the list
-    // never shows less than that; the average row stands for both.
-    readonly property real twoRowsHeight: rowModel.count === 0 ? 0 : Math.min(rowModel.count, 2) * (column.implicitHeight + column.spacing) / rowModel.count - column.spacing
+    // The height of the tallest row, so the list never shows less than one
+    // full row; it scrolls for the rest. Kept current by measure().
+    property real oneRowHeight: 0
+
+    // Recomputes oneRowHeight from the rows that exist.
+    function measure() {
+        let tallest = 0;
+        for (let i = 0; i < rowModel.count; i++) {
+            const item = repeater.itemAt(i);
+            if (item !== null) {
+                tallest = Math.max(tallest, item.implicitHeight);
+            }
+        }
+        root.oneRowHeight = tallest;
+    }
 
     // The row item of `name`; null if there is none.
     function rowFor(name: string): var {
@@ -126,6 +138,9 @@ Item {
 
                 model: rowModel
 
+                onItemAdded: Qt.callLater(root.measure)
+                onItemRemoved: Qt.callLater(root.measure)
+
                 delegate: ColumnLayout {
                     id: row
 
@@ -161,6 +176,7 @@ Item {
 
                     width: column.width
                     spacing: 0
+                    onImplicitHeightChanged: Qt.callLater(root.measure)
 
                     RowLayout {
                         Layout.fillWidth: true

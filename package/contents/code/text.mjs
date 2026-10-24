@@ -19,3 +19,9 @@ export function substitute(text, args) {
 export function pluralFallback(singular, plural, n, args) {
   return substitute(n === 1 ? singular : plural, [n, ...args]);
 }
+
+// "192.168.1.121 · Online": the address and the (already translated) status
+// of the header, joined by one separator. A missing part leaves no separator.
+export function headerDetails(ip, status) {
+  return [ip, status].filter((part) => typeof part === "string" && part !== "").join(" · ");
+}

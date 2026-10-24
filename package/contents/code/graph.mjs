@@ -77,8 +77,7 @@ export function axisScale(maxValue, formatOptions) {
 
 // The indices (0 = bottom ... steps = top) of the axis labels that fit into
 // `availableHeight` when each label is `labelHeight` high. With little room
-// every second label goes; 0 and the top always stay (so the label just below
-// the top is dropped when it would sit next to it).
+// only the bottom (0) and the top stay, so the labels never read unevenly.
 export function axisLabelIndices(steps, availableHeight, labelHeight) {
   const all = [];
   for (let i = 0; i <= steps; i++) {
@@ -87,7 +86,7 @@ export function axisLabelIndices(steps, availableHeight, labelHeight) {
   if (availableHeight >= steps * labelHeight * LABEL_ROOM) {
     return all;
   }
-  return all.filter((i) => i === steps || (i % 2 === 0 && i !== steps - 1));
+  return [0, steps];
 }
 
 // The index of the first of `candidates` (`{ r, g, b }`, each 0..1) that is
