@@ -27,6 +27,7 @@ Item {
     property bool done: false
     property int step: 0
     property int opened: 0
+    property int picked: 0
     // The time the popup gets to settle after a change (Qt.callLater runs in
     // the next event loop pass).
     readonly property int settleMs: 60
@@ -92,6 +93,32 @@ Item {
             if (texts.some(t => t.indexOf(unwanted) >= 0)) {
                 return where + ": unexpected '" + unwanted + "' in [" + texts.join(" | ") + "]";
             }
+        }
+        return "";
+    }
+
+    // A history of `count` samples, one second apart.
+    function historyOf(count: int): var {
+        let history = History.createHistory(20);
+        for (let i = 0; i < count; i++) {
+            history = History.pushSample(history, {
+                timestamp: 1000 * (i + 1),
+                down: 1000 * (i + 1),
+                up: 100 * (i + 1),
+                totals: {}
+            });
+        }
+        return history;
+    }
+
+    // "" when the graph is loaded and both series have `count` values.
+    function graphProblem(where: string, count: int): string {
+        const graph = view.graphItem;
+        if (graph === null) {
+            return where + ": the graph is not loaded";
+        }
+        if (graph.downSeries.length !== count || graph.upSeries.length !== count) {
+            return where + ": the series have " + graph.downSeries.length + " and " + graph.upSeries.length + " values, expected " + count;
         }
         return "";
     }
@@ -174,11 +201,40 @@ Item {
             check: scene.sizeProblem
         },
         {
+            name: "graph with ten values",
+            apply: () => {
+                stub.history = scene.historyOf(10);
+            },
+            check: () => scene.graphProblem("graph", 10)
+        },
+        {
+            name: "graph minutes reach the graph",
+            apply: () => {
+                view.graphMinutes = 1;
+            },
+            check: () => view.graphItem !== null && view.graphItem.minutes === 1 ? "" : "graph: graphMinutes 1 did not reach the graph"
+        },
+        {
+            name: "graph while inactive",
+            apply: () => {
+                view.active = false;
+                stub.history = scene.historyOf(11);
+            },
+            check: () => scene.graphProblem("graph inactive", 10)
+        },
+        {
+            name: "graph after activation",
+            apply: () => {
+                view.active = true;
+            },
+            check: () => scene.graphProblem("graph active again", 11)
+        },
+        {
             name: "snapshot while inactive",
             apply: () => {
                 scene.before = {
                     shownDown: view.shown.down,
-                    text: scene.textProblem("x", [], []) === "" ? scene.shownTexts(view, []).join("|") : ""
+                    text: scene.shownTexts(view, []).join("|")
                 };
                 view.active = false;
                 stub.down = 9 * 1024 * 1024;
@@ -213,14 +269,13 @@ Item {
 
     function sizeProblem(): string {
         const unit = Kirigami.Units.gridUnit;
-        const column = view;
-        if (column.Layout.minimumWidth < unit * 18 || column.Layout.minimumHeight < unit * 20) {
-            return "size: minimum is " + column.Layout.minimumWidth + "x" + column.Layout.minimumHeight + ", expected at least " + unit * 18 + "x" + unit * 20;
+        if (view.Layout.minimumWidth < unit * 18 || view.Layout.minimumHeight < unit * 20) {
+            return "size: minimum is " + view.Layout.minimumWidth + "x" + view.Layout.minimumHeight + ", expected at least " + unit * 18 + "x" + unit * 20;
         }
-        if (column.Layout.preferredWidth !== unit * 22 || column.Layout.preferredHeight !== unit * 26) {
-            return "size: preferred is " + column.Layout.preferredWidth + "x" + column.Layout.preferredHeight;
+        if (view.Layout.preferredWidth !== unit * 22 || view.Layout.preferredHeight !== unit * 26) {
+            return "size: preferred is " + view.Layout.preferredWidth + "x" + view.Layout.preferredHeight;
         }
-        if (view.width < column.Layout.minimumWidth || view.height < column.Layout.minimumHeight) {
+        if (view.width < view.Layout.minimumWidth || view.height < view.Layout.minimumHeight) {
             return "size: the view is " + view.width + "x" + view.height + ", below its minimum";
         }
         if (view.contentHeight > view.height) {
@@ -271,6 +326,12 @@ Item {
         when: scene.step >= scene.steps.length && !scene.done
 
         function test_button() {
+            input.pressButton();
+            input.pressGraphSwitch();
+            scene.finish(true, "SMOKE OK popup");
+        }
+
+        function pressButton() {
             const button = scene.itemWithText(view, "Open System Monitor");
             if (button === null) {
                 scene.fail("button: there is no 'Open System Monitor' button");
@@ -282,7 +343,18 @@ Item {
                 scene.fail("button: openSystemMonitor was sent " + scene.opened + " times, expected 1");
                 return;
             }
-            scene.finish(true, "SMOKE OK popup");
+        }
+
+        function pressGraphSwitch() {
+            const button = scene.itemWithText(view, "15 min");
+            if (button === null) {
+                scene.fail("graph: there is no '15 min' switch");
+                return;
+            }
+            input.mouseClick(button);
+            if (scene.picked !== 15) {
+                scene.fail("graph: graphMinutesPicked gave " + scene.picked + ", expected 15");
+            }
         }
     }
 
@@ -313,5 +385,6 @@ Item {
         width: Layout.preferredWidth
         height: Layout.preferredHeight
         onOpenSystemMonitor: scene.opened++
+        onGraphMinutesPicked: minutes => scene.picked = minutes
     }
 }

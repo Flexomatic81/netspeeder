@@ -45,6 +45,8 @@ Item {
     property bool active: true
     // The time span of the graph in minutes.
     property int graphMinutes: 5
+    // The file of the graph. Only tests point it elsewhere.
+    property url graphSource: Qt.resolvedUrl("TrafficGraph.qml")
 
     // The user picked another time span in the graph.
     signal graphMinutesPicked(int minutes)
@@ -55,6 +57,8 @@ Item {
     readonly property var shown: internals.shown
     // The height the content asks for (for the smoke scene).
     readonly property real contentHeight: column.implicitHeight
+    // The loaded graph; null while loading or when it failed to load.
+    readonly property Item graphItem: graphLoader.item as Item
 
     Layout.preferredWidth: Kirigami.Units.gridUnit * 22
     Layout.preferredHeight: Kirigami.Units.gridUnit * 26
@@ -263,11 +267,55 @@ Item {
             }
         }
 
-        // Placeholder for the graph.
-        Item {
+        // The graph is loaded from its file instead of being a type of this
+        // file: without Qt Quick Charts only the graph is missing.
+        Loader {
+            id: graphLoader
+
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.minimumHeight: Kirigami.Units.gridUnit * 3
+            source: root.graphSource
+
+            QQC2.Label {
+                anchors.fill: parent
+                visible: graphLoader.status === Loader.Error
+                text: root.trc("@info", "The traffic graph is not available because Qt Quick Charts is missing.")
+                wrapMode: Text.WordWrap
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                opacity: 0.7
+            }
+
+            Binding {
+                when: graphLoader.status === Loader.Ready
+                target: graphLoader.item
+                property: "history"
+                value: root.shown.history
+            }
+
+            Binding {
+                when: graphLoader.status === Loader.Ready
+                target: graphLoader.item
+                property: "minutes"
+                value: root.graphMinutes
+            }
+
+            Binding {
+                when: graphLoader.status === Loader.Ready
+                target: graphLoader.item
+                property: "formatOptions"
+                value: root.formatOptions
+            }
+
+            Connections {
+                target: graphLoader.item
+                ignoreUnknownSignals: true
+
+                function onMinutesPicked(minutes: int) {
+                    root.graphMinutesPicked(minutes);
+                }
+            }
         }
 
         // Placeholder for the figures and the list of interfaces.

@@ -29,6 +29,10 @@ expected_lines() {
       # owns that process when the scene exits.
       echo '^QProcess: Destroyed while process \("/bin/sh"\) is still running\.$'
       ;;
+    PopupGraphFailSmoke.qml)
+      # The scene points the graph at a file that does not exist.
+      echo '^file://.*/tests/qml/MissingGraph\.qml: No such file or directory$'
+      ;;
     ProviderSmoke.qml)
       # The scene points the provider at a data source that does not exist.
       echo '^file://.*/tests/qml/Missing\.qml: No such file or directory$'

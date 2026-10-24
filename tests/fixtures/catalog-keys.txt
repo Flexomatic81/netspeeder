@@ -62,3 +62,5 @@
 @info:tooltip	IP address: %1	
 @info:tooltip	Upload: %1	
 @item:valuesuffix %1 is a number of seconds	%1 s	
+@info	The traffic graph is not available because Qt Quick Charts is missing.	
+@option:radio time span of the graph	%1 min	

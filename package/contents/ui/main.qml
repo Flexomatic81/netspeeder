@@ -16,6 +16,7 @@ import "data"
 import "full"
 import "../code/clicks.mjs" as Clicks
 import "../code/format.mjs" as Format
+import "../code/graph.mjs" as Graph
 import "../code/text.mjs" as TextTools
 import "../code/tooltip.mjs" as Tooltip
 
@@ -98,6 +99,9 @@ PlasmoidItem {
     fullRepresentation: FullRepresentation {
         provider: root.provider
         formatOptions: root.formatOptions
+        // (configuration is created from main.xml at Plasma runtime)
+        graphMinutes: Graph.validMinutes(Plasmoid.configuration.graphMinutes) // qmllint disable missing-property
+        onGraphMinutesPicked: minutes => Plasmoid.configuration.graphMinutes = minutes // qmllint disable missing-property
         // Only a visible popup (or the desktop view) follows the provider.
         active: root.expanded || Plasmoid.formFactor === PlasmaCore.Types.Planar
         onOpenSystemMonitor: monitorLauncher.launch()
