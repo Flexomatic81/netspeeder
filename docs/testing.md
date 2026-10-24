@@ -161,7 +161,12 @@ For these checks vnstat 2.0 or newer is installed and its service enabled
 ## Release record 1.0.0
 
 Gates the project owner has to pass before anything is published. Fill in the
-date and the result of each row.
+date and the result of each row. `scripts/release-check.sh 1.0.0` checks that
+every row is filled in, that `package/metadata.json` has this version, that
+the CHANGELOG heading for it carries a date and no longer says "unreleased",
+and that the screenshots in `docs/images` exist. The tag job of the CI
+workflow runs it before it builds or publishes anything, so a tag pushed too
+early fails there.
 
 | Gate | Date | Result |
 |---|---|---|
@@ -169,6 +174,8 @@ date and the result of each row.
 | (b) Run on Plasma 6.3 in a VM, as described in [compatibility.md](compatibility.md) | | |
 | (c) Screenshots generated with `scripts/screenshots.sh`, reviewed and committed | | |
 | (d) CMake route verified (`cmake -B build -DCMAKE_INSTALL_PREFIX=$PWD/stage`, build, install, compare `stage/` with the `.plasmoid`), or knowingly released with the caveat in the changelog | | |
+| (e) A green CI run on the remote for the commit to be tagged, before the tag is pushed | | |
+| (f) CHANGELOG and the changelog in [store.md](store.md) finalized: release date set, "unreleased" and every "still to be done" note removed or resolved | | |
 
 ## Automatic acceptance 0.1
 

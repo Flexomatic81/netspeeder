@@ -78,7 +78,9 @@ First stable release. The date is set when it is published.
 - Build and release tooling: CMake installation for distribution packages,
   `scripts/build-plasmoid.sh` for the `.plasmoid` file, a continuous
   integration workflow (tests on Node 22.13 and 24, QML lint, shellcheck,
-  actionlint, `.plasmoid` as release asset for version tags).
+  actionlint, `.plasmoid` as release asset for version tags) and
+  `scripts/release-check.sh`, which stops a release tag while the changelog,
+  the screenshots or the release record are not final.
 - Development checks: ESLint, Prettier, coverage floor (branch coverage of the
   logic modules is 100 %, the floor is 98 %), strict qmllint, shellcheck, one
   check runner (`node tools/check.mjs`) used locally, by the pre-commit hook and

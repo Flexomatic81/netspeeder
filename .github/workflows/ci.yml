@@ -7,10 +7,11 @@
 #          workflows, in the versions pinned in tools/requirements-dev.txt.
 # qml:     qmllint over every QML file, in an Arch Linux container because
 #          that is where the Plasma QML modules are packaged in current versions.
-# package: only for tags v*; builds the .plasmoid and attaches it to the
-#          GitHub release with the GitHub CLI (no third-party action runs in
-#          the job that has write access). The upload to the KDE Store stays
-#          manual.
+# package: only for tags v*; checks the release gates
+#          (scripts/release-check.sh), builds the .plasmoid and attaches it to
+#          the GitHub release with the GitHub CLI (no third-party action runs
+#          in the job that has write access). The upload to the KDE Store
+#          stays manual.
 # The QML smoke scenes and the load check are not part of CI: they need
 # ksystemstats and a desktop session.
 name: CI
@@ -95,6 +96,10 @@ jobs:
           # The token is only needed for the release step, which gets it
           # through its own environment; git must not store it in .git/config.
           persist-credentials: false
+      - name: Check the release gates
+        # Refuses the tag while the changelog, the screenshots or the release
+        # record in docs/testing.md are not final.
+        run: scripts/release-check.sh "${GITHUB_REF_NAME#v}"
       - name: Build the .plasmoid
         # Refuses a tag whose version differs from package/metadata.json.
         run: scripts/build-plasmoid.sh "${GITHUB_REF_NAME#v}"
