@@ -6,7 +6,8 @@
     "node": "^22.13.0 || >=24"
   },
   "scripts": {
-    "test": "node --test 'tests/*.test.mjs'"
+    "test": "node --test 'tests/*.test.mjs'",
+    "check": "node tools/check.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

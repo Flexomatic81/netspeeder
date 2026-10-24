@@ -1,0 +1,6 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-or-later
+# SPDX-FileCopyrightText: 2026 Flexomatic81
+
+# Activated with: node tools/check.mjs --install-hook
+exec node tools/check.mjs fast

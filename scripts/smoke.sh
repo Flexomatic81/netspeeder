@@ -8,7 +8,7 @@
 # Runs locally only: the scenes need ksystemstats and /sys.
 set -uo pipefail
 
-cd "$(dirname "${BASH_SOURCE[0]}")/.."
+cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 
 scenes=("$@")
 if [ "${#scenes[@]}" -eq 0 ]; then
