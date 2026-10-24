@@ -21,6 +21,7 @@ import "../code/graph.mjs" as Graph
 import "../code/launchtext.mjs" as LaunchText
 import "../code/text.mjs" as TextTools
 import "../code/tooltip.mjs" as Tooltip
+import "../code/visibility.mjs" as Visibility
 
 PlasmoidItem {
     id: root
@@ -56,6 +57,17 @@ PlasmoidItem {
         const speed = Format.formatSpeed(bytesPerSecond, root.formatOptions);
         return speed.value + " " + speed.unit;
     }
+
+    // Plasma's edit mode, where a hidden widget must stay reachable.
+    readonly property bool editMode: Plasmoid.containment !== null && Plasmoid.containment.corona !== null ? Plasmoid.containment.corona.editMode : false
+    // "shown", "hidden" or "placeholder" from the auto-hide setting; the
+    // desktop view is never hidden.
+    readonly property string presence: Plasmoid.formFactor === PlasmaCore.Types.Planar ? "shown" : Visibility.autoHideState(Appearance.validChoice(Plasmoid.configuration.autoHide, ["never", "offline", "idle"], "never"), root.provider, { // qmllint disable missing-property
+            editMode: root.editMode,
+            expanded: root.expanded
+        })
+    // A hidden widget leaves the panel's visible items.
+    Plasmoid.status: root.presence === "hidden" ? PlasmaCore.Types.PassiveStatus : PlasmaCore.Types.ActiveStatus
 
     // The state of the popup at the last press (see CompactRepresentation).
     property bool wasExpanded: false
@@ -117,6 +129,7 @@ PlasmoidItem {
         colorUnits: Plasmoid.configuration.colorUnits // qmllint disable missing-property
         sparkline: Appearance.validChoice(Plasmoid.configuration.sparkline, Appearance.SPARKLINE_MODES, "off") // qmllint disable missing-property
         history: root.provider.history
+        presence: root.presence
         onPressed: root.wasExpanded = root.expanded
         onActivated: button => root.runAction(button === Qt.MiddleButton ? "middle" : "left")
     }
@@ -133,6 +146,8 @@ PlasmoidItem {
         interfaceSelection: Plasmoid.configuration.interfaceSelection // qmllint disable missing-property
         selectedInterfaces: Plasmoid.configuration.selectedInterfaces // qmllint disable missing-property
         updateInterval: Plasmoid.configuration.updateInterval // qmllint disable missing-property
+        idleThreshold: Appearance.validInt(Plasmoid.configuration.idleThreshold, 0, 2147483647, 1024) // qmllint disable missing-property
+        idleSeconds: Appearance.validInt(Plasmoid.configuration.idleSeconds, 5, 3600, 30) // qmllint disable missing-property
     }
 
     Launcher {

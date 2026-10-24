@@ -8,7 +8,8 @@
 // then the appearance settings (font, size and symbol style), the mini chart
 // (off, behind the text, beside it, combined, in a vertical panel), and finally
 // the clicks: left and middle report pressed() then activated(), the right button
-// reports nothing.
+// reports nothing; and the presence (hidden takes no room, the placeholder is a
+// dimmed icon that still reacts to clicks, shown restores the sizes).
 // plasmawindowed does not instantiate the compact view of this plasmoid, so
 // this scene is the only runtime check of its bindings. It cannot see QML
 // warnings itself: read the output of qml6 for the scene as well, it must be
@@ -338,7 +339,7 @@ Item {
         when: scene.step >= scene.steps.length && !scene.done
 
         function test_clicks() {
-            const problem = scene.clickProblem();
+            const problem = scene.clickProblem() || scene.presenceProblem();
             if (problem !== "") {
                 scene.fail(problem);
                 return;
@@ -430,6 +431,26 @@ Item {
 
         CompactRepresentation {
             id: wide44
+
+            provider: stub
+            formatOptions: Format.DEFAULT_FORMAT
+            minReadablePx: scene.plasmaSmallPx
+            baseFontPx: scene.plasmaDefaultPx
+            Layout.fillHeight: true
+        }
+    }
+
+    RowLayout {
+        id: hostPresence
+
+        x: 320
+        y: 10
+        width: 300
+        height: 44
+        spacing: 0
+
+        CompactRepresentation {
+            id: presence44
 
             provider: stub
             formatOptions: Format.DEFAULT_FORMAT
@@ -635,6 +656,68 @@ Item {
             baseFontPx: scene.plasmaDefaultPx
             Layout.fillWidth: true
         }
+    }
+
+    // What the presence view reported: "activated:<button>".
+    property var presenceEvents: []
+
+    Connections {
+        target: presence44
+
+        function onActivated(button: int) {
+            scene.presenceEvents.push("activated:" + button);
+        }
+    }
+
+    function layoutSizes(view) {
+        const l = view.Layout;
+        return [l.preferredWidth, l.preferredHeight, l.minimumWidth, l.minimumHeight, l.maximumWidth, l.maximumHeight].join(",");
+    }
+
+    // "" when the view's presence has the expected look, else what is wrong.
+    function presenceLook(name, view, presence, before) {
+        const sizes = scene.layoutSizes(view);
+        const icon = view.placeholderIcon;
+        if (presence === "hidden") {
+            if (sizes !== "0,0,0,0,0,0" || view.mouseArea.enabled || icon.visible || scene.shownTexts(view, view, []).length > 0) {
+                return name + ": sizes " + sizes + ", mouse " + view.mouseArea.enabled + ", icon " + icon.visible;
+            }
+        } else if (presence === "placeholder") {
+            if (!icon.visible || icon.source !== "network-connect" || Math.abs(icon.opacity - 0.5) > 0.001 || !view.mouseArea.enabled || scene.shownTexts(view, view, []).length > 0) {
+                return name + ": icon " + icon.visible + " " + icon.source + " " + icon.opacity + ", mouse " + view.mouseArea.enabled;
+            }
+            if (Math.abs(icon.height - view.height / 2) > 0.01 && Math.abs(icon.height - view.height) > 0.01) {
+                return name + ": icon height " + icon.height + " in a view of " + view.height;
+            }
+        } else if (sizes !== before || icon.visible || !view.mouseArea.enabled || scene.shownTexts(view, view, []).length === 0) {
+            return name + ": sizes " + sizes + " instead of " + before + ", icon " + icon.visible;
+        }
+        return "";
+    }
+
+    function presenceProblem() {
+        const before = scene.layoutSizes(presence44);
+        const initial = scene.presenceLook("presence shown", presence44, "shown", before);
+        if (initial !== "") {
+            return initial;
+        }
+        for (const presence of ["hidden", "placeholder", "shown"]) {
+            presence44.presence = presence;
+            input.wait(50);
+            const problem = scene.presenceLook("presence " + presence, presence44, presence, before);
+            if (problem !== "") {
+                return problem;
+            }
+            if (presence === "placeholder") {
+                scene.presenceEvents = [];
+                input.mouseClick(presence44, presence44.width / 2, presence44.height / 2, Qt.LeftButton);
+                if (scene.presenceEvents.join(",") !== "activated:" + Qt.LeftButton) {
+                    return "presence placeholder: click reported '" + scene.presenceEvents.join(",") + "'";
+                }
+            }
+        }
+        console.log("compact presence: hidden takes no room, placeholder is a clickable icon, shown restores " + before);
+        return "";
     }
 
     function clickProblem() {

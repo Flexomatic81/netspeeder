@@ -82,6 +82,15 @@ Item {
     property int minReadablePx: Kirigami.Theme.smallFont.pixelSize
     property int baseFontPx: Kirigami.Theme.defaultFont.pixelSize
 
+    // "shown", "hidden" (takes no room, shows nothing, ignores clicks) or
+    // "placeholder" (a dimmed icon instead of the values, for edit mode).
+    property string presence: "shown"
+    readonly property bool isShown: root.presence !== "hidden" && root.presence !== "placeholder"
+    readonly property bool isHidden: root.presence === "hidden"
+    // The icon of the placeholder and the mouse area (for the smoke scenes).
+    readonly property Kirigami.Icon placeholderIcon: placeholder
+    readonly property MouseArea mouseArea: mouse
+
     // A mouse button went down / a click with it completed. The host decides
     // what they mean; the view only reports them.
     signal pressed(int button)
@@ -259,15 +268,32 @@ Item {
     // The loader of the mini chart (for the smoke scenes).
     readonly property Loader sparkLoaderItem: sparkLoader
 
-    implicitWidth: grid.implicitWidth + root.sparkWidth
-    implicitHeight: grid.implicitHeight
-    // The panel sizes the view along its own direction by what it needs.
-    Layout.minimumWidth: root.vertical ? -1 : root.implicitWidth
-    Layout.preferredWidth: root.vertical ? -1 : root.implicitWidth
-    Layout.minimumHeight: root.vertical ? root.implicitHeight : -1
-    Layout.preferredHeight: root.vertical ? root.implicitHeight : -1
+    // The placeholder icon is as high as a text row (as wide as the panel in a
+    // vertical one) and square.
+    readonly property real placeholderSize: root.vertical ? root.width : root.rowHeight
 
-    opacity: root.provider.stale ? 0.5 : 1
+    implicitWidth: {
+        if (root.isHidden) {
+            return 0;
+        }
+        return root.isShown ? grid.implicitWidth + root.sparkWidth : root.placeholderSize;
+    }
+    implicitHeight: {
+        if (root.isHidden) {
+            return 0;
+        }
+        return root.isShown ? grid.implicitHeight : root.placeholderSize;
+    }
+    // The panel sizes the view along its own direction by what it needs;
+    // hidden pins every size to 0.
+    Layout.minimumWidth: root.isHidden ? 0 : (root.vertical ? -1 : root.implicitWidth)
+    Layout.preferredWidth: root.isHidden ? 0 : (root.vertical ? -1 : root.implicitWidth)
+    Layout.maximumWidth: root.isHidden ? 0 : Number.POSITIVE_INFINITY
+    Layout.minimumHeight: root.isHidden ? 0 : (root.vertical ? root.implicitHeight : -1)
+    Layout.preferredHeight: root.isHidden ? 0 : (root.vertical ? root.implicitHeight : -1)
+    Layout.maximumHeight: root.isHidden ? 0 : Number.POSITIVE_INFINITY
+
+    opacity: root.provider.stale && root.isShown ? 0.5 : 1
     Accessible.role: Accessible.StaticText
     Accessible.name: root.accessibleName
 
@@ -392,6 +418,7 @@ Item {
         id: sparkLoader
 
         active: root.sparkline !== "off"
+        visible: root.isShown
         source: root.sparklineSource
         // Beside: right of the text; otherwise behind it over the whole area.
         x: root.sparkBeside ? root.width - root.sparkWidth + root.sparkGap : 0
@@ -439,6 +466,7 @@ Item {
     GridLayout {
         id: grid
 
+        visible: root.isShown
         // Centered, but never pushed out at the left when the view is narrower
         // than the content.
         x: Math.max(0, Math.round((root.width - root.sparkWidth - grid.implicitWidth) / 2))
@@ -492,8 +520,22 @@ Item {
         }
     }
 
+    Kirigami.Icon {
+        id: placeholder
+
+        visible: root.presence === "placeholder"
+        source: "network-connect"
+        width: root.placeholderSize
+        height: root.placeholderSize
+        anchors.centerIn: parent
+        opacity: 0.5
+    }
+
     MouseArea {
+        id: mouse
+
         anchors.fill: parent
+        enabled: !root.isHidden
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton
         onPressed: mouse => root.pressed(mouse.button)
         onClicked: mouse => root.activated(mouse.button)
