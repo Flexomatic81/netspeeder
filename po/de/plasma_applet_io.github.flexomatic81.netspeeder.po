@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: netspeeder\n"
 "Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
-"POT-Creation-Date: 2026-10-24 12:34+0200\n"
+"POT-Creation-Date: 2026-10-24 16:20+0200\n"
 "PO-Revision-Date: 2026-10-24 01:44+0200\n"
 "Last-Translator: Flexomatic81\n"
 "Language-Team: German\n"
@@ -85,7 +85,7 @@ msgstr "Anzeige"
 msgid "Data"
 msgstr "Daten"
 
-#: package/contents/ui/compact/CompactRepresentation.qml:100
+#: package/contents/ui/compact/CompactRepresentation.qml:105
 msgctxt "@info accessible"
 msgid "Download %1, upload %2"
 msgstr "Download %1, Upload %2"
@@ -260,6 +260,30 @@ msgstr "%1 s"
 msgid "Preview:"
 msgstr "Vorschau:"
 
-#: package/contents/ui/main.qml:70
+#: package/contents/ui/main.qml:63
+msgctxt "@info"
+msgid "The launch target “%1” is not valid."
+msgstr "Das Startziel „%1“ ist ungültig."
+
+#: package/contents/ui/main.qml:65
+msgctxt "@info"
+msgid "Could not find “%1”."
+msgstr "„%1“ wurde nicht gefunden."
+
+#: package/contents/ui/main.qml:67
+msgctxt "@info"
+msgid "Starting “%1” did not respond."
+msgstr "Beim Starten von „%1“ kam keine Antwort."
+
+#: package/contents/ui/main.qml:69
+msgctxt "@info"
+msgid "Could not start “%1”."
+msgstr "„%1“ konnte nicht gestartet werden."
+
+#: package/contents/ui/main.qml:106
 msgid "Network"
 msgstr "Netzwerk"
+
+#: package/contents/ui/main.qml:138
+msgid "Netspeeder"
+msgstr "Netspeeder"

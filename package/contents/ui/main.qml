@@ -10,8 +10,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
+import org.kde.notification
 import "compact"
 import "data"
+import "../code/clicks.mjs" as Clicks
 import "../code/format.mjs" as Format
 import "../code/text.mjs" as TextTools
 import "../code/tooltip.mjs" as Tooltip
@@ -51,7 +53,39 @@ PlasmoidItem {
         return speed.value + " " + speed.unit;
     }
 
-    preferredRepresentation: compactRepresentation
+    // The state of the popup at the last press (see CompactRepresentation).
+    property bool wasExpanded: false
+
+    // The text of the notification for a failed launch.
+    function launchFailureText(code: string, target: string): string {
+        switch (code) {
+        case "invalid":
+            return root.trc("@info", "The launch target “%1” is not valid.", target);
+        case "not-found":
+            return root.trc("@info", "Could not find “%1”.", target);
+        case "timeout":
+            return root.trc("@info", "Starting “%1” did not respond.", target);
+        default:
+            return root.trc("@info", "Could not start “%1”.", target);
+        }
+    }
+
+    // What a click with a button does, from the settings.
+    function runAction(button: string) {
+        // (configuration is created from main.xml at Plasma runtime)
+        const action = Clicks.actionFor(button, {
+            leftClick: Plasmoid.configuration.leftClick, // qmllint disable missing-property
+            middleClick: Plasmoid.configuration.middleClick // qmllint disable missing-property
+        });
+        if (action === "popup") {
+            root.expanded = Clicks.nextExpanded(root.wasExpanded);
+        } else if (action === "launch") {
+            launcher.launch();
+        }
+    }
+
+    // On the desktop the view is the full one; in a panel the compact one.
+    preferredRepresentation: Plasmoid.formFactor === PlasmaCore.Types.Planar ? fullRepresentation : compactRepresentation
     // Plasma 6 only instantiates compactRepresentation when a
     // fullRepresentation exists. The real popup arrives in 0.3; until then an
     // empty placeholder keeps the panel view alive.
@@ -65,6 +99,8 @@ PlasmoidItem {
         uploadFirst: Plasmoid.configuration.uploadFirst // qmllint disable missing-property
         combined: Plasmoid.configuration.combined // qmllint disable missing-property
         fixedWidth: Plasmoid.configuration.fixedWidth // qmllint disable missing-property
+        onPressed: root.wasExpanded = root.expanded
+        onActivated: button => root.runAction(button === Qt.MiddleButton ? "middle" : "left")
     }
 
     toolTipMainText: root.provider.primaryLabel || root.tr("Network")
@@ -79,6 +115,28 @@ PlasmoidItem {
         interfaceSelection: Plasmoid.configuration.interfaceSelection // qmllint disable missing-property
         selectedInterfaces: Plasmoid.configuration.selectedInterfaces // qmllint disable missing-property
         updateInterval: Plasmoid.configuration.updateInterval // qmllint disable missing-property
+    }
+
+    Launcher {
+        id: launcher
+
+        // (configuration is created from main.xml at Plasma runtime)
+        kind: Plasmoid.configuration.launchKind // qmllint disable missing-property
+        app: Plasmoid.configuration.launchApp // qmllint disable missing-property
+        command: Plasmoid.configuration.launchCommand // qmllint disable missing-property
+        onFailed: (code, target) => {
+            failure.text = root.launchFailureText(code, target);
+            failure.sendEvent();
+        }
+    }
+
+    Notification {
+        id: failure
+
+        componentName: "plasma_workspace"
+        eventId: "notification"
+        title: root.tr("Netspeeder")
+        iconName: "network-connect"
     }
 
     Component.onCompleted: console.debug("netspeeder: loaded")

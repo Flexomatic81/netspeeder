@@ -19,6 +19,7 @@
 	Kernel counters (/proc/net/dev)	
 	Kernel counters also show VPN and container interfaces, but start a small process at every update.	
 	Layout:	
+	Netspeeder	
 	Network	
 	No current data	
 	No network interfaces found.	
@@ -45,6 +46,10 @@
 	Using kernel counters because system sensors are not available.	
 	Using kernel counters because system sensors report no network interfaces.	
 	Waiting for network data…	
+@info	Could not find “%1”.	
+@info	Could not start “%1”.	
+@info	Starting “%1” did not respond.	
+@info	The launch target “%1” is not valid.	
 @info accessible	Download %1, upload %2	
 @info interface kind	not available	
 @info interface kind	physical	

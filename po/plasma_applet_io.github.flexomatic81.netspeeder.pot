@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: netspeeder\n"
 "Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
-"POT-Creation-Date: 2026-10-24 12:34+0200\n"
+"POT-Creation-Date: 2026-10-24 16:20+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -78,7 +78,7 @@ msgstr ""
 msgid "Data"
 msgstr ""
 
-#: package/contents/ui/compact/CompactRepresentation.qml:100
+#: package/contents/ui/compact/CompactRepresentation.qml:105
 msgctxt "@info accessible"
 msgid "Download %1, upload %2"
 msgstr ""
@@ -251,6 +251,30 @@ msgstr ""
 msgid "Preview:"
 msgstr ""
 
-#: package/contents/ui/main.qml:70
+#: package/contents/ui/main.qml:63
+msgctxt "@info"
+msgid "The launch target “%1” is not valid."
+msgstr ""
+
+#: package/contents/ui/main.qml:65
+msgctxt "@info"
+msgid "Could not find “%1”."
+msgstr ""
+
+#: package/contents/ui/main.qml:67
+msgctxt "@info"
+msgid "Starting “%1” did not respond."
+msgstr ""
+
+#: package/contents/ui/main.qml:69
+msgctxt "@info"
+msgid "Could not start “%1”."
+msgstr ""
+
+#: package/contents/ui/main.qml:106
 msgid "Network"
+msgstr ""
+
+#: package/contents/ui/main.qml:138
+msgid "Netspeeder"
 msgstr ""

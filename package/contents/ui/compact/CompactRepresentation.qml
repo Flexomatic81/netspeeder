@@ -57,6 +57,11 @@ Item {
     property int minReadablePx: Kirigami.Theme.smallFont.pixelSize
     property int baseFontPx: Kirigami.Theme.defaultFont.pixelSize
 
+    // A mouse button went down / a click with it completed. The host decides
+    // what they mean; the view only reports them.
+    signal pressed(int button)
+    signal activated(int button)
+
     // "single", "rows" or "columns"
     readonly property string resolvedLayout: LayoutLogic.resolveLayout({
             mode: root.layoutMode,
@@ -339,5 +344,12 @@ Item {
             Layout.fillWidth: false
             Layout.preferredHeight: root.vertical ? -1 : root.rowHeight
         }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+        onPressed: mouse => root.pressed(mouse.button)
+        onClicked: mouse => root.activated(mouse.button)
     }
 }

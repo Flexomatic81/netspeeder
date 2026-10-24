@@ -4,7 +4,9 @@
 // Smoke scene for CompactRepresentation: shows the panel view in four panel
 // sizes (horizontal 44, 20 and 96 px high, vertical 32 px wide) with a stub
 // provider and checks sizes, placement and the "–" shown before the first data;
-// then the order, the single value, the natural width and the explicit layouts.
+// then the order, the single value, the natural width and the explicit layouts,
+// and finally the clicks: left and middle report pressed() then activated(),
+// the right button reports nothing.
 // plasmawindowed does not instantiate the compact view of this plasmoid, so
 // this scene is the only runtime check of its bindings. It cannot see QML
 // warnings itself: read the output of qml6 for the scene as well, it must be
@@ -12,6 +14,7 @@
 
 import QtQuick
 import QtQuick.Layouts
+import QtTest
 import "../../package/contents/ui/compact"
 import "../../package/contents/code/format.mjs" as Format
 
@@ -211,6 +214,46 @@ Item {
         return scene.shownTexts(view, view, []).filter(t => t.text === text)[0];
     }
 
+    // What the views reported: "pressed:<button>" and "activated:<button>".
+    property var events: []
+
+    Connections {
+        target: wide44
+
+        function onPressed(button: int) {
+            scene.events.push("pressed:" + button);
+        }
+
+        function onActivated(button: int) {
+            scene.events.push("activated:" + button);
+        }
+    }
+
+    // plain qml6 can only synthesize mouse events through a TestCase; it runs
+    // its test functions once the steps are through and then quits.
+    TestCase {
+        id: input
+
+        name: "input"
+        when: scene.step >= scene.steps.length && !scene.done
+
+        function test_clicks() {
+            const problem = scene.clickProblem();
+            if (problem !== "") {
+                scene.fail(problem);
+                return;
+            }
+            scene.finish(true, "SMOKE OK compact");
+        }
+    }
+
+    // Clicks the middle of the view with a button; returns what was reported.
+    function clickWith(button: int): string {
+        scene.events = [];
+        input.mouseClick(wide44, wide44.width / 2, wide44.height / 2, button);
+        return scene.events.join(",");
+    }
+
     QtObject {
         id: stub
 
@@ -301,6 +344,18 @@ Item {
             baseFontPx: scene.plasmaDefaultPx
             Layout.fillWidth: true
         }
+    }
+
+    function clickProblem() {
+        const expected = [[Qt.LeftButton, "pressed:" + Qt.LeftButton + ",activated:" + Qt.LeftButton, "left"], [Qt.MiddleButton, "pressed:" + Qt.MiddleButton + ",activated:" + Qt.MiddleButton, "middle"], [Qt.RightButton, "", "right"]];
+        for (const [button, events, name] of expected) {
+            const got = scene.clickWith(button);
+            if (got !== events) {
+                return name + " click reported '" + got + "', expected '" + events + "'";
+            }
+        }
+        console.log("compact clicks: left and middle report pressed then activated, right nothing");
+        return "";
     }
 
     // Each step checks what the previous one changed and then changes the next
@@ -423,7 +478,7 @@ Item {
                 return;
             }
             if (scene.step >= scene.steps.length) {
-                scene.finish(true, "SMOKE OK compact");
+                // the TestCase takes over (the click checks)
                 return;
             }
             const problem = scene.steps[scene.step]();
