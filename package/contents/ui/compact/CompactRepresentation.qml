@@ -60,6 +60,14 @@ Item {
     property string iconStyle: "arrows"
     property string customDownIcon: "↓"
     property string customUpIcon: "↑"
+    // How the values are coloured: "theme", "direction" or "thresholds" (by
+    // speed, with the levels in `thresholds`). Empty colours use the theme.
+    property string colorMode: "theme"
+    property string downloadColor: ""
+    property string uploadColor: ""
+    property var thresholds: Appearance.DEFAULT_THRESHOLDS
+    // Symbol and unit take the colour of the value, too.
+    property bool colorUnits: false
     // The smallest text size that is still readable, and the text size of a
     // vertical panel at fontScale 100. They follow the theme; only the smoke
     // scenes set them, because plain qml6 reports odd theme fonts.
@@ -111,6 +119,23 @@ Item {
     readonly property string firstSymbol: root.uploadFirst && !root.single ? root.symbolSet.up : root.symbolSet.down
     // The symbol of the second label (SpeedLabel's secondSymbol is pairedSymbol).
     readonly property string secondSymbol: root.uploadFirst ? root.symbolSet.down : root.symbolSet.up
+    // The colours of the values: a colour from the settings, else the role.
+    readonly property var modeColors: Appearance.speedColors(root.colorMode, {
+            down: root.provider.down,
+            up: root.provider.up,
+            total: root.provider.down + root.provider.up
+        }, {
+            downloadColor: root.downloadColor,
+            uploadColor: root.uploadColor,
+            thresholds: root.thresholds
+        })
+    readonly property bool byDirection: root.colorMode === "direction"
+    readonly property color downColor: root.modeColors.down !== "" ? root.modeColors.down : (root.byDirection ? Kirigami.Theme.highlightColor : Kirigami.Theme.textColor)
+    readonly property color upColor: root.modeColors.up !== "" ? root.modeColors.up : (root.byDirection ? Kirigami.Theme.neutralTextColor : Kirigami.Theme.textColor)
+    readonly property color totalColor: root.modeColors.total !== "" ? root.modeColors.total : (root.byDirection ? Kirigami.Theme.highlightColor : Kirigami.Theme.textColor)
+    readonly property color firstColor: root.single ? root.totalColor : (root.uploadFirst ? root.upColor : root.downColor)
+    readonly property color secondColor: root.uploadFirst ? root.downColor : root.upColor
+
     // The single value stands for both directions and shows both symbols.
     readonly property string pairedSymbol: root.single ? root.symbolSet.up : ""
 
@@ -363,6 +388,8 @@ Item {
             iconSymbol: root.symbolSet.icons
             fontFamily: root.family
             bold: root.fontBold
+            valueColor: root.firstColor
+            unitColor: root.colorUnits ? root.firstColor : Kirigami.Theme.textColor
             valueText: root.firstSpeed.value
             unitText: root.firstSpeed.unit
             valueWidth: root.valueSlot
@@ -382,6 +409,8 @@ Item {
             iconSymbol: root.symbolSet.icons
             fontFamily: root.family
             bold: root.fontBold
+            valueColor: root.secondColor
+            unitColor: root.colorUnits ? root.secondColor : Kirigami.Theme.textColor
             valueText: root.secondSpeed.value
             unitText: root.secondSpeed.unit
             valueWidth: root.valueSlot

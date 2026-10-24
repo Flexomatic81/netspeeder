@@ -285,6 +285,29 @@ Item {
         return "";
     }
 
+    // The visible texts and icons of a view in layout order, with their colours.
+    function partColors(view) {
+        return scene.shownItems(view, []).map(item => item.text !== undefined ? item.text + "=" + item.color : "icon=" + item.color);
+    }
+
+    // "" when the parts have the expected colours (and the accessible name is
+    // that of the plain view), else what is wrong.
+    function colorProblem(where, view, expected) {
+        const items = scene.shownItems(view, []);
+        if (view.accessibleName !== wide44.accessibleName) {
+            return where + ": accessible name changed to '" + view.accessibleName + "'";
+        }
+        if (items.length !== expected.length) {
+            return where + ": " + items.length + " parts, expected " + expected.length + ": " + scene.partColors(view).join(" ");
+        }
+        for (let i = 0; i < items.length; i++) {
+            if (!Qt.colorEqual(items[i].color, expected[i])) {
+                return where + ": part " + i + " is " + items[i].color + ", expected " + expected[i] + ": " + scene.partColors(view).join(" ");
+            }
+        }
+        return "";
+    }
+
     function styledProblem(where) {
         const texts = scene.shownTexts(styled44, styled44, []);
         return scene.textProblem(where, texts, 2, true) || scene.placementProblem(where, styled44, texts, false, 0);
@@ -738,6 +761,77 @@ Item {
             const texts = scene.shownTexts(styled44, styled44, []);
             console.log("compact fontScale 150 single: pixelSize " + styled44.pixelSize + " | " + scene.describe(texts));
             return styled44.resolvedLayout !== "single" ? "fontScale 150: layout is " + styled44.resolvedLayout : scene.scaledProblem("fontScale 150 single", texts, 1);
+        },
+        () => {
+            // The colours; parts in order: symbol, value, unit, symbol, value, unit.
+            styled44.fontScale = 100;
+            styled44.combined = false;
+            styled44.layoutMode = "auto";
+            return "";
+        },
+        () => {
+            const text = Kirigami.Theme.textColor;
+            const problem = scene.colorProblem("colors theme", styled44, [text, text, text, text, text, text]);
+            styled44.colorMode = "direction";
+            styled44.downloadColor = "#ff0000";
+            styled44.uploadColor = "#00ff00";
+            return problem;
+        },
+        () => {
+            const text = Kirigami.Theme.textColor;
+            const problem = scene.colorProblem("colors direction", styled44, [text, "#ff0000", text, text, "#00ff00", text]);
+            styled44.colorUnits = true;
+            return problem;
+        },
+        () => {
+            const problem = scene.colorProblem("colors direction with units", styled44, ["#ff0000", "#ff0000", "#ff0000", "#00ff00", "#00ff00", "#00ff00"]);
+            styled44.colorUnits = false;
+            styled44.downloadColor = "";
+            styled44.uploadColor = "";
+            return problem;
+        },
+        () => {
+            const text = Kirigami.Theme.textColor;
+            const high = Kirigami.Theme.highlightColor;
+            const neutral = Kirigami.Theme.neutralTextColor;
+            const problem = scene.colorProblem("colors direction by theme", styled44, [text, high, text, text, neutral, text]);
+            styled44.colorMode = "thresholds";
+            stub.down = 2 * 1024 * 1024;
+            stub.up = 0;
+            return problem;
+        },
+        () => {
+            const text = Kirigami.Theme.textColor;
+            const problem = scene.colorProblem("colors thresholds", styled44, [text, "#1d99f3", text, text, text, text]);
+            styled44.combined = true;
+            return problem;
+        },
+        () => {
+            const text = Kirigami.Theme.textColor;
+            // The sum of 2 MiB/s and 0 reaches the second level.
+            const problem = scene.colorProblem("colors thresholds combined", styled44, [text, "#1d99f3", text]);
+            styled44.colorMode = "direction";
+            styled44.downloadColor = "#ff0000";
+            styled44.uploadColor = "#00ff00";
+            styled44.combined = false;
+            styled44.iconStyle = "icons";
+            return problem;
+        },
+        () => {
+            // Icons: tinted like the unit.
+            const text = Kirigami.Theme.textColor;
+            const problem = scene.colorProblem("colors icons", styled44, [text, "#ff0000", text, text, "#00ff00", text]);
+            styled44.colorUnits = true;
+            return problem;
+        },
+        () => {
+            const problem = scene.colorProblem("colors icons with units", styled44, ["#ff0000", "#ff0000", "#ff0000", "#00ff00", "#00ff00", "#00ff00"]);
+            styled44.colorUnits = false;
+            styled44.colorMode = "theme";
+            styled44.iconStyle = "arrows";
+            stub.down = 1.5 * 1024 * 1024;
+            stub.up = 130 * 1024;
+            return problem;
         }
     ]
     property int step: 0

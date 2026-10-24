@@ -110,6 +110,11 @@ PlasmoidItem {
         iconStyle: Appearance.validChoice(Plasmoid.configuration.iconStyle, Appearance.ICON_STYLES, "arrows") // qmllint disable missing-property
         customDownIcon: Plasmoid.configuration.customDownIcon // qmllint disable missing-property
         customUpIcon: Plasmoid.configuration.customUpIcon // qmllint disable missing-property
+        colorMode: Appearance.validChoice(Plasmoid.configuration.colorMode, Appearance.COLOR_MODES, "theme") // qmllint disable missing-property
+        downloadColor: Plasmoid.configuration.downloadColor // qmllint disable missing-property
+        uploadColor: Plasmoid.configuration.uploadColor // qmllint disable missing-property
+        thresholds: Appearance.parseThresholds(Plasmoid.configuration.colorThresholds) // qmllint disable missing-property
+        colorUnits: Plasmoid.configuration.colorUnits // qmllint disable missing-property
         onPressed: root.wasExpanded = root.expanded
         onActivated: button => root.runAction(button === Qt.MiddleButton ? "middle" : "left")
     }

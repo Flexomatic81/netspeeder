@@ -32,7 +32,9 @@ GridLayout {
     property string fontFamily: ""
     property int pixelSize: Kirigami.Theme.defaultFont.pixelSize
     property bool bold: false
-    property color textColor: Kirigami.Theme.textColor
+    // The colour of the value, and of the symbol and unit.
+    property color valueColor: Kirigami.Theme.textColor
+    property color unitColor: Kirigami.Theme.textColor
     // Two lines instead of one: symbol and value on top, the unit below them.
     property bool stacked: false
     // Only when stacked: the value stands alone on top, and the symbol moves to
@@ -63,7 +65,7 @@ GridLayout {
         font.pixelSize: root.pixelSize
         font.bold: root.bold
         font.features: { "tnum": 1 }
-        color: root.textColor
+        color: root.unitColor
         renderType: Text.NativeRendering
         Layout.row: root.valueAlone ? 1 : 0
         Layout.column: 0
@@ -83,6 +85,8 @@ GridLayout {
 
         Kirigami.Icon {
             source: root.iconSymbol ? root.symbol : ""
+            // Tints symbolic icons; others keep their own colours.
+            color: root.unitColor
             implicitWidth: root.pixelSize
             implicitHeight: root.pixelSize
         }
@@ -90,6 +94,7 @@ GridLayout {
         Kirigami.Icon {
             visible: root.secondSymbol !== ""
             source: root.iconSymbol ? root.secondSymbol : ""
+            color: root.unitColor
             implicitWidth: root.pixelSize
             implicitHeight: root.pixelSize
         }
@@ -103,7 +108,7 @@ GridLayout {
         font.pixelSize: root.pixelSize
         font.bold: root.bold
         font.features: { "tnum": 1 }
-        color: root.textColor
+        color: root.valueColor
         renderType: Text.NativeRendering
         horizontalAlignment: Text.AlignRight
         Layout.row: 0
@@ -128,7 +133,7 @@ GridLayout {
         font.pixelSize: root.pixelSize
         font.bold: root.bold
         font.features: { "tnum": 1 }
-        color: root.textColor
+        color: root.unitColor
         renderType: Text.NativeRendering
         horizontalAlignment: Text.AlignLeft
         // One row: after the value. Stacked: below the symbol and the value, or
