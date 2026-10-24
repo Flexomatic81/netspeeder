@@ -443,8 +443,8 @@ Item {
     RowLayout {
         id: hostPresence
 
-        x: 320
-        y: 10
+        x: 10
+        y: 452
         width: 300
         height: 44
         spacing: 0
@@ -686,7 +686,7 @@ Item {
             if (!icon.visible || icon.source !== "network-connect" || Math.abs(icon.opacity - 0.5) > 0.001 || !view.mouseArea.enabled || scene.shownTexts(view, view, []).length > 0) {
                 return name + ": icon " + icon.visible + " " + icon.source + " " + icon.opacity + ", mouse " + view.mouseArea.enabled;
             }
-            if (Math.abs(icon.height - view.height / 2) > 0.01 && Math.abs(icon.height - view.height) > 0.01) {
+            if (Math.abs(icon.height - view.rowHeight) > 0.01) {
                 return name + ": icon height " + icon.height + " in a view of " + view.height;
             }
         } else if (sizes !== before || icon.visible || !view.mouseArea.enabled || scene.shownTexts(view, view, []).length === 0) {

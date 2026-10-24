@@ -295,6 +295,7 @@ Item {
 
     opacity: root.provider.stale && root.isShown ? 0.5 : 1
     Accessible.role: Accessible.StaticText
+    Accessible.ignored: root.isHidden
     Accessible.name: root.accessibleName
 
     // The height of a text line per pixel of font size, laid out as SpeedLabel
@@ -417,7 +418,7 @@ Item {
     Loader {
         id: sparkLoader
 
-        active: root.sparkline !== "off"
+        active: root.sparkline !== "off" && root.isShown
         visible: root.isShown
         source: root.sparklineSource
         // Beside: right of the text; otherwise behind it over the whole area.

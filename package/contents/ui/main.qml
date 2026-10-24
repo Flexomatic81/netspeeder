@@ -61,13 +61,15 @@ PlasmoidItem {
     // Plasma's edit mode, where a hidden widget must stay reachable.
     readonly property bool editMode: Plasmoid.containment !== null && Plasmoid.containment.corona !== null ? Plasmoid.containment.corona.editMode : false
     // "shown", "hidden" or "placeholder" from the auto-hide setting; the
-    // desktop view is never hidden.
+    // desktop view is never hidden. (configuration is created from main.xml at
+    // Plasma runtime)
     readonly property string presence: Plasmoid.formFactor === PlasmaCore.Types.Planar ? "shown" : Visibility.autoHideState(Appearance.validChoice(Plasmoid.configuration.autoHide, ["never", "offline", "idle"], "never"), root.provider, { // qmllint disable missing-property
             editMode: root.editMode,
             expanded: root.expanded
         })
-    // A hidden widget leaves the panel's visible items.
-    Plasmoid.status: root.presence === "hidden" ? PlasmaCore.Types.PassiveStatus : PlasmaCore.Types.ActiveStatus
+    // The panel collapses an applet only on HiddenStatus (PassiveStatus leaves
+    // a gap) and shows it again by itself in edit mode.
+    Plasmoid.status: root.presence === "hidden" ? PlasmaCore.Types.HiddenStatus : PlasmaCore.Types.ActiveStatus
 
     // The state of the popup at the last press (see CompactRepresentation).
     property bool wasExpanded: false
