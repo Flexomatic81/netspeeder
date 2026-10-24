@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: netspeeder\n"
 "Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
-"POT-Creation-Date: 2026-10-24 22:10+0200\n"
+"POT-Creation-Date: 2026-10-24 22:16+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -123,6 +123,11 @@ msgstr ""
 
 #: package/contents/config/config.qml:44
 msgctxt "@title"
+msgid "Usage"
+msgstr ""
+
+#: package/contents/config/config.qml:49
+msgctxt "@title"
 msgid "Behavior"
 msgstr ""
 
@@ -152,6 +157,7 @@ msgid "Text size:"
 msgstr ""
 
 #: package/contents/ui/config/ConfigAppearance.qml:128
+#: package/contents/ui/config/ConfigUsage.qml:153
 msgctxt "@item:valuesuffix %1 is a percentage"
 msgid "%1 %"
 msgstr ""
@@ -511,6 +517,56 @@ msgstr ""
 msgid "Preview:"
 msgstr ""
 
+#: package/contents/ui/config/ConfigUsage.qml:63
+msgid "vnstat found"
+msgstr ""
+
+#: package/contents/ui/config/ConfigUsage.qml:65
+msgid "vnstat is not installed"
+msgstr ""
+
+#: package/contents/ui/config/ConfigUsage.qml:67
+msgid "This vnstat version is not supported"
+msgstr ""
+
+#: package/contents/ui/config/ConfigUsage.qml:69
+#: package/contents/ui/full/UsagePanel.qml:155
+msgid "Reading vnstat failed: %1"
+msgstr ""
+
+#: package/contents/ui/config/ConfigUsage.qml:71
+msgid "Checking vnstat…"
+msgstr ""
+
+#: package/contents/ui/config/ConfigUsage.qml:87
+msgid "Show usage from vnstat"
+msgstr ""
+
+#: package/contents/ui/config/ConfigUsage.qml:109
+msgid "Data cap"
+msgstr ""
+
+#: package/contents/ui/config/ConfigUsage.qml:120
+msgid "Monthly cap:"
+msgstr ""
+
+#: package/contents/ui/config/ConfigUsage.qml:127
+msgctxt "@item:valuesuffix %1 is a number of gibibytes"
+msgid "%1 GiB"
+msgstr ""
+
+#: package/contents/ui/config/ConfigUsage.qml:134
+msgid "Billing period starts on day:"
+msgstr ""
+
+#: package/contents/ui/config/ConfigUsage.qml:146
+msgid "Warn at:"
+msgstr ""
+
+#: package/contents/ui/config/ConfigUsage.qml:161
+msgid "Notify when the warning level or the cap is reached"
+msgstr ""
+
 #: package/contents/ui/config/ThresholdEditor.qml:213
 msgctxt "@action:button use the color of the theme"
 msgid "Theme"
@@ -609,10 +665,6 @@ msgstr ""
 
 #: package/contents/ui/full/UsagePanel.qml:153
 msgid "This vnstat version is not supported."
-msgstr ""
-
-#: package/contents/ui/full/UsagePanel.qml:155
-msgid "Reading vnstat failed: %1"
 msgstr ""
 
 #: package/contents/ui/full/UsagePanel.qml:157

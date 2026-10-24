@@ -41,6 +41,11 @@ ConfigModel {
         source: "config/ConfigData.qml"
     }
     ConfigCategory {
+        name: root.trc("@title", "Usage")
+        icon: "office-chart-bar"
+        source: "config/ConfigUsage.qml"
+    }
+    ConfigCategory {
         name: root.trc("@title", "Behavior")
         icon: "input-mouse"
         source: "config/ConfigBehavior.qml"

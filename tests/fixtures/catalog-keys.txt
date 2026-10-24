@@ -1,149 +1,161 @@
-	1 KiB/s	
-	10 KiB/s	
 	100 KiB/s	
+	10 KiB/s	
+	1 KiB/s	
+	%1 (not installed)	
+	%1 of %2 (%3 %)	
 	512 B/s	
+@action:button use the color of the theme	Theme	
 	Active source: %1	
+	Add level	
 	Application	
 	Application:	
 	Applications (*.desktop)	
+	Arrows	
 	Automatic	
 	Automatic (physical network devices)	
 	Automatic (recommended)	
+	Behind the values	
+	Beside the values	
+	Billing period starts on day:	
 	Bits (Mbit/s)	
+	Bold	
+	By direction	
+	By speed	
 	Bytes, binary (KiB/s)	
 	Bytes, decimal (kB/s)	
-	Choose an application	
+	Checking vnstat…	
 	Choose…	
+	Choose a color	
+	Choose an application	
+	Colors:	
+	Color units and symbols too	
 	Command	
 	Command:	
+	Custom	
 	Data	
+	Data cap	
+	Data cap %1 % used	
 	Data source:	
 	Decimal places:	
 	Display	
 	Do nothing	
+	Download color:	
 	Download first	
-	Interfaces counted in the total:	
-	Kernel counters	
-	Kernel counters (/proc/net/dev)	
-	Kernel counters also show VPN and container interfaces, but start a small process at every update.	
-	Layout:	
-	Left click:	
-	Middle click:	
-	Neither click opens the popup. It stays reachable on the desktop only.	
-	Netspeeder	
-	Network	
-	No current data	
-	No network interfaces found.	
-	No selected network interface available	
-	Off	
-	Offline	
-	Online	
-	Open System Monitor	
-	Open the popup	
-	Order:	
-	Preview:	
-	Reading network data failed: %1	
-	Selected interfaces only	
-	Show as 0 below:	
-	Show only the combined speed	
-	Side by side	
-	Start the application or command	
-	Start:	
-	System sensors	
-	System sensors (ksystemstats)	
-	System sensors are not available.	
-	System sensors are not available. Choose another data source in the settings.	
-	System sensors report no network interfaces.	
-	Two rows	
-	Units:	
-	Update interval:	
-	Upload first	
-	Use short unit names	
-	Using kernel counters because system sensors are not available.	
-	Using kernel counters because system sensors report no network interfaces.	
-	Waiting for network data…	
+	Download symbol:	
+	Font:	
+	For at least:	
+	Hide the widget:	
+	Icons	
+	Idle below:	
+	* incomplete: vnstat lacks some days of this period	
+	In edit mode the widget stays visible so it can be configured.	
+@info accessible	Download %1, upload %2	
+@info	Copied	
 @info	Could not find “%1”.	
 @info	Could not start “%1”.	
+@info download and upload total since the interface became active	Total ↓ %1   ↑ %2	
+@info interface kind, download and upload speed	%1 – ↓ %2   ↑ %3	
+@info interface kind	not available	
+@info interface kind	not counted	
+@info interface kind	physical	
+@info interface kind	virtual	
 @info	No application is set. Choose one in the widget settings.	
 @info	No command is set. Choose one in the widget settings.	
 @info	Source: %1	
 @info	Starting “%1” did not respond.	
 @info	The launch target “%1” is not valid.	
-@info accessible	Download %1, upload %2	
-@info interface kind	not available	
-@info interface kind	physical	
-@info interface kind	virtual	
-@info interface kind, download and upload speed	%1 – ↓ %2   ↑ %3	
+@info	The traffic graph is not available because Qt Quick Charts is missing.	
+@info:tooltip	Copy IP address	
 @info:tooltip	Download: %1	
 @info:tooltip	IP address: %1	
+@info:tooltip	Today: ↓ %1 ↑ %2	
 @info:tooltip	Upload: %1	
-@item:valuesuffix %1 is a number of seconds	%1 s	
-@info	The traffic graph is not available because Qt Quick Charts is missing.	
-@option:radio time span of the graph	%1 min	
-@label	Peak	
-@label	This session	
-@info interface kind	not counted	
 @info Wi-Fi signal strength in percent	Signal %1%	
-@info download and upload total since the interface became active	Total ↓ %1   ↑ %2	
-@info	Copied	
-@info:tooltip	Copy IP address	
-@title	Behavior	
-@title	Appearance	
-	Font:	
-	Theme font	
-	Bold	
-	Text size:	
-@item:valuesuffix %1 is a percentage	%1 %	
-	Symbols:	
-	Arrows	
-	Triangles	
-	Icons	
-	None	
-	Custom	
-	Download symbol:	
-	Upload symbol:	
-	Colors:	
-	Theme color	
-	By direction	
-	By speed	
-	Download color:	
-	Choose a color	
-	Use theme color	
-	Upload color:	
-	Speed levels:	
-	Color units and symbols too	
-	Keep a fixed width	
-	Sparkline:	
-	Behind the values	
-	Beside the values	
-@action:button use the color of the theme	Theme	
-	Remove level	
-	Add level	
-	%1 (not installed)	
-	Hide the widget:	
-	Never	
-	When offline	
-	When offline or idle	
-	In edit mode the widget stays visible so it can be configured.	
-	Idle below:	
+	Install vnstat and enable its service to see daily and monthly usage.	
+	Interfaces counted in the total:	
 @item:valuesuffix %1 is a number	%1 KiB/s	
-	For at least:	
+@item:valuesuffix %1 is a number of gibibytes	%1 GiB	
+@item:valuesuffix %1 is a number of seconds	%1 s	
+@item:valuesuffix %1 is a percentage	%1 %	
+	Keep a fixed width	
+	Kernel counters	
+	Kernel counters also show VPN and container interfaces, but start a small process at every update.	
+	Kernel counters (/proc/net/dev)	
+@label	Last period	
+@label	Peak	
+@label	This period	
+@label	This session	
 @label	Today	
 @label	Yesterday	
-@label	This period	
-@label	Last period	
-	Install vnstat and enable its service to see daily and monthly usage.	
-	This vnstat version is not supported.	
-	Reading vnstat failed: %1	
+	Layout:	
+	Left click:	
 	Loading usage…	
-	%1 of %2 (%3 %)	
-	vnstat last updated: %1	
+	Middle click:	
+	Monthly cap:	
+	Neither click opens the popup. It stays reachable on the desktop only.	
+	Netspeeder	
+	Network	
+	Never	
+	No current data	
+	None	
+	No network interfaces found.	
+	No selected network interface available	
+	Notify when the warning level or the cap is reached	
+	Off	
+	Offline	
+	Online	
+	Open System Monitor	
+	Open the popup	
+@option:radio time span of the graph	%1 min	
+	Order:	
+	Preview:	
+	Reading network data failed: %1	
+	Reading vnstat failed: %1	
+	Remove level	
+	Selected interfaces only	
+	Show as 0 below:	
+	Show only the combined speed	
+	Show usage from vnstat	
+	Side by side	
+	Sparkline:	
+	Speed levels:	
+	Start:	
+	Start the application or command	
+	Symbols:	
+	System sensors	
+	System sensors are not available.	
+	System sensors are not available. Choose another data source in the settings.	
+	System sensors (ksystemstats)	
+	System sensors report no network interfaces.	
+	Text size:	
+	Theme color	
+	Theme font	
 	The vnstat data is not current. Is the vnstat service running?	
-	vnstat does not track %1	
-	vnstat website	
+	This vnstat version is not supported	
+	This vnstat version is not supported.	
+@title	Appearance	
+@title	Behavior	
 @title:group	Usage	
-	* incomplete: vnstat lacks some days of this period	
-@info:tooltip	Today: ↓ %1 ↑ %2	
+@title	Usage	
+	Triangles	
+	Two rows	
+	Units:	
+	Update interval:	
+	Upload color:	
+	Upload first	
+	Upload symbol:	
+	Use short unit names	
+	Use theme color	
+	Using kernel counters because system sensors are not available.	
+	Using kernel counters because system sensors report no network interfaces.	
+	vnstat does not track %1	
+	vnstat found	
+	vnstat is not installed	
+	vnstat last updated: %1	
+	vnstat website	
+	Waiting for network data…	
+	Warn at:	
+	When offline	
+	When offline or idle	
 	You have reached your data cap (%1 of %2).	
 	You have used %1 % of your data cap (%2 of %3).	
-	Data cap %1 % used	
