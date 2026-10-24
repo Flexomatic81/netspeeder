@@ -50,6 +50,15 @@ function tail(list, capacity) {
   return list.length > capacity ? list.slice(list.length - capacity) : list.slice();
 }
 
+// A copy of the list with the value appended, trimmed to the most recent
+// `capacity` entries; the list itself is copied once and left alone.
+function appended(list, value, capacity) {
+  const drop = Math.max(0, list.length + 1 - capacity);
+  const next = drop > 0 ? list.slice(drop) : list.slice();
+  next.push(value);
+  return next;
+}
+
 function isCount(value) {
   return typeof value === "number" && isFinite(value) && value >= 0;
 }
@@ -91,14 +100,15 @@ function foldTotals(previous, totals) {
 export function pushSample(history, sample) {
   const earlier = history.times.length > 0 && sample.timestamp < history.times[history.times.length - 1];
   // A clock set back makes the old points unusable for the time axis.
-  const down = (earlier ? [] : history.down).concat([sample.down]);
-  const up = (earlier ? [] : history.up).concat([sample.up]);
-  const times = (earlier ? [] : history.times).concat([sample.timestamp]);
+  const cap = history.capacity;
+  const down = appended(earlier ? [] : history.down, sample.down, cap);
+  const up = appended(earlier ? [] : history.up, sample.up, cap);
+  const times = appended(earlier ? [] : history.times, sample.timestamp, cap);
   const folded = foldTotals(history.baselines, sample.totals);
   return copyHistory(history, {
-    down: tail(down, history.capacity),
-    up: tail(up, history.capacity),
-    times: tail(times, history.capacity),
+    down: down,
+    up: up,
+    times: times,
     peakDown: Math.max(history.peakDown, sample.down),
     peakUp: Math.max(history.peakUp, sample.up),
     sessionDown: history.sessionDown + folded.addedDown,
