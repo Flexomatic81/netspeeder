@@ -77,7 +77,7 @@ function testCommand(env) {
   const tests = env.testFiles();
   const { lines, branches, functions } = COVERAGE;
   return [
-    "node",
+    process.execPath,
     "--test",
     "--experimental-test-coverage",
     `--test-coverage-include=${CODE_DIR}/**`,
@@ -100,25 +100,37 @@ function qmllintCommand(env) {
   const qmllint = findQmllint(env);
   // qmllint exits 0 on warnings unless told otherwise.
   const files = env.gitFiles(["package", "tests/qml"]).filter((f) => f.endsWith(".qml"));
+  if (qmllint && files.length === 0) throw new Error("no QML files found to lint");
   return qmllint ? [qmllint, "--max-warnings", "0", ...files] : null;
 }
 
 const PLANNERS = {
   eslint: { tool: "eslint", command: () => ["pnpm", "exec", "eslint", "."], needs: "pnpm" },
   format: { tool: "prettier", command: () => ["pnpm", "exec", "prettier", "--check", "**/*.mjs"], needs: "pnpm" },
-  test: { tool: "node", command: testCommand, needs: "node" },
+  test: { tool: "node", command: testCommand },
   qmllint: { tool: "Qt 6 qmllint", command: qmllintCommand },
   shellcheck: { tool: "shellcheck", command: shellcheckCommand },
   smoke: { tool: "qml6", command: () => ["scripts/smoke.sh"], needs: "qml6" },
   load: { tool: "plasmawindowed", command: () => ["scripts/load-check.sh"], needs: "plasmawindowed" },
 };
 
-/** The command of one step; null when its tool is missing. The load step carries a preflight that must pass. */
+/** One line for an exception, to show as the reason a step failed. */
+function oneLine(error) {
+  return String(error?.message ?? error).split("\n")[0];
+}
+
+/** The command of one step; null when its tool is missing. The load step carries a preflight that must pass.
+ *  A planning error does not escape: the step carries it as `error` and counts as failed. */
 export function planStep(name, env) {
   const planner = PLANNERS[name];
   if (!planner) throw new Error(`unknown step: ${name}`);
   const present = !planner.needs || Boolean(env.which(planner.needs));
-  const step = { name, command: present ? planner.command(env) : null, missing: planner.tool, cwd: ROOT };
+  const step = { name, command: null, missing: planner.tool, cwd: ROOT };
+  try {
+    if (present) step.command = planner.command(env);
+  } catch (e) {
+    step.error = oneLine(e);
+  }
   if (name === "load") step.preflight = () => checkInstalled(env);
   return step;
 }
@@ -126,6 +138,7 @@ export function planStep(name, env) {
 /** "run" when the command exists; a missing one is "skipped" locally for Qt and local-only steps, else "failed".
  *  Local-only steps are skipped in CI and without a desktop session, never "passed". */
 export function classify(step, env) {
+  if (step.error) return "failed";
   if (LOCAL_ONLY.includes(step.name) && (env.inCi || !env.hasDesktop)) return "skipped";
   if (step.command) return "run";
   const mayBeMissing = QT_STEPS.includes(step.name) || LOCAL_ONLY.includes(step.name);
@@ -236,6 +249,15 @@ function execute(step) {
   return result.error ? 127 : (result.status ?? 1);
 }
 
+/** Result of one step; an exception while running it (for instance in the install comparison) is a failure. */
+function runOne(step, run) {
+  try {
+    return [run(step) === 0 ? "passed" : "failed", ""];
+  } catch (e) {
+    return ["failed", oneLine(e)];
+  }
+}
+
 /** Runs every step, also after a failure; returns { name: [passed|failed|skipped, detail] }. */
 export function runSteps(steps, env, run = execute) {
   const results = {};
@@ -243,7 +265,9 @@ export function runSteps(steps, env, run = execute) {
     console.log(`\n== ${step.name} ==`);
     const verdict = classify(step, env);
     if (verdict === "run") {
-      results[step.name] = [run(step) === 0 ? "passed" : "failed", ""];
+      results[step.name] = runOne(step, run);
+    } else if (step.error) {
+      results[step.name] = ["failed", step.error];
     } else if (verdict === "skipped") {
       results[step.name] = ["skipped", skipReason(step, env)];
     } else {

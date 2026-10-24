@@ -186,3 +186,41 @@ test("diffTrees reports missing, changed and extra files and honours the exclusi
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("qmllint with no QML file to lint fails instead of passing vacuously", () => {
+  const env = makeEnv({ tools: ["qmllint6"], gitFiles: () => ["package/y.js"] });
+  const step = planStep("qmllint", env);
+  assert.equal(step.command, null);
+  assert.match(step.error, /no QML files/);
+  assert.equal(classify(step, env), "failed");
+  assert.equal(classify(step, makeEnv({ inCi: true })), "failed");
+});
+
+test("an exception while planning or running a step fails that step and the others still run", () => {
+  const env = makeEnv({
+    tools: ["qmllint6", "pnpm"],
+    gitFiles: () => {
+      throw new Error("detected dubious ownership\nhint: more");
+    },
+  });
+  const steps = [planStep("qmllint", env), planStep("eslint", env), planStep("format", env)];
+  assert.equal(steps[0].error, "detected dubious ownership");
+  const silent = console.log;
+  console.log = () => {};
+  let results;
+  try {
+    results = runSteps(steps, env, (step) => {
+      if (step.name === "format") throw new Error("EISDIR: illegal operation on a directory\nstack");
+      return 0;
+    });
+  } finally {
+    console.log = silent;
+  }
+  assert.deepEqual(results.qmllint, ["failed", "detected dubious ownership"]);
+  assert.deepEqual(results.eslint, ["passed", ""]);
+  assert.deepEqual(results.format, ["failed", "EISDIR: illegal operation on a directory"]);
+});
+
+test("the test step starts the running Node, not the one from PATH", () => {
+  assert.equal(planStep("test", makeEnv()).command[0], process.execPath);
+});
