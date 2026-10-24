@@ -50,9 +50,12 @@ export function nextIdle(state, input) {
   return { belowSince: belowSince, lastNow: now, idle: now - belowSince >= seconds * 1000 };
 }
 
+// Stale data is no reason to hide: a frozen source keeps showing its dimmed
+// values instead of vanishing like quiet traffic.
 function hideReason(mode, view) {
-  if (mode === "offline") return view.hasData && !view.online;
-  if (mode === "idle") return view.hasData && (!view.online || view.idle);
+  if (!view.hasData || view.stale) return false;
+  if (mode === "offline") return !view.online;
+  if (mode === "idle") return !view.online || view.idle;
   return false;
 }
 

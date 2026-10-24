@@ -94,17 +94,18 @@ test("an invalid time is no idleness and keeps the last good time", () => {
 
 function expected(mode, v, c) {
   let reason = false;
-  if (mode === "offline") reason = v.hasData && !v.online;
-  if (mode === "idle") reason = v.hasData && (!v.online || v.idle);
+  const live = v.hasData && !v.stale;
+  if (mode === "offline") reason = live && !v.online;
+  if (mode === "idle") reason = live && (!v.online || v.idle);
   if (!reason || c.expanded) return "shown";
   return c.editMode ? "placeholder" : "hidden";
 }
 
 function* combinations() {
   for (const mode of ["never", "offline", "idle", "bogus", "", undefined]) {
-    for (let bits = 0; bits < 32; bits++) {
+    for (let bits = 0; bits < 64; bits++) {
       const on = (n) => (bits & (1 << n)) !== 0;
-      yield [mode, { hasData: on(0), online: on(1), idle: on(2) }, { editMode: on(3), expanded: on(4) }];
+      yield [mode, { hasData: on(0), online: on(1), idle: on(2), stale: on(5) }, { editMode: on(3), expanded: on(4) }];
     }
   }
 }
@@ -115,7 +116,17 @@ test("autoHideState over the whole table", () => {
     assert.equal(autoHideState(mode, v, c), expected(mode, v, c), JSON.stringify([mode, v, c]));
     count++;
   }
-  assert.equal(count, 192);
+  assert.equal(count, 384);
+});
+
+test("stale data is never hidden, in every mode", () => {
+  const c = { editMode: false, expanded: false };
+  for (const mode of ["offline", "idle"]) {
+    const v = { hasData: true, online: false, idle: true, stale: true };
+    assert.equal(autoHideState(mode, v, c), "shown", mode);
+    assert.equal(autoHideState(mode, { ...v, stale: false }, c), "hidden", mode);
+    assert.equal(autoHideState(mode, v, { editMode: true, expanded: false }), "shown", mode);
+  }
 });
 
 test("known cases and never hidden before the first data", () => {
