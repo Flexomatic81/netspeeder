@@ -82,6 +82,10 @@ PlasmoidItem {
     }
 
     preferredRepresentation: compactRepresentation
+    // Plasma 6 only instantiates compactRepresentation when a
+    // fullRepresentation exists. The real popup arrives in 0.3; until then an
+    // empty placeholder keeps the panel view alive.
+    fullRepresentation: Item {}
     compactRepresentation: CompactRepresentation {
         provider: root.provider
         formatOptions: root.formatOptions
