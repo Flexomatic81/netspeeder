@@ -12,6 +12,7 @@ import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Dialogs as Dialogs
 import QtQuick.Layouts
+import QtCore
 import org.kde.kirigami as Kirigami
 import org.kde.kcmutils as KCM
 import "../../code/clicks.mjs" as Clicks
@@ -197,6 +198,9 @@ KCM.SimpleKCM {
         }
     }
 
+    // Every applications folder below the data directories (user and system).
+    readonly property var applicationRoots: StandardPaths.standardLocations(StandardPaths.GenericDataLocation).map(url => url.toString().replace(/^file:\/\//, "") + "/applications")
+
     Dialogs.FileDialog {
         id: appDialog
 
@@ -204,7 +208,7 @@ KCM.SimpleKCM {
         currentFolder: "file:///usr/share/applications"
         nameFilters: [root.tr("Applications (*.desktop)")]
         onAccepted: {
-            const id = Clicks.desktopIdFromUrl(appDialog.selectedFile);
+            const id = Clicks.desktopIdFromUrl(appDialog.selectedFile, root.applicationRoots);
             // A file that is no launcher leaves the setting as it is.
             if (id !== "") {
                 root.cfg_launchApp = id;

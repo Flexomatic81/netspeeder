@@ -15,13 +15,26 @@ const PLAIN_WORD = /^[A-Za-z0-9._+/-]+$/;
 const NOT_FOUND = 127;
 const TIMED_OUT = -2;
 
-// $1 is the desktop id. Looks for $d/applications/$1.desktop in the user data
-// directory and in every system data directory.
+// $1 is the desktop id. In every data directory it first looks for
+// $d/applications/$1.desktop; when that is missing, it applies the desktop
+// entry naming rule to every .desktop file below $d/applications (the id is
+// the path relative to that folder with "/" replaced by "-", at any depth).
+// "tr" turns the whole path into dashes, so only the prefix needs the same
+// treatment before the comparison.
 const APP_SCRIPT = [
   "IFS=:",
   "set -f",
   'for d in "${XDG_DATA_HOME:-$HOME/.local/share}" ${XDG_DATA_DIRS:-/usr/local/share:/usr/share}; do',
-  '  if [ -f "$d/applications/$1.desktop" ]; then',
+  '  a="$d/applications"',
+  '  if [ -f "$a/$1.desktop" ]; then',
+  '    setsid -f kstart --application "$1" >/dev/null 2>&1; exit 0',
+  "  fi",
+  '  [ -d "$a" ] || continue',
+  "  p=$(printf '%s' \"$a/\" | tr / -)",
+  "  hit=$(find -L \"$a\" -name '*.desktop' 2>/dev/null | tr / - | while IFS= read -r f; do",
+  '    if [ "${f#"$p"}" = "$1.desktop" ]; then echo y; break; fi',
+  "  done)",
+  '  if [ -n "$hit" ]; then',
   '    setsid -f kstart --application "$1" >/dev/null 2>&1; exit 0',
   "  fi",
   "done",

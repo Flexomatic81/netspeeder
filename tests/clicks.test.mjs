@@ -52,6 +52,38 @@ test("the desktop ID is the file name of a chosen launcher without .desktop", ()
   assert.equal(desktopIdFromUrl("/usr/share/applications/firefox.desktop"), "firefox");
 });
 
+const ROOTS = ["/usr/share/applications", "/home/user/.local/share/applications"];
+
+test("the desktop ID of a launcher in a subfolder joins the relative path with dashes", () => {
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/kde4/foo.desktop", ROOTS), "kde4-foo");
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/a/b/c/d.desktop", ROOTS), "a-b-c-d");
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/a/b-c.desktop", ROOTS), "a-b-c");
+  assert.equal(
+    desktopIdFromUrl("file:///home/user/.local/share/applications/kde4/foo%20x.desktop", ROOTS),
+    "kde4-foo x",
+  );
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/org.kde.konsole.desktop", ROOTS), "org.kde.konsole");
+});
+
+test("the longest matching root is the prefix of the desktop ID", () => {
+  const roots = ["/usr/share/applications", "/usr/share/applications/vendor/applications"];
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/vendor/applications/foo.desktop", roots), "foo");
+  assert.equal(
+    desktopIdFromUrl("file:///usr/share/applications/vendor/applications/foo.desktop", ["/usr/share/applications"]),
+    "vendor-applications-foo",
+  );
+  assert.equal(
+    desktopIdFromUrl("file:///usr/share/applications/vendor/applications/foo.desktop", ["/usr/share/applications/"]),
+    "vendor-applications-foo",
+  );
+});
+
+test("a launcher outside every root gives its file name", () => {
+  assert.equal(desktopIdFromUrl("file:///opt/tools/x/foo.desktop", ROOTS), "foo");
+  assert.equal(desktopIdFromUrl("file:///usr/share/applicationsx/foo.desktop", ROOTS), "foo");
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/sub/foo.desktop"), "foo");
+});
+
 test("anything that is not a .desktop file gives an empty ID", () => {
   assert.equal(desktopIdFromUrl("file:///usr/bin/konsole"), "");
   assert.equal(desktopIdFromUrl("file:///usr/share/applications/"), "");

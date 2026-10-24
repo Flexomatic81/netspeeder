@@ -132,6 +132,59 @@ test("app launch: finds desktop files in XDG_DATA_DIRS entries", (t) => {
   assert.equal(result.status, 0);
 });
 
+function launchApp(box, app, files) {
+  for (const file of files) {
+    const full = path.join(box.data, "applications", file);
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, "");
+  }
+  return box.run(launchCommandLine({ kind: "app", app }));
+}
+
+test("app launch: finds an application in a subfolder by its dashed id", (t) => {
+  const box = makeSandbox();
+  t.after(box.cleanup);
+  const out = launchApp(box, "kde4-foo", ["kde4/foo.desktop"]);
+  assert.equal(out.status, 0);
+  assert.deepEqual(out.seen, ["-f", "kstart", "--application", "kde4-foo"]);
+});
+
+test("app launch: dashes in the file name stay part of the id", (t) => {
+  const box = makeSandbox();
+  t.after(box.cleanup);
+  assert.equal(launchApp(box, "a-b-c", ["a/b-c.desktop"]).status, 0);
+});
+
+test("app launch: finds an application four levels deep", (t) => {
+  const box = makeSandbox();
+  t.after(box.cleanup);
+  assert.equal(launchApp(box, "a-b-c-d", ["a/b/c/d.desktop"]).status, 0);
+});
+
+test("app launch: nested applications folder is relative to the real root", (t) => {
+  const box = makeSandbox();
+  t.after(box.cleanup);
+  assert.equal(launchApp(box, "vendor-applications-foo", ["vendor/applications/foo.desktop"]).status, 0);
+});
+
+test("app launch: a partial dashed id does not match a subfolder file", (t) => {
+  const box = makeSandbox();
+  t.after(box.cleanup);
+  const out = launchApp(box, "kde4", ["kde4/foo.desktop"]);
+  assert.equal(out.status, 127);
+  assert.equal(out.seen, null);
+});
+
+test("app launch: unknown dashed id exits 127", (t) => {
+  const box = makeSandbox();
+  t.after(box.cleanup);
+  assert.equal(launchApp(box, "kde4-missing", ["kde4/foo.desktop"]).status, 127);
+});
+
+test("app launch: an id with a semicolon is rejected before any launch", () => {
+  assert.equal(launchCommandLine({ kind: "app", app: "kde4-foo;touch x" }), null);
+});
+
 test("command launch: existing program starts through sh -c", (t) => {
   const box = makeSandbox();
   t.after(box.cleanup);

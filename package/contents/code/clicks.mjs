@@ -30,25 +30,59 @@ export function nextExpanded(wasExpanded) {
   return !wasExpanded;
 }
 
-// The desktop ID of a launcher file the user chose (a file URL or a plain
-// path): the file name without ".desktop". Anything else gives "".
-export function desktopIdFromUrl(url) {
-  const text = String(url ?? "");
-  const path = text.startsWith("file://") ? text.slice("file://".length) : text;
-  if (/^[a-z][a-z0-9+.-]*:/i.test(path)) {
-    return "";
+function decodePath(path) {
+  const parts = path.split("/").map((part) => decodeURIComponent(part));
+  return parts.some((part) => part.includes("/")) ? null : parts.join("/");
+}
+
+// A root as a plain path without "file://" and without trailing slashes.
+function plainRoot(root) {
+  const text = String(root ?? "");
+  return (text.startsWith("file://") ? text.slice("file://".length) : text).replace(/\/+$/, "");
+}
+
+// The part of the path below the longest root that contains it, or "" when
+// no root does.
+function relativeToRoot(path, roots) {
+  let best = "";
+  for (const root of roots.map(plainRoot)) {
+    if (root.length > best.length && path.startsWith(`${root}/`)) {
+      best = root;
+    }
   }
-  const name = path.slice(path.lastIndexOf("/") + 1);
-  if (!name.endsWith(".desktop")) {
-    return "";
+  return best === "" ? "" : path.slice(best.length + 1);
+}
+
+// The decoded path of a file URL or plain path, or null for other URLs, a
+// malformed percent-encoding or a path that is no .desktop file.
+function launcherPath(url) {
+  const text = String(url ?? "");
+  const raw = text.startsWith("file://") ? text.slice("file://".length) : text;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(raw)) {
+    return null;
   }
   try {
-    return decodeURIComponent(name.slice(0, -".desktop".length));
+    const path = decodePath(raw);
+    return path !== null && /(^|\/)[^/]+\.desktop$/.test(path) ? path : null;
   } catch (error) {
     // Malformed percent-encoding; anything else is a real fault.
     if (error instanceof URIError) {
-      return "";
+      return null;
     }
     throw error;
   }
+}
+
+// The desktop ID of a launcher file the user chose (a file URL or a plain
+// path), following the desktop entry naming rule: the path below the
+// applications folder (one of `roots`, the longest match wins) with "/"
+// replaced by "-", without ".desktop". A file outside every root gives its
+// file name without ".desktop". Anything else gives "".
+export function desktopIdFromUrl(url, roots = []) {
+  const path = launcherPath(url);
+  if (path === null) {
+    return "";
+  }
+  const relative = relativeToRoot(path, roots) || path.slice(path.lastIndexOf("/") + 1);
+  return relative.slice(0, -".desktop".length).replace(/\//g, "-");
 }
