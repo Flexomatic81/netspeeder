@@ -20,6 +20,7 @@ import {
   dateParts,
   namesKey,
   namesFromKey,
+  nextKnownVirtual,
   todayUsage,
 } from "../package/contents/code/usage.mjs";
 
@@ -301,6 +302,27 @@ test("auto mode adds included live interfaces vnstat does not know", () => {
   assert.deepEqual(usageNames("auto", ["tun0"], live, ["eth0", "eth0"]), ["eth0", "WLAN0", "wlan0"]);
 });
 
+test("auto mode leaves out remembered virtual interfaces that are absent", () => {
+  const live = [{ name: "eth0", kind: "physical", included: true }];
+  assert.deepEqual(usageNames("auto", [], live, ["eth0", "tun0", "docker0"], ["tun0", "docker0"]), ["eth0"]);
+});
+
+test("auto mode still counts an included live interface that was remembered as virtual", () => {
+  const live = [{ name: "usb0", kind: "physical", included: true }];
+  assert.deepEqual(usageNames("auto", [], live, ["usb0"], ["usb0"]), ["usb0"]);
+});
+
+test("manual mode ignores remembered virtual interfaces", () => {
+  assert.deepEqual(usageNames("manual", ["tun0", "eth0"], [], ["tun0", "eth0"], ["tun0"]), ["eth0", "tun0"]);
+});
+
+test("namesKey follows the remembered virtual interfaces", () => {
+  const live = [{ name: "eth0", kind: "physical", included: true }];
+  assert.equal(namesKey("auto", [], live, ["eth0", "tun0"], []), "eth0\ntun0");
+  assert.equal(namesKey("auto", [], live, ["eth0", "tun0"], ["tun0"]), "eth0");
+  assert.equal(namesKey("auto", [], live, ["eth0", "tun0"], null), "eth0\ntun0");
+});
+
 test("usageNames copes with missing lists", () => {
   assert.deepEqual(usageNames("auto", null, null, null), []);
   assert.deepEqual(usageNames("manual", null, null, null), []);
@@ -423,6 +445,50 @@ test("capNotification treats a malformed store as nothing reported", () => {
     notify: 1,
     store: { cycle: "2026-10-01", level: 1 },
   });
+});
+
+// --- nextKnownVirtual -------------------------------------------------------
+
+test("nextKnownVirtual adds a virtual interface the provider reports", () => {
+  const live = [
+    { name: "eth0", kind: "physical", included: true },
+    { name: "tun0", kind: "virtual", included: false },
+  ];
+  assert.deepEqual(nextKnownVirtual([], live, ["eth0", "tun0"]), ["tun0"]);
+  assert.deepEqual(nextKnownVirtual(["docker0"], live, ["eth0", "tun0", "docker0"]), ["docker0", "tun0"]);
+});
+
+test("nextKnownVirtual is null when nothing changes", () => {
+  const live = [{ name: "tun0", kind: "virtual", included: false }];
+  assert.equal(nextKnownVirtual(["tun0"], live, ["tun0"]), null);
+  assert.equal(nextKnownVirtual(["tun0", "docker0"], [], ["docker0", "tun0"]), null);
+  assert.equal(nextKnownVirtual([], [], []), null);
+  assert.equal(nextKnownVirtual([], [{ name: "eth0", kind: "physical", included: true }], ["eth0"]), null);
+});
+
+test("nextKnownVirtual drops absent names vnstat no longer knows", () => {
+  assert.deepEqual(nextKnownVirtual(["tun0", "veth1a2b"], [], ["eth0", "tun0"]), ["tun0"]);
+  assert.deepEqual(nextKnownVirtual(["veth1a2b"], [], ["eth0"]), []);
+});
+
+test("nextKnownVirtual keeps a live virtual interface vnstat does not know yet", () => {
+  const live = [{ name: "tun0", kind: "virtual", included: false }];
+  assert.deepEqual(nextKnownVirtual([], live, ["eth0"]), ["tun0"]);
+  assert.equal(nextKnownVirtual(["tun0"], live, []), null);
+});
+
+test("nextKnownVirtual prunes nothing without a vnstat result", () => {
+  const live = [{ name: "tun0", kind: "virtual", included: false }];
+  assert.equal(nextKnownVirtual(["docker0"], [], null), null);
+  assert.deepEqual(nextKnownVirtual(["docker0"], live, null), ["docker0", "tun0"]);
+});
+
+test("nextKnownVirtual cleans up a malformed list", () => {
+  assert.deepEqual(nextKnownVirtual(["tun0", "tun0", "lo", ""], [], ["tun0"]), ["tun0"]);
+  assert.equal(nextKnownVirtual(null, null, null), null);
+  assert.deepEqual(nextKnownVirtual(null, [null, { kind: "virtual" }, { name: "tun0", kind: "virtual" }], null), [
+    "tun0",
+  ]);
 });
 
 // --- todayUsage -------------------------------------------------------------

@@ -242,24 +242,53 @@ function liveRows(live) {
   return toList(live).filter((row) => row && typeof row.name === "string");
 }
 
+function liveVirtual(live) {
+  return liveRows(live)
+    .filter((row) => row.kind === "virtual")
+    .map((row) => row.name);
+}
+
 // The interfaces whose usage counts. "manual": the configured names, present
 // or not. "auto": every name vnStat knows except those the provider currently
-// reports as virtual, plus the live interfaces in the sum. Virtual interfaces
-// that are absent cannot be recognized and then count, too. The loopback
-// device never counts. Sorted by compareNames, without duplicates.
-export function usageNames(mode, selected, live, known) {
+// reports as virtual and those once seen as virtual (`knownVirtual`, see
+// nextKnownVirtual), plus the live interfaces in the sum. The loopback device
+// never counts. Sorted by compareNames, without duplicates.
+export function usageNames(mode, selected, live, known, knownVirtual) {
   let names;
   if (mode === "manual") {
     names = toList(selected);
   } else {
-    const rows = liveRows(live);
-    const virtual = rows.filter((row) => row.kind === "virtual").map((row) => row.name);
-    const included = rows.filter((row) => row.included).map((row) => row.name);
+    const excluded = liveVirtual(live).concat(toList(knownVirtual));
+    const included = liveRows(live)
+      .filter((row) => row.included)
+      .map((row) => row.name);
     names = toList(known)
-      .filter((name) => virtual.indexOf(name) < 0)
+      .filter((name) => excluded.indexOf(name) < 0)
       .concat(included);
   }
   return uniqueSorted(names.filter((name) => name !== LOOPBACK));
+}
+
+function sameNames(a, b) {
+  return a.length === b.length && a.every((name, i) => name === b[i]);
+}
+
+// The interfaces once seen as virtual, so that automatic mode leaves them out
+// even while they are absent (a VPN tunnel after a disconnect). Adds the
+// names the provider reports as virtual now and drops absent names vnStat no
+// longer knows (`vnstatKnown`; null before the first vnStat result, then
+// nothing is dropped), so the list cannot grow forever. Returns the new
+// sorted list, or null when it is the same set as `previous`.
+export function nextKnownVirtual(previous, live, vnstatKnown) {
+  const before = uniqueSorted(toList(previous).filter((name) => typeof name === "string" && name !== ""));
+  const current = liveVirtual(live);
+  const kept =
+    vnstatKnown === null || vnstatKnown === undefined
+      ? before
+      : before.filter((name) => toList(vnstatKnown).indexOf(name) >= 0);
+  const next = uniqueSorted(kept.concat(current).filter((name) => name !== LOOPBACK));
+  const stored = uniqueSorted(toList(previous));
+  return sameNames(next, stored) ? null : next;
 }
 
 const KEY_SEPARATOR = "\n";
@@ -267,8 +296,8 @@ const KEY_SEPARATOR = "\n";
 // usageNames as one string ("eth0\nwlan0"). A string only counts as changed
 // when its value changes, so a new interfaces array per sample with the same
 // names leaves the usage sums alone.
-export function namesKey(mode, selected, live, known) {
-  return usageNames(mode, selected, live, known).join(KEY_SEPARATOR);
+export function namesKey(mode, selected, live, known, knownVirtual) {
+  return usageNames(mode, selected, live, known, knownVirtual).join(KEY_SEPARATOR);
 }
 
 // The names of a namesKey; [] for an empty key.

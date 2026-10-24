@@ -183,5 +183,10 @@
     <entry name="capNotifiedLevel" type="Int">
       <default>0</default>
     </entry>
+    <!-- Interfaces once seen as virtual, left out of the automatic usage
+         totals while absent; not shown in the settings dialog. -->
+    <entry name="knownVirtual" type="StringList">
+      <default></default>
+    </entry>
   </group>
 </kcfg>

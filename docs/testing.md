@@ -117,7 +117,7 @@ For these checks vnstat 2.0 or newer is installed and its service enabled
 | Cap set so that usage is already past 100 %: only the 100 % notification appears, not the warning too | 0.4 | |
 | Panel dot: appears from the warning level on, not before; a screen reader (or the accessibility inspector) reads the cap sentence in the widget's name | 0.4 | |
 | Tooltip in a real panel: a "Today" line (German: “Heute”) with download and upload | 0.4 | |
-| Manual interface selection with an absent interface in the list: its recorded traffic stays in the totals; automatic mode counts the interfaces vnstat knows, without `lo` and without those currently virtual | 0.4 | |
+| Manual interface selection with an absent interface in the list: its recorded traffic stays in the totals; automatic mode counts the interfaces vnstat knows, without `lo` and without those seen as virtual; after a VPN disconnect the tunnel stays out of the totals, and the configuration lists it in `knownVirtual` | 0.4 | |
 | Login with a VPN that connects automatically and a data cap the tunnel would push past a level: no notification at login | 0.4 | |
 | Popup that has been resized before (a stored small size): after the update the "Usage" section may not fit; enlarging the popup once is enough and the size is kept | 0.4 | |
 | German system language: all texts of the section "Usage" and the settings page are German and nothing is cut off | 0.4 | |

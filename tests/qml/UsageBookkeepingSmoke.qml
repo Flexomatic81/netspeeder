@@ -3,7 +3,8 @@
 
 // Smoke scene for UsageBookkeeping: a vnStat result that arrives before the
 // network provider knows the interfaces decides nothing, the cap is decided
-// once they are known, and a level reached is reported once. A plain
+// once they are known, virtual interfaces are remembered and stay out of the
+// totals after they are gone, and a level reached is reported once. A plain
 // object stands in for the configuration and records every write. It never
 // runs vnstat: the command prints a hand-built result with today's date.
 
@@ -78,7 +79,7 @@ Item {
     }
 
     function writes(): string {
-        return "cycle " + config.cycleWrites + ", level " + config.levelWrites;
+        return "cycle " + config.cycleWrites + ", level " + config.levelWrites + ", virtual " + config.virtualWrites;
     }
 
     // A check returns "" when it passes, "wait" to look again later.
@@ -89,6 +90,7 @@ Item {
             apply: () => {
                 config.cycleWrites = 0;
                 config.levelWrites = 0;
+                config.virtualWrites = 0;
             },
             check: () => {
                 if (model.status !== "ok" || Date.now() - scene.stepStart < 500) {
@@ -101,7 +103,7 @@ Item {
                 if (scene.fresh !== 0 || scene.reported.length !== 0) {
                     return "early: " + scene.fresh + " fresh results, reported " + scene.reported;
                 }
-                return config.cycleWrites + config.levelWrites === 0 ? "" : "early: " + scene.writes();
+                return config.cycleWrites + config.levelWrites + config.virtualWrites === 0 ? "" : "early: " + scene.writes();
             }
         },
         {
@@ -131,7 +133,32 @@ Item {
                 if (config.capNotifiedCycle !== model.summary.current.start || config.capNotifiedLevel !== 0) {
                     return "ready: stored " + config.capNotifiedCycle + "/" + config.capNotifiedLevel;
                 }
-                return config.cycleWrites === 1 && config.levelWrites === 0 ? "" : "ready: " + scene.writes();
+                if (config.knownVirtual.join(",") !== "tun0") {
+                    return "ready: remembered '" + config.knownVirtual.join(",") + "'";
+                }
+                return config.cycleWrites === 1 && config.levelWrites === 0 && config.virtualWrites === 1 ? "" : "ready: " + scene.writes();
+            }
+        },
+        {
+            name: "the tunnel is gone",
+            apply: () => {
+                model.interfaces = [
+                    {
+                        name: "eth0",
+                        kind: "physical",
+                        included: true
+                    }
+                ];
+                model.refresh();
+            },
+            check: () => {
+                if (scene.fresh < 2) {
+                    return "wait";
+                }
+                if (model.namesKey !== "eth0" || model.cap.level !== 0 || scene.reported.length !== 0) {
+                    return "gone: names '" + model.namesKey + "', level " + model.cap.level + ", reported " + scene.reported;
+                }
+                return config.cycleWrites === 1 && config.levelWrites === 0 && config.virtualWrites === 1 ? "" : "gone: " + scene.writes();
             }
         },
         {
@@ -142,7 +169,7 @@ Item {
                 model.refresh();
             },
             check: () => {
-                if (scene.fresh < 2) {
+                if (scene.fresh < 3) {
                     return "wait";
                 }
                 if (scene.reported.join(",") !== "2" || config.capNotifiedLevel !== 2 || config.levelWrites !== 1) {
@@ -155,7 +182,7 @@ Item {
             name: "the same level again",
             apply: () => model.refresh(),
             check: () => {
-                if (scene.fresh < 3) {
+                if (scene.fresh < 4) {
                     return "wait";
                 }
                 return scene.reported.join(",") === "2" && config.levelWrites === 1 ? "" : "again: reported " + scene.reported + ", " + scene.writes();
@@ -170,11 +197,14 @@ Item {
         property bool capNotify: true
         property string capNotifiedCycle: ""
         property int capNotifiedLevel: 0
+        property var knownVirtual: []
         property int cycleWrites: 0
         property int levelWrites: 0
+        property int virtualWrites: 0
 
         onCapNotifiedCycleChanged: config.cycleWrites++
         onCapNotifiedLevelChanged: config.levelWrites++
+        onKnownVirtualChanged: config.virtualWrites++
     }
 
     Timer {
@@ -221,6 +251,7 @@ Item {
         capEnabled: true
         capGiB: 1
         warnPercent: 80
+        knownVirtual: config.knownVirtual
         onFreshResult: scene.fresh++
     }
 

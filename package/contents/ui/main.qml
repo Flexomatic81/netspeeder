@@ -208,6 +208,7 @@ PlasmoidItem {
         capEnabled: Plasmoid.configuration.dataCapEnabled === true // qmllint disable missing-property
         capGiB: Appearance.validPositive(Plasmoid.configuration.dataCapGiB, 100) // qmllint disable missing-property
         warnPercent: Appearance.validInt(Plasmoid.configuration.capWarnPercent, 1, 99, 80) // qmllint disable missing-property
+        knownVirtual: Plasmoid.configuration.knownVirtual // qmllint disable missing-property
     }
 
     UsageBookkeeping {

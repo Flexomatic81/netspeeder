@@ -162,12 +162,15 @@ and the notification switch.
 **Which interfaces count:** in manual mode the interfaces you selected on the
 page "Data" count, even while they are absent (a USB tethering device that is
 unplugged keeps its past traffic in the sum). In automatic mode the interfaces
-vnStat knows count, except `lo` and those the widget currently sees as
-virtual. Limitation: an absent virtual interface cannot be recognized in
-automatic mode, so its recorded traffic is counted until you switch to manual
-selection or remove it from vnStat. The data cap is checked only once the
-widget knows its interfaces, so a reading right after login cannot count a
-tunnel and report a level too early.
+vnStat knows count, except `lo`, the interfaces the widget currently sees as
+virtual and those it has seen as virtual before. The widget remembers every
+virtual interface it sees, so a VPN tunnel stays out of the totals after a
+disconnect; names that vnStat no longer knows are forgotten again. A virtual
+interface that vnStat recorded but the widget has never seen (for example one
+from before the widget was installed) still counts until it appears once,
+until you switch to manual selection, or until you remove it from vnStat. The
+data cap is checked only once the widget knows its interfaces, so a reading
+right after login cannot count a tunnel and report a level too early.
 
 The tooltip leaves out the "Today" line while vnStat tracks none of the
 interfaces that count.
@@ -199,7 +202,7 @@ It takes a day for the first daily figures to appear.
 - Nothing else for the default data source: it uses the system sensors
   (`ksystemstats`) that every Plasma installation ships.
 - Optional: vnStat 2.0 or newer for the usage statistics and the data cap
-  (see [Data usage and data cap](#data-usage-and-data-cap-0-4)).
+  (see [Data usage and data cap](#data-usage-and-data-cap-04)).
 
 ## Installation
 
