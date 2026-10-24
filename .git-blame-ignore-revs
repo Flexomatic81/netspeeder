@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# SPDX-FileCopyrightText: 2026 Flexomatic81
+
+# Commits that only reformatted code; hide them from git blame (git config blame.ignoreRevsFile .git-blame-ignore-revs)
+1596bd17dd936817b878a593f20f2660fcfa5d01
