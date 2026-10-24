@@ -59,6 +59,8 @@ Item {
     readonly property real contentHeight: column.implicitHeight
     // The loaded graph; null while loading or when it failed to load.
     readonly property Item graphItem: graphLoader.item as Item
+    // The list of the interfaces (for the smoke scene).
+    readonly property Item interfaceList: list
 
     Layout.preferredWidth: Kirigami.Units.gridUnit * 22
     Layout.preferredHeight: Kirigami.Units.gridUnit * 26
@@ -94,6 +96,17 @@ Item {
         }
         const speed = Format.formatSpeed(bytesPerSecond, root.formatOptions);
         return symbol + " " + speed.value + " " + speed.unit;
+    }
+
+    // "1.5 MiB/s"
+    function peakText(bytesPerSecond: real): string {
+        const speed = Format.formatSpeed(bytesPerSecond, root.formatOptions);
+        return speed.value + " " + speed.unit;
+    }
+
+    function totalText(bytes: real): string {
+        const total = Format.formatTotal(bytes, root.formatOptions);
+        return total.value + " " + total.unit;
     }
 
     function statusText(state: var): string {
@@ -318,11 +331,57 @@ Item {
             }
         }
 
-        // Placeholder for the figures and the list of interfaces.
-        Item {
+        // Peaks and totals of the session.
+        GridLayout {
+            Layout.fillWidth: true
+            columns: 3
+            columnSpacing: Kirigami.Units.largeSpacing
+            rowSpacing: 0
+            visible: root.shown.history !== null
+
+            QQC2.Label {
+                text: root.trc("@label", "Peak")
+                opacity: 0.7
+            }
+
+            QQC2.Label {
+                Layout.fillWidth: true
+                text: "↓ " + root.peakText(root.shown.history ? root.shown.history.peakDown : 0)
+                font.features: { "tnum": 1 }
+            }
+
+            QQC2.Label {
+                Layout.fillWidth: true
+                text: "↑ " + root.peakText(root.shown.history ? root.shown.history.peakUp : 0)
+                font.features: { "tnum": 1 }
+            }
+
+            QQC2.Label {
+                text: root.trc("@label", "This session")
+                opacity: 0.7
+            }
+
+            QQC2.Label {
+                Layout.fillWidth: true
+                text: "↓ " + root.totalText(root.shown.history ? root.shown.history.sessionDown : 0)
+                font.features: { "tnum": 1 }
+            }
+
+            QQC2.Label {
+                Layout.fillWidth: true
+                text: "↑ " + root.totalText(root.shown.history ? root.shown.history.sessionUp : 0)
+                font.features: { "tnum": 1 }
+            }
+        }
+
+        InterfaceList {
+            id: list
+
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.minimumHeight: Kirigami.Units.gridUnit * 3
+            interfaces: root.shown.interfaces
+            formatOptions: root.formatOptions
         }
 
         RowLayout {

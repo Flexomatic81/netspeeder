@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: netspeeder\n"
 "Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
-"POT-Creation-Date: 2026-10-24 16:40+0200\n"
+"POT-Creation-Date: 2026-10-24 16:52+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,12 +16,12 @@ msgstr ""
 
 #: package/contents/code/tooltip.mjs:18
 #: package/contents/ui/config/ConfigData.qml:231
-#: package/contents/ui/full/FullRepresentation.qml:101
+#: package/contents/ui/full/FullRepresentation.qml:114
 msgid "Waiting for network data…"
 msgstr ""
 
 #: package/contents/code/tooltip.mjs:21
-#: package/contents/ui/full/FullRepresentation.qml:104
+#: package/contents/ui/full/FullRepresentation.qml:117
 msgid "No current data"
 msgstr ""
 
@@ -30,7 +30,7 @@ msgid "No selected network interface available"
 msgstr ""
 
 #: package/contents/code/tooltip.mjs:27
-#: package/contents/ui/full/FullRepresentation.qml:106
+#: package/contents/ui/full/FullRepresentation.qml:119
 msgid "Offline"
 msgstr ""
 
@@ -87,12 +87,12 @@ msgid "Download %1, upload %2"
 msgstr ""
 
 #: package/contents/ui/config/ConfigData.qml:123
-#: package/contents/ui/full/FullRepresentation.qml:112
+#: package/contents/ui/full/FullRepresentation.qml:125
 msgid "System sensors"
 msgstr ""
 
 #: package/contents/ui/config/ConfigData.qml:125
-#: package/contents/ui/full/FullRepresentation.qml:114
+#: package/contents/ui/full/FullRepresentation.qml:127
 msgid "Kernel counters"
 msgstr ""
 
@@ -144,6 +144,7 @@ msgid "physical"
 msgstr ""
 
 #: package/contents/ui/config/ConfigData.qml:252
+#: package/contents/ui/full/InterfaceList.qml:144
 msgctxt "@info interface kind"
 msgid "virtual"
 msgstr ""
@@ -256,25 +257,61 @@ msgstr ""
 msgid "Preview:"
 msgstr ""
 
-#: package/contents/ui/full/FullRepresentation.qml:106
+#: package/contents/ui/full/FullRepresentation.qml:119
 msgid "Online"
 msgstr ""
 
-#: package/contents/ui/full/FullRepresentation.qml:283
+#: package/contents/ui/full/FullRepresentation.qml:296
 msgctxt "@info"
 msgid "The traffic graph is not available because Qt Quick Charts is missing."
 msgstr ""
 
-#: package/contents/ui/full/FullRepresentation.qml:333
+#: package/contents/ui/full/FullRepresentation.qml:343
+msgctxt "@label"
+msgid "Peak"
+msgstr ""
+
+#: package/contents/ui/full/FullRepresentation.qml:360
+msgctxt "@label"
+msgid "This session"
+msgstr ""
+
+#: package/contents/ui/full/FullRepresentation.qml:392
 msgid "Open System Monitor"
 msgstr ""
 
-#: package/contents/ui/full/FullRepresentation.qml:340
+#: package/contents/ui/full/FullRepresentation.qml:399
 msgctxt "@info"
 msgid "Source: %1"
 msgstr ""
 
-#: package/contents/ui/full/TrafficGraph.qml:97
+#: package/contents/ui/full/InterfaceList.qml:147
+msgctxt "@info interface kind"
+msgid "not counted"
+msgstr ""
+
+#: package/contents/ui/full/InterfaceList.qml:150
+#, javascript-format
+msgctxt "@info Wi-Fi signal strength in percent"
+msgid "Signal %1%"
+msgstr ""
+
+#: package/contents/ui/full/InterfaceList.qml:154
+msgctxt "@info download and upload total since the interface became active"
+msgid "Total ↓ %1   ↑ %2"
+msgstr ""
+
+#: package/contents/ui/full/InterfaceList.qml:192
+msgctxt "@info"
+msgid "Copied"
+msgstr ""
+
+#: package/contents/ui/full/InterfaceList.qml:209
+msgctxt "@info:tooltip"
+msgid "Copy IP address"
+msgstr ""
+
+#: package/contents/ui/full/TrafficGraph.qml:99
 msgctxt "@option:radio time span of the graph"
 msgid "%1 min"
 msgstr ""

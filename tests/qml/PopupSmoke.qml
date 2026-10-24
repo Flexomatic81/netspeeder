@@ -4,7 +4,10 @@
 // Smoke scene for FullRepresentation: the header values ("–" without data,
 // formatted with data), the status text per state, the source hint (also
 // without a following sample), a selection change without a new sample, the
-// button, the minimum size and the snapshot: while the popup is not active a
+// button, the minimum size, the figures (peaks and session totals), the list
+// of interfaces (12 rows scroll, the popup keeps its preferred size with the
+// error hint shown, rows that stay keep their delegate, a click on an address
+// copies it) and the snapshot: while the popup is not active a
 // new provider value changes neither `shown` nor the displayed text, and
 // after it becomes active again both are current at once.
 // It cannot see QML warnings itself: read the output of qml6 for the scene as
@@ -14,6 +17,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtTest
 import org.kde.kirigami as Kirigami
+import org.kde.kquickcontrolsaddons
 import "../../package/contents/ui/full"
 import "../../package/contents/code/format.mjs" as Format
 import "../../package/contents/code/history.mjs" as History
@@ -122,6 +126,105 @@ Item {
         }
         return "";
     }
+
+    // The interfaces of the list steps: a wired and a wireless one that count,
+    // and ten virtual ones that do not.
+    function interfaceRows(ethDown: real): var {
+        const rows = [
+            {
+                name: "eth0", label: "Ethernet", kind: "physical", included: true, online: true,
+                down: ethDown, up: 200, totalDown: 5 * 1024 * 1024, totalUp: 2048, totalsKnown: true,
+                ipv4: "192.168.1.5", ipv6: "", signal: null
+            },
+            {
+                name: "wlan0", label: "Home WiFi", kind: "physical", included: true, online: true,
+                down: 10, up: 20, totalDown: 100, totalUp: 200, totalsKnown: true,
+                ipv4: "", ipv6: "fe80::1", signal: 71
+            }
+        ];
+        for (let i = 0; i < 10; i++) {
+            rows.push({
+                name: "veth" + i, label: "", kind: "virtual", included: false, online: false,
+                down: 0, up: 0, totalDown: 0, totalUp: 0, totalsKnown: false,
+                ipv4: "", ipv6: "", signal: null
+            });
+        }
+        return rows;
+    }
+
+    // A history whose peaks and session totals are not zero.
+    function totalsHistory(): var {
+        let history = History.createHistory(20);
+        for (let i = 0; i < 3; i++) {
+            history = History.pushSample(history, {
+                timestamp: 1000 * (i + 1),
+                down: 50000 * (i + 1),
+                up: 7000 * (i + 1),
+                totals: { eth0: { down: 4000000 * i, up: 900000 * i, known: true } }
+            });
+        }
+        return history;
+    }
+
+    function totalText(bytes: real): string {
+        const total = Format.formatTotal(bytes, Format.DEFAULT_FORMAT);
+        return total.value + " " + total.unit;
+    }
+
+    // "" when the figures, the hint and the list of the "interfaces" step are
+    // all there and the popup kept its preferred size.
+    function interfaceProblem(): string {
+        const list = view.interfaceList;
+        if (list === null || list === undefined) {
+            return "interfaces: there is no list";
+        }
+        const h = stub.history;
+        if (h.sessionDown <= 0 || h.peakDown <= 0) {
+            return "interfaces: the test history has no figures";
+        }
+        const problem = scene.textProblem("interfaces", [
+            "Peak",
+            "This session",
+            "↓ " + scene.speedText(h.peakDown),
+            "↑ " + scene.speedText(h.peakUp),
+            "↓ " + scene.totalText(h.sessionDown),
+            "↑ " + scene.totalText(h.sessionUp),
+            "Ethernet",
+            "Home WiFi",
+            "Reading network data failed: boom"
+        ], []);
+        if (problem !== "") {
+            return problem;
+        }
+        const texts = scene.shownTexts(list, []);
+        for (const wanted of ["Signal 71%", "Total ↓ " + scene.totalText(5 * 1024 * 1024) + "   ↑ " + scene.totalText(2048)]) {
+            if (!texts.some(t => t.indexOf(wanted) >= 0)) {
+                return "interfaces: missing '" + wanted + "' in [" + texts.join(" | ") + "]";
+            }
+        }
+        if (!texts.some(t => t.indexOf("virtual") >= 0 && t.indexOf("not counted") >= 0)) {
+            return "interfaces: no row is marked virtual and not counted in [" + texts.join(" | ") + "]";
+        }
+        if (list.rowFor("veth9") === null) {
+            return "interfaces: there is no row for veth9";
+        }
+        if (list.contentHeight <= list.viewportHeight) {
+            return "interfaces: the list does not scroll (content " + list.contentHeight + ", view " + list.viewportHeight + ")";
+        }
+        const size = scene.sizeProblem();
+        if (size !== "") {
+            return size;
+        }
+        return view.height === view.Layout.preferredHeight ? "" : "interfaces: the popup is " + view.height + " px high";
+    }
+
+    // "" when the row of `name` is the object it was before.
+    function sameRow(name: string): string {
+        const row = view.interfaceList.rowFor(name);
+        return row !== null && row === scene.rowsBefore[name] ? "" : "rows: the row of " + name + " was rebuilt";
+    }
+
+    property var rowsBefore: ({})
 
     readonly property var waitingTexts: ["↓ –", "↑ –", "Waiting for network data…"]
     readonly property var statuses: ["Waiting for network data…", "No current data", "Offline", "Online"]
@@ -262,6 +365,47 @@ Item {
                 }
                 return scene.textProblem("after activation", ["↓ " + scene.speedText(stub.down)], []);
             }
+        },
+        {
+            name: "interfaces, figures and hint",
+            apply: () => {
+                stub.history = scene.totalsHistory();
+                stub.interfaces = scene.interfaceRows(1000);
+                stub.errorDetail = "boom";
+                stub.errorCode = "source-failed";
+            },
+            check: scene.interfaceProblem
+        },
+        {
+            name: "rows survive a change",
+            apply: () => {
+                const list = view.interfaceList;
+                scene.rowsBefore = { eth0: list.rowFor("eth0"), wlan0: list.rowFor("wlan0"), veth7: list.rowFor("veth7") };
+                const rows = scene.interfaceRows(3 * 1024 * 1024).filter(r => r.name !== "veth3");
+                stub.interfaces = rows;
+            },
+            check: () => {
+                const list = view.interfaceList;
+                for (const name of ["eth0", "wlan0", "veth7"]) {
+                    const problem = scene.sameRow(name);
+                    if (problem !== "") {
+                        return problem;
+                    }
+                }
+                if (list.rowFor("veth3") !== null) {
+                    return "rows: veth3 is still listed";
+                }
+                const texts = scene.shownTexts(list, []);
+                const wanted = "↓ " + scene.speedText(3 * 1024 * 1024);
+                return texts.some(t => t.indexOf(wanted) >= 0) ? "" : "rows: eth0 does not show '" + wanted + "' in [" + texts.join(" | ") + "]";
+            }
+        },
+        {
+            name: "a row comes back",
+            apply: () => {
+                stub.interfaces = scene.interfaceRows(1000);
+            },
+            check: () => view.interfaceList.rowFor("veth3") !== null ? scene.sameRow("eth0") : "rows: veth3 is not back"
         }
     ]
 
@@ -329,6 +473,7 @@ Item {
             input.pressButton();
             input.pressGraphSwitch();
             input.pressActiveSwitch();
+            input.pressAddress();
             scene.finish(true, "SMOKE OK popup");
         }
 
@@ -362,6 +507,20 @@ Item {
             }
         }
 
+        // A click on an address copies it and says so.
+        function pressAddress() {
+            const button = view.interfaceList.rowFor("eth0").ipButton;
+            probe.content = "";
+            input.mouseClick(button);
+            if (probe.content !== "192.168.1.5") {
+                scene.fail("copy: the clipboard holds '" + probe.content + "', expected 192.168.1.5");
+                return;
+            }
+            if (scene.itemWithText(view, "Copied") === null) {
+                scene.fail("copy: there is no 'Copied' note after the click");
+            }
+        }
+
         function pressGraphSwitch() {
             const button = scene.itemWithText(view, "15 min");
             if (button === null) {
@@ -373,6 +532,11 @@ Item {
                 scene.fail("graph: graphMinutesPicked gave " + scene.picked + ", expected 15");
             }
         }
+    }
+
+    // Reads the system clipboard the list writes to.
+    Clipboard {
+        id: probe
     }
 
     QtObject {

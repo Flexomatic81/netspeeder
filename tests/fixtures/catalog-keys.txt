@@ -64,3 +64,10 @@
 @item:valuesuffix %1 is a number of seconds	%1 s	
 @info	The traffic graph is not available because Qt Quick Charts is missing.	
 @option:radio time span of the graph	%1 min	
+@label	Peak	
+@label	This session	
+@info interface kind	not counted	
+@info Wi-Fi signal strength in percent	Signal %1%	
+@info download and upload total since the interface became active	Total ↓ %1   ↑ %2	
+@info	Copied	
+@info:tooltip	Copy IP address	
