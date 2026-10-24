@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: netspeeder\n"
 "Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
-"POT-Creation-Date: 2026-10-24 16:52+0200\n"
+"POT-Creation-Date: 2026-10-24 17:01+0200\n"
 "PO-Revision-Date: 2026-10-24 01:44+0200\n"
 "Last-Translator: Flexomatic81\n"
 "Language-Team: German\n"
@@ -88,10 +88,73 @@ msgstr "Anzeige"
 msgid "Data"
 msgstr "Daten"
 
+#: package/contents/config/config.qml:39
+msgctxt "@title"
+msgid "Behavior"
+msgstr "Verhalten"
+
 #: package/contents/ui/compact/CompactRepresentation.qml:105
 msgctxt "@info accessible"
 msgid "Download %1, upload %2"
 msgstr "Download %1, Upload %2"
+
+#: package/contents/ui/config/ConfigBehavior.qml:58
+msgid "Neither click opens the popup. It stays reachable on the desktop only."
+msgstr "Kein Klick öffnet das Popup. Es bleibt nur auf dem Desktop erreichbar."
+
+#: package/contents/ui/config/ConfigBehavior.qml:65
+msgid "Left click:"
+msgstr "Linksklick:"
+
+#: package/contents/ui/config/ConfigBehavior.qml:67
+#: package/contents/ui/config/ConfigBehavior.qml:80
+msgid "Open the popup"
+msgstr "Popup öffnen"
+
+#: package/contents/ui/config/ConfigBehavior.qml:68
+#: package/contents/ui/config/ConfigBehavior.qml:81
+msgid "Start the application or command"
+msgstr "Anwendung oder Befehl starten"
+
+#: package/contents/ui/config/ConfigBehavior.qml:77
+msgid "Middle click:"
+msgstr "Mittelklick:"
+
+#: package/contents/ui/config/ConfigBehavior.qml:79
+msgid "Do nothing"
+msgstr "Nichts tun"
+
+#: package/contents/ui/config/ConfigBehavior.qml:94
+msgid "Start:"
+msgstr "Starten:"
+
+#: package/contents/ui/config/ConfigBehavior.qml:96
+msgid "Application"
+msgstr "Anwendung"
+
+#: package/contents/ui/config/ConfigBehavior.qml:97
+msgid "Command"
+msgstr "Befehl"
+
+#: package/contents/ui/config/ConfigBehavior.qml:104
+msgid "Application:"
+msgstr "Anwendung:"
+
+#: package/contents/ui/config/ConfigBehavior.qml:120
+msgid "Choose…"
+msgstr "Auswählen …"
+
+#: package/contents/ui/config/ConfigBehavior.qml:129
+msgid "Command:"
+msgstr "Befehl:"
+
+#: package/contents/ui/config/ConfigBehavior.qml:141
+msgid "Choose an application"
+msgstr "Anwendung auswählen"
+
+#: package/contents/ui/config/ConfigBehavior.qml:143
+msgid "Applications (*.desktop)"
+msgstr "Anwendungen (*.desktop)"
 
 #: package/contents/ui/config/ConfigData.qml:123
 #: package/contents/ui/full/FullRepresentation.qml:125
@@ -153,7 +216,7 @@ msgid "physical"
 msgstr "physisch"
 
 #: package/contents/ui/config/ConfigData.qml:252
-#: package/contents/ui/full/InterfaceList.qml:144
+#: package/contents/ui/full/InterfaceList.qml:147
 msgctxt "@info interface kind"
 msgid "virtual"
 msgstr "virtuell"
@@ -294,28 +357,28 @@ msgctxt "@info"
 msgid "Source: %1"
 msgstr "Quelle: %1"
 
-#: package/contents/ui/full/InterfaceList.qml:147
+#: package/contents/ui/full/InterfaceList.qml:150
 msgctxt "@info interface kind"
 msgid "not counted"
 msgstr "nicht gezählt"
 
-#: package/contents/ui/full/InterfaceList.qml:150
+#: package/contents/ui/full/InterfaceList.qml:153
 #, javascript-format
 msgctxt "@info Wi-Fi signal strength in percent"
 msgid "Signal %1%"
 msgstr "Signal %1%"
 
-#: package/contents/ui/full/InterfaceList.qml:154
+#: package/contents/ui/full/InterfaceList.qml:157
 msgctxt "@info download and upload total since the interface became active"
 msgid "Total ↓ %1   ↑ %2"
 msgstr "Gesamt ↓ %1   ↑ %2"
 
-#: package/contents/ui/full/InterfaceList.qml:192
+#: package/contents/ui/full/InterfaceList.qml:195
 msgctxt "@info"
 msgid "Copied"
 msgstr "Kopiert"
 
-#: package/contents/ui/full/InterfaceList.qml:209
+#: package/contents/ui/full/InterfaceList.qml:212
 msgctxt "@info:tooltip"
 msgid "Copy IP address"
 msgstr "IP-Adresse kopieren"

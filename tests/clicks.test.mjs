@@ -3,7 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { actionFor, nextExpanded, popupReachable } from "../package/contents/code/clicks.mjs";
+import { actionFor, desktopIdFromUrl, nextExpanded, popupReachable } from "../package/contents/code/clicks.mjs";
 
 const actions = ["popup", "launch", "none"];
 
@@ -43,4 +43,23 @@ test("the popup is reachable when at least one button opens it", () => {
 test("the popup toggles against the state seen at the press", () => {
   assert.equal(nextExpanded(false), true);
   assert.equal(nextExpanded(true), false);
+});
+
+test("the desktop ID is the file name of a chosen launcher without .desktop", () => {
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/org.kde.konsole.desktop"), "org.kde.konsole");
+  assert.equal(desktopIdFromUrl("file:///home/user/.local/share/applications/my%20app.desktop"), "my app");
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/caf%C3%A9.desktop"), "café");
+  assert.equal(desktopIdFromUrl("/usr/share/applications/firefox.desktop"), "firefox");
+});
+
+test("anything that is not a .desktop file gives an empty ID", () => {
+  assert.equal(desktopIdFromUrl("file:///usr/bin/konsole"), "");
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/"), "");
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/.desktop"), "");
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/a.desktop.bak"), "");
+  assert.equal(desktopIdFromUrl("https://example.org/a.desktop"), "");
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/%E0%A4%A.desktop"), "");
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/%FF%FF.desktop"), "");
+  assert.equal(desktopIdFromUrl(""), "");
+  assert.equal(desktopIdFromUrl(undefined), "");
 });

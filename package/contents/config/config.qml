@@ -35,4 +35,9 @@ ConfigModel {
         icon: "network-wired"
         source: "config/ConfigData.qml"
     }
+    ConfigCategory {
+        name: root.trc("@title", "Behavior")
+        icon: "input-mouse"
+        source: "config/ConfigBehavior.qml"
+    }
 }

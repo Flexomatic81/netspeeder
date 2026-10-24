@@ -29,3 +29,26 @@ export function popupReachable(config) {
 export function nextExpanded(wasExpanded) {
   return !wasExpanded;
 }
+
+// The desktop ID of a launcher file the user chose (a file URL or a plain
+// path): the file name without ".desktop". Anything else gives "".
+export function desktopIdFromUrl(url) {
+  const text = String(url ?? "");
+  const path = text.startsWith("file://") ? text.slice("file://".length) : text;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(path)) {
+    return "";
+  }
+  const name = path.slice(path.lastIndexOf("/") + 1);
+  if (!name.endsWith(".desktop")) {
+    return "";
+  }
+  try {
+    return decodeURIComponent(name.slice(0, -".desktop".length));
+  } catch (error) {
+    // Malformed percent-encoding; anything else is a real fault.
+    if (error instanceof URIError) {
+      return "";
+    }
+    throw error;
+  }
+}

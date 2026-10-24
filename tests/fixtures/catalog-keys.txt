@@ -3,22 +3,33 @@
 	100 KiB/s	
 	512 B/s	
 	Active source: %1	
+	Application	
+	Application:	
+	Applications (*.desktop)	
 	Automatic	
 	Automatic (physical network devices)	
 	Automatic (recommended)	
 	Bits (Mbit/s)	
 	Bytes, binary (KiB/s)	
 	Bytes, decimal (kB/s)	
+	Choose an application	
+	Choose…	
+	Command	
+	Command:	
 	Data	
 	Data source:	
 	Decimal places:	
 	Display	
+	Do nothing	
 	Download first	
 	Interfaces counted in the total:	
 	Kernel counters	
 	Kernel counters (/proc/net/dev)	
 	Kernel counters also show VPN and container interfaces, but start a small process at every update.	
 	Layout:	
+	Left click:	
+	Middle click:	
+	Neither click opens the popup. It stays reachable on the desktop only.	
 	Netspeeder	
 	Network	
 	No current data	
@@ -28,6 +39,7 @@
 	Offline	
 	Online	
 	Open System Monitor	
+	Open the popup	
 	Order:	
 	Preview:	
 	Reading network data failed: %1	
@@ -35,6 +47,8 @@
 	Show as 0 below:	
 	Show only the combined speed	
 	Side by side	
+	Start the application or command	
+	Start:	
 	System sensors	
 	System sensors (ksystemstats)	
 	System sensors are not available.	
@@ -71,3 +85,4 @@
 @info download and upload total since the interface became active	Total ↓ %1   ↑ %2	
 @info	Copied	
 @info:tooltip	Copy IP address	
+@title	Behavior	
