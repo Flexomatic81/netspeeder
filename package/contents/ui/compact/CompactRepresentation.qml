@@ -12,6 +12,7 @@
 import QtQuick
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
+import "../../code/appearance.mjs" as Appearance
 import "../../code/format.mjs" as Format
 import "../../code/layout.mjs" as LayoutLogic
 import "../../code/text.mjs" as TextTools
@@ -51,6 +52,14 @@ Item {
     property bool fixedWidth: true
     // Text size in percent of the size that fits the panel.
     property int fontScale: 100
+    // Empty uses the font of the Plasma theme.
+    property string fontFamily: ""
+    property bool fontBold: false
+    // Symbols in front of the values: "arrows", "triangles", "icons", "none"
+    // or "custom" with the two texts below.
+    property string iconStyle: "arrows"
+    property string customDownIcon: "↓"
+    property string customUpIcon: "↑"
     // The smallest text size that is still readable, and the text size of a
     // vertical panel at fontScale 100. They follow the theme; only the smoke
     // scenes set them, because plain qml6 reports odd theme fonts.
@@ -72,11 +81,18 @@ Item {
             minReadablePx: root.minReadablePx
         })
     readonly property bool single: root.resolvedLayout === "single"
-    readonly property string family: Kirigami.Theme.defaultFont.family
+    readonly property string family: root.fontFamily !== "" ? root.fontFamily : Kirigami.Theme.defaultFont.family
+    // { down, up, icons }: texts, or theme icon names when icons is true.
+    readonly property var symbolSet: Appearance.symbols(root.iconStyle, {
+            down: root.customDownIcon,
+            up: root.customUpIcon
+        })
 
     // Text size and, in a vertical panel, the chosen display variant.
     readonly property real rowHeight: root.resolvedLayout === "rows" ? root.height / 2 : root.height
-    readonly property var verticalFit: root.vertical ? LayoutLogic.fitVertical(root.width, root.variantWidths, root.baseFontPx * root.fontScale / 100, root.minReadablePx) : ({
+    // The layout rounds the symbol column of each label up to whole pixels.
+    readonly property var roundedParts: root.resolvedLayout === "columns" ? [root.symbolWidth, root.symbolWidth] : [root.symbolWidth]
+    readonly property var verticalFit: root.vertical ? LayoutLogic.fitVertical(root.width, root.variantWidths, root.baseFontPx * root.fontScale / 100, root.minReadablePx, root.roundedParts) : ({
             index: 0,
             pixelSize: 0
         })
@@ -91,8 +107,10 @@ Item {
     readonly property var totalSpeed: root.speedFor(root.provider.down + root.provider.up, root.activeVariant.options)
     readonly property var firstSpeed: root.single ? root.totalSpeed : (root.uploadFirst ? root.upSpeed : root.downSpeed)
     readonly property var secondSpeed: root.uploadFirst ? root.downSpeed : root.upSpeed
-    readonly property string firstSymbol: root.single ? "↓↑" : (root.uploadFirst ? "↑" : "↓")
-    readonly property string secondSymbol: root.uploadFirst ? "↓" : "↑"
+    readonly property string firstSymbol: root.uploadFirst && !root.single ? root.symbolSet.up : root.symbolSet.down
+    readonly property string secondSymbol: root.uploadFirst ? root.symbolSet.down : root.symbolSet.up
+    // The single value stands for both directions and shows both symbols.
+    readonly property string pairedSymbol: root.single ? root.symbolSet.up : ""
 
     // The width of the slots for value and unit, in pixels at the current size;
     // 0 lets the texts take their natural width.
@@ -140,7 +158,14 @@ Item {
         }))
     readonly property real longUnitWidth: Math.max(longUnit0.advanceWidth, longUnit1.advanceWidth, longUnit2.advanceWidth, longUnit3.advanceWidth)
     readonly property real shortUnitWidth: Math.max(shortUnit0.advanceWidth, shortUnit1.advanceWidth, shortUnit2.advanceWidth, shortUnit3.advanceWidth)
-    readonly property real symbolWidth: root.single ? symbolBoth.advanceWidth : Math.max(symbolDown.advanceWidth, symbolUp.advanceWidth)
+    // An icon is as wide as the text is high; without symbols there is no gap.
+    readonly property real symbolWidth: {
+        if (root.symbolSet.icons) {
+            return (root.single ? 2 : 1) * LayoutLogic.REFERENCE_PX;
+        }
+        return root.single ? symbolBoth.advanceWidth : Math.max(symbolDown.advanceWidth, symbolUp.advanceWidth);
+    }
+    readonly property real symbolGap: root.symbolSet.down !== "" ? 0.25 * LayoutLogic.REFERENCE_PX : 0
 
     // The ways a vertical panel can show the speeds, from the most to the least
     // space-hungry: as chosen; no decimals; no decimals and short units; the
@@ -183,7 +208,7 @@ Item {
 
     // Width at the reference size that the panel needs for each variant.
     readonly property var variantWidths: root.variants.map(variant => {
-        const gap = 0.25 * LayoutLogic.REFERENCE_PX;
+        const gap = root.symbolGap;
         const label = variant.symbolBelow ? Math.max(variant.valueWidth, root.symbolWidth + gap + variant.unitWidth) : Math.max(root.symbolWidth + gap + variant.valueWidth, variant.unitWidth);
         return root.resolvedLayout === "columns" ? 2 * label + 0.6 * LayoutLogic.REFERENCE_PX : label;
     })
@@ -206,6 +231,7 @@ Item {
 
         visible: false
         font.family: root.family
+        font.bold: root.fontBold
         font.pixelSize: LayoutLogic.REFERENCE_PX
         font.features: { "tnum": 1 }
     }
@@ -284,21 +310,21 @@ Item {
         id: symbolDown
 
         font: referenceFont.font
-        text: "↓"
+        text: root.symbolSet.icons ? "" : root.symbolSet.down
     }
 
     TextMetrics {
         id: symbolUp
 
         font: referenceFont.font
-        text: "↑"
+        text: root.symbolSet.icons ? "" : root.symbolSet.up
     }
 
     TextMetrics {
         id: symbolBoth
 
         font: referenceFont.font
-        text: "↓↑"
+        text: root.symbolSet.icons ? "" : root.symbolSet.down + root.symbolSet.up
     }
 
     GridLayout {
@@ -318,6 +344,10 @@ Item {
             id: firstLabel
 
             symbol: root.firstSymbol
+            secondSymbol: root.pairedSymbol
+            iconSymbol: root.symbolSet.icons
+            fontFamily: root.family
+            bold: root.fontBold
             valueText: root.firstSpeed.value
             unitText: root.firstSpeed.unit
             valueWidth: root.valueSlot
@@ -334,6 +364,9 @@ Item {
 
             visible: !root.single
             symbol: root.secondSymbol
+            iconSymbol: root.symbolSet.icons
+            fontFamily: root.family
+            bold: root.fontBold
             valueText: root.secondSpeed.value
             unitText: root.secondSpeed.unit
             valueWidth: root.valueSlot

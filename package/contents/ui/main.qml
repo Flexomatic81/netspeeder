@@ -14,6 +14,7 @@ import org.kde.notification
 import "compact"
 import "data"
 import "full"
+import "../code/appearance.mjs" as Appearance
 import "../code/clicks.mjs" as Clicks
 import "../code/format.mjs" as Format
 import "../code/graph.mjs" as Graph
@@ -103,6 +104,12 @@ PlasmoidItem {
         uploadFirst: Plasmoid.configuration.uploadFirst // qmllint disable missing-property
         combined: Plasmoid.configuration.combined // qmllint disable missing-property
         fixedWidth: Plasmoid.configuration.fixedWidth // qmllint disable missing-property
+        fontFamily: Plasmoid.configuration.fontFamily // qmllint disable missing-property
+        fontBold: Plasmoid.configuration.fontBold // qmllint disable missing-property
+        fontScale: Appearance.validInt(Plasmoid.configuration.fontScale, 50, 200, 100) // qmllint disable missing-property
+        iconStyle: Appearance.validChoice(Plasmoid.configuration.iconStyle, Appearance.ICON_STYLES, "arrows") // qmllint disable missing-property
+        customDownIcon: Plasmoid.configuration.customDownIcon // qmllint disable missing-property
+        customUpIcon: Plasmoid.configuration.customUpIcon // qmllint disable missing-property
         onPressed: root.wasExpanded = root.expanded
         onActivated: button => root.runAction(button === Qt.MiddleButton ? "middle" : "left")
     }

@@ -51,15 +51,40 @@ export function fitPixelSize(available, measuredAtReference, maxPx) {
   return Math.min(max, Math.max(1, size));
 }
 
+// Width at `px` of text that measures `measured` at REFERENCE_PX, plus what
+// the layout adds by rounding each of the `rounded` parts (widths at
+// REFERENCE_PX that are part of the text) up to whole pixels.
+function roundedWidth(px, measured, rounded) {
+  let width = (measured * px) / REFERENCE_PX;
+  for (const part of rounded) {
+    const scaled = (finiteOr(part, 0) * px) / REFERENCE_PX;
+    width += Math.ceil(scaled) - scaled;
+  }
+  return width;
+}
+
+// fitPixelSize(), made smaller until the rounded parts fit as well.
+function fitRounded(available, measured, maxPx, rounded) {
+  const room = Math.max(0, finiteOr(available, 0));
+  let size = fitPixelSize(room, measured, maxPx);
+  while (size > 1 && roundedWidth(size, finiteOr(measured, 0), rounded) > room) {
+    size -= 1;
+  }
+  return size;
+}
+
 // Picks the first candidate that fits `available` at a readable size.
 // `candidates` are widths at REFERENCE_PX, ordered from the most to the least
 // space-hungry variant. If none is readable, the last (most compact) variant
 // is used at the size it gets, which is too small but the best possible.
-export function fitVertical(available, candidates, maxPx, minReadablePx) {
+// `rounded` lists parts of every candidate (widths at REFERENCE_PX) that the
+// layout rounds up to whole pixels, such as the symbol column.
+export function fitVertical(available, candidates, maxPx, minReadablePx, rounded) {
   const minimum = finiteOr(minReadablePx, 1);
+  const parts = Array.isArray(rounded) ? rounded : [];
   let result = { index: 0, pixelSize: fitPixelSize(available, 0, maxPx) };
   for (let i = 0; i < candidates.length; i++) {
-    result = { index: i, pixelSize: fitPixelSize(available, candidates[i], maxPx) };
+    result = { index: i, pixelSize: fitRounded(available, candidates[i], maxPx, parts) };
     if (result.pixelSize >= minimum) break;
   }
   return result;

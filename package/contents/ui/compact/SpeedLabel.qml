@@ -17,8 +17,12 @@ import org.kde.kirigami as Kirigami
 GridLayout {
     id: root
 
-    // Direction symbol, for example an arrow.
+    // Direction symbol, for example an arrow; with iconSymbol the name of a
+    // theme icon, shown as high as the text.
     property string symbol: ""
+    // A second symbol right after the first, for the sum of both directions.
+    property string secondSymbol: ""
+    property bool iconSymbol: false
     property string valueText: ""
     property string unitText: ""
     // Width of the value and unit slots; 0 uses the natural width of the text.
@@ -42,7 +46,7 @@ GridLayout {
     readonly property real unitGap: 0.2 * root.pixelSize
 
     // The widths the parts ask for.
-    readonly property real symbolSlot: symbolText.implicitWidth
+    readonly property real symbolSlot: root.iconSymbol ? iconBox.implicitWidth : symbolText.implicitWidth
     readonly property real valueSlot: root.valueWidth > 0 ? root.valueWidth : valueLabel.implicitWidth
     readonly property real unitSlot: root.unitWidth > 0 ? root.unitWidth : unitLabel.implicitWidth
 
@@ -53,7 +57,8 @@ GridLayout {
     Text {
         id: symbolText
 
-        text: root.symbol
+        visible: !root.iconSymbol
+        text: root.symbol + root.secondSymbol
         font.family: root.family
         font.pixelSize: root.pixelSize
         font.bold: root.bold
@@ -64,6 +69,30 @@ GridLayout {
         Layout.column: 0
         Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
         Layout.preferredWidth: root.symbolSlot
+    }
+
+    // The symbols as icons, in the same place as the text above.
+    Row {
+        id: iconBox
+
+        visible: root.iconSymbol
+        Layout.row: root.valueAlone ? 1 : 0
+        Layout.column: 0
+        Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+        Layout.preferredWidth: root.symbolSlot
+
+        Kirigami.Icon {
+            source: root.iconSymbol ? root.symbol : ""
+            implicitWidth: root.pixelSize
+            implicitHeight: root.pixelSize
+        }
+
+        Kirigami.Icon {
+            visible: root.secondSymbol !== ""
+            source: root.iconSymbol ? root.secondSymbol : ""
+            implicitWidth: root.pixelSize
+            implicitHeight: root.pixelSize
+        }
     }
 
     Text {

@@ -47,8 +47,53 @@
   </group>
 
   <group name="Appearance">
+    <!-- Empty uses the font of the Plasma theme. -->
+    <entry name="fontFamily" type="String">
+      <default></default>
+    </entry>
+    <entry name="fontBold" type="Bool">
+      <default>false</default>
+    </entry>
+    <!-- Text size in percent. -->
+    <entry name="fontScale" type="Int">
+      <default>100</default>
+      <min>50</min>
+      <max>200</max>
+    </entry>
+    <!-- arrows, triangles, icons, none or custom. -->
+    <entry name="iconStyle" type="String">
+      <default>arrows</default>
+    </entry>
+    <entry name="customDownIcon" type="String">
+      <default>↓</default>
+    </entry>
+    <entry name="customUpIcon" type="String">
+      <default>↑</default>
+    </entry>
+    <!-- theme, direction or thresholds. -->
+    <entry name="colorMode" type="String">
+      <default>theme</default>
+    </entry>
+    <!-- #rrggbb; empty uses the theme's colour. -->
+    <entry name="downloadColor" type="String">
+      <default></default>
+    </entry>
+    <entry name="uploadColor" type="String">
+      <default></default>
+    </entry>
+    <!-- JSON list of up to six levels: { "min": bytes per second, "color": "#rrggbb" or "" }. -->
+    <entry name="colorThresholds" type="String">
+      <default>[{"min":0,"color":""},{"min":1048576,"color":"#1d99f3"},{"min":10485760,"color":"#f67400"},{"min":104857600,"color":"#da4453"}]</default>
+    </entry>
+    <entry name="colorUnits" type="Bool">
+      <default>false</default>
+    </entry>
     <entry name="fixedWidth" type="Bool">
       <default>true</default>
+    </entry>
+    <!-- off, background or beside. -->
+    <entry name="sparkline" type="String">
+      <default>off</default>
     </entry>
   </group>
 
@@ -79,6 +124,21 @@
     </entry>
     <entry name="launchCommand" type="String">
       <default></default>
+    </entry>
+    <!-- never, offline or idle. -->
+    <entry name="autoHide" type="String">
+      <default>never</default>
+    </entry>
+    <!-- Bytes per second below which the connection counts as idle. -->
+    <entry name="idleThreshold" type="Int">
+      <default>1024</default>
+      <min>0</min>
+    </entry>
+    <!-- Seconds below the threshold before the connection counts as idle. -->
+    <entry name="idleSeconds" type="Int">
+      <default>30</default>
+      <min>5</min>
+      <max>3600</max>
     </entry>
   </group>
 

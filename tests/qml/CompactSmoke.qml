@@ -5,8 +5,9 @@
 // sizes (horizontal 44, 20 and 96 px high, vertical 32 px wide) with a stub
 // provider and checks sizes, placement and the "–" shown before the first data;
 // then the order, the single value, the natural width and the explicit layouts,
-// and finally the clicks: left and middle report pressed() then activated(),
-// the right button reports nothing.
+// then the appearance settings (font, size and symbol style), and finally the
+// clicks: left and middle report pressed() then activated(), the right button
+// reports nothing.
 // plasmawindowed does not instantiate the compact view of this plasmoid, so
 // this scene is the only runtime check of its bindings. It cannot see QML
 // warnings itself: read the output of qml6 for the scene as well, it must be
@@ -15,6 +16,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtTest
+import org.kde.kirigami as Kirigami
 import "../../package/contents/ui/compact"
 import "../../package/contents/code/format.mjs" as Format
 
@@ -214,6 +216,62 @@ Item {
         return scene.shownTexts(view, view, []).filter(t => t.text === text)[0];
     }
 
+    // The visible Text items and theme icons inside `item`.
+    function shownItems(item, found) {
+        for (let i = 0; i < item.children.length; i++) {
+            const child = item.children[i];
+            if (!child.visible) {
+                continue;
+            }
+            if ((child instanceof Text && child.text !== "") || child instanceof Kirigami.Icon) {
+                found.push(child);
+            }
+            scene.shownItems(child, found);
+        }
+        return found;
+    }
+
+    // The texts of a view that are neither a value nor a unit: its symbols.
+    function symbolTexts(view) {
+        const units = Format.speedUnits(view.formatOptions).concat(Format.speedUnits(Object.assign({}, view.formatOptions, {
+            shortUnits: true
+        })));
+        return scene.shownItems(view, []).filter(item => item instanceof Text && !/^[\d–]/.test(item.text) && units.indexOf(item.text) < 0).map(item => item.text);
+    }
+
+    function iconSources(view) {
+        return scene.shownItems(view, []).filter(item => item instanceof Kirigami.Icon).map(item => String(item.source));
+    }
+
+    // With the default appearance a view shows arrows in the theme font and colour.
+    function defaultLookProblem(name, view) {
+        const symbols = scene.symbolTexts(view).join(",");
+        if (symbols !== "↓,↑") {
+            return name + ": symbols are '" + symbols + "', expected '↓,↑'";
+        }
+        if (scene.iconSources(view).length !== 0) {
+            return name + ": shows icons";
+        }
+        for (const item of scene.shownItems(view, [])) {
+            if (item.font.family !== Kirigami.Theme.defaultFont.family || item.font.bold || !Qt.colorEqual(item.color, Kirigami.Theme.textColor)) {
+                return name + ": '" + item.text + "' uses " + item.font.family + (item.font.bold ? " bold" : "") + " in " + item.color + ", expected " + Kirigami.Theme.defaultFont.family + " in " + Kirigami.Theme.textColor;
+            }
+        }
+        return "";
+    }
+
+    // A family other than the theme's, preferably a wide monospace one.
+    readonly property string otherFamily: {
+        const families = Qt.fontFamilies().filter(f => f !== Kirigami.Theme.defaultFont.family && !f.endsWith(".pcf"));
+        return families.filter(f => /Mono/.test(f))[0] || families[0] || "";
+    }
+    property real boldWidth: 0
+
+    function styledProblem(where) {
+        const texts = scene.shownTexts(styled44, styled44, []);
+        return scene.textProblem(where, texts, 2, true) || scene.placementProblem(where, styled44, texts, false, 0);
+    }
+
     // What the views reported: "pressed:<button>" and "activated:<button>".
     property var events: []
 
@@ -346,6 +404,76 @@ Item {
         }
     }
 
+    // The appearance settings: once spelled out with their defaults, once bold
+    // in another family, and one view whose style the steps change.
+    RowLayout {
+        id: hostDefaults
+
+        x: 10
+        y: 220
+        width: 300
+        height: 44
+        spacing: 0
+
+        CompactRepresentation {
+            id: defaults44
+
+            provider: stub
+            formatOptions: Format.DEFAULT_FORMAT
+            minReadablePx: scene.plasmaSmallPx
+            baseFontPx: scene.plasmaDefaultPx
+            fontFamily: ""
+            fontBold: false
+            fontScale: 100
+            iconStyle: "arrows"
+            customDownIcon: "↓"
+            customUpIcon: "↑"
+            Layout.fillHeight: true
+        }
+    }
+
+    RowLayout {
+        id: hostBold
+
+        x: 10
+        y: 280
+        width: 300
+        height: 44
+        spacing: 0
+
+        CompactRepresentation {
+            id: bold44
+
+            provider: stub
+            formatOptions: Format.DEFAULT_FORMAT
+            minReadablePx: scene.plasmaSmallPx
+            baseFontPx: scene.plasmaDefaultPx
+            fontFamily: scene.otherFamily
+            fontBold: true
+            Layout.fillHeight: true
+        }
+    }
+
+    RowLayout {
+        id: hostStyled
+
+        x: 10
+        y: 340
+        width: 300
+        height: 44
+        spacing: 0
+
+        CompactRepresentation {
+            id: styled44
+
+            provider: stub
+            formatOptions: Format.DEFAULT_FORMAT
+            minReadablePx: scene.plasmaSmallPx
+            baseFontPx: scene.plasmaDefaultPx
+            Layout.fillHeight: true
+        }
+    }
+
     function clickProblem() {
         const expected = [[Qt.LeftButton, "pressed:" + Qt.LeftButton + ",activated:" + Qt.LeftButton, "left"], [Qt.MiddleButton, "pressed:" + Qt.MiddleButton + ",activated:" + Qt.MiddleButton, "middle"], [Qt.RightButton, "", "right"]];
         for (const [button, events, name] of expected) {
@@ -465,6 +593,116 @@ Item {
             problem = narrow32.resolvedLayout !== "columns" ? "explicit columns at 32 px: layout is " + narrow32.resolvedLayout : scene.textProblem("columns at 32 px", texts, 2, true) || scene.placementProblem("columns at 32 px", narrow32, texts, true, 32);
             console.log("compact vertical 32px with explicit columns: pixelSize " + narrow32.pixelSize + " | " + scene.describe(texts));
             return problem;
+        },
+        () => {
+            // Spelled-out defaults look exactly like a view that sets none of them.
+            if (Math.abs(defaults44.implicitWidth - wide44.implicitWidth) > 0.01 || Math.abs(defaults44.implicitHeight - wide44.implicitHeight) > 0.01) {
+                return "explicit defaults: " + defaults44.implicitWidth + "x" + defaults44.implicitHeight + " instead of " + wide44.implicitWidth + "x" + wide44.implicitHeight;
+            }
+            const problem = scene.defaultLookProblem("no appearance set", wide44) || scene.defaultLookProblem("explicit defaults", defaults44);
+            if (problem !== "") {
+                return problem;
+            }
+            if (scene.otherFamily === "") {
+                return "no font family besides the theme's";
+            }
+            // The bold view starts with small values.
+            stub.down = 2 * 1024;
+            stub.up = 3 * 1024;
+            return "";
+        },
+        () => {
+            const fonts = scene.shownItems(bold44, []).filter(item => item.font.family !== scene.otherFamily || !item.font.bold);
+            if (fonts.length > 0) {
+                return "bold view: '" + fonts[0].text + "' uses " + fonts[0].font.family + ", expected bold " + scene.otherFamily;
+            }
+            const texts = scene.shownTexts(bold44, bold44, []);
+            const problem = scene.textProblem("bold", texts, 2, true) || scene.placementProblem("bold", bold44, texts, false, 0);
+            scene.boldWidth = bold44.implicitWidth;
+            stub.down = 99.9 * 1024 * 1024;
+            stub.up = 999 * 1024;
+            return problem;
+        },
+        () => {
+            // The fixed width holds in the chosen font, and the widest values fit.
+            if (Math.abs(bold44.implicitWidth - scene.boldWidth) > 0.01) {
+                return "bold " + scene.otherFamily + ": width changed from " + scene.boldWidth + " to " + bold44.implicitWidth;
+            }
+            const texts = scene.shownTexts(bold44, bold44, []);
+            console.log("compact bold " + scene.otherFamily + ": implicit " + bold44.implicitWidth.toFixed(1) + " | " + scene.describe(texts));
+            const problem = scene.textProblem("bold widest", texts, 2, true) || scene.placementProblem("bold widest", bold44, texts, false, 0);
+            stub.down = 1.5 * 1024 * 1024;
+            stub.up = 130 * 1024;
+            styled44.iconStyle = "none";
+            return problem;
+        },
+        () => {
+            // No symbols: the values start at the left edge, without a gap.
+            const texts = scene.shownTexts(styled44, styled44, []);
+            const symbols = scene.symbolTexts(styled44);
+            if (symbols.length !== 0 || scene.iconSources(styled44).length !== 0) {
+                return "style none: shows symbols " + symbols;
+            }
+            const values = texts.filter(t => /^\d/.test(t.text));
+            if (values.some(t => Math.abs(t.x) > 0.5) || !(styled44.implicitWidth < wide44.implicitWidth)) {
+                return "style none: values do not start at the left edge or the width " + styled44.implicitWidth + " is not below " + wide44.implicitWidth + ": " + scene.describe(texts);
+            }
+            const problem = scene.styledProblem("style none");
+            styled44.iconStyle = "triangles";
+            return problem;
+        },
+        () => {
+            const symbols = scene.symbolTexts(styled44).join(",");
+            if (symbols !== "▼,▲") {
+                return "style triangles: symbols are '" + symbols + "'";
+            }
+            const problem = scene.styledProblem("style triangles");
+            styled44.iconStyle = "icons";
+            return problem;
+        },
+        () => {
+            const sources = scene.iconSources(styled44).join(",");
+            const symbols = scene.symbolTexts(styled44);
+            if (sources !== "go-down,go-up" || symbols.length !== 0) {
+                return "style icons: icons '" + sources + "', texts '" + symbols + "'";
+            }
+            const icons = scene.shownItems(styled44, []).filter(item => item instanceof Kirigami.Icon);
+            if (icons.some(icon => Math.abs(icon.width - styled44.pixelSize) > 0.01 || Math.abs(icon.height - styled44.pixelSize) > 0.01)) {
+                return "style icons: an icon is " + icons[0].width + "x" + icons[0].height + ", expected " + styled44.pixelSize;
+            }
+            const problem = scene.styledProblem("style icons");
+            styled44.customDownIcon = "D";
+            styled44.customUpIcon = "U";
+            styled44.iconStyle = "custom";
+            return problem;
+        },
+        () => {
+            const symbols = scene.symbolTexts(styled44).join(",");
+            if (symbols !== "D,U") {
+                return "style custom: symbols are '" + symbols + "'";
+            }
+            const problem = scene.styledProblem("style custom");
+            styled44.iconStyle = "triangles";
+            styled44.combined = true;
+            return problem;
+        },
+        () => {
+            const symbols = scene.symbolTexts(styled44).join(",");
+            if (symbols !== "▼▲") {
+                return "combined triangles: symbols are '" + symbols + "'";
+            }
+            styled44.combined = false;
+            styled44.iconStyle = "arrows";
+            styled44.fontScale = 150;
+            return "";
+        },
+        () => {
+            if (!(styled44.pixelSize > wide44.pixelSize)) {
+                return "fontScale 150: pixelSize " + styled44.pixelSize + " is not above " + wide44.pixelSize;
+            }
+            const texts = scene.shownTexts(styled44, styled44, []);
+            console.log("compact fontScale 150: pixelSize " + styled44.pixelSize + " | " + scene.describe(texts));
+            return scene.textProblem("fontScale 150", texts, 2, true);
         }
     ]
     property int step: 0

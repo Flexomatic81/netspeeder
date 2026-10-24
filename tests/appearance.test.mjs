@@ -3,6 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   COLOR_MODES,
   DEFAULT_THRESHOLDS,
@@ -218,4 +219,27 @@ test("the choice lists are as specified", () => {
   assert.deepEqual(SPARKLINE_MODES, ["off", "background", "beside"]);
   assert.deepEqual(COLOR_MODES, ["theme", "direction", "thresholds"]);
   assert.deepEqual(ICON_STYLES, ["arrows", "triangles", "icons", "none", "custom"]);
+});
+
+// The stored defaults in main.xml agree with the rules above.
+const mainXml = readFileSync(new URL("../package/contents/config/main.xml", import.meta.url), "utf8");
+function xmlDefault(name) {
+  const match = mainXml.match(new RegExp(`<entry name="${name}" type="[A-Za-z]+">\\s*<default>([^<]*)</default>`));
+  assert.ok(match, `no default for ${name}`);
+  return match[1];
+}
+
+test("main.xml stores the default thresholds in their serialized form", () => {
+  assert.equal(xmlDefault("colorThresholds"), serializeThresholds(DEFAULT_THRESHOLDS));
+});
+
+test("main.xml defaults are valid choices and symbols", () => {
+  assert.equal(validChoice(xmlDefault("iconStyle"), ICON_STYLES, ""), "arrows");
+  assert.equal(validChoice(xmlDefault("colorMode"), COLOR_MODES, ""), "theme");
+  assert.equal(validChoice(xmlDefault("sparkline"), SPARKLINE_MODES, ""), "off");
+  assert.deepEqual(
+    symbols("custom", { down: xmlDefault("customDownIcon"), up: xmlDefault("customUpIcon") }),
+    symbols("arrows"),
+  );
+  assert.equal(validInt(Number(xmlDefault("fontScale")), 50, 200, 0), 100);
 });

@@ -45,6 +45,25 @@ test("fitVertical falls back to the last candidate when nothing is readable", ()
   assert.deepEqual(fitVertical(10, [631, 400, 230], 14, 12), { index: 2, pixelSize: 4 });
 });
 
+// The layout rounds the symbol column up to whole pixels: a symbol 125.5 px wide
+// at the reference size takes 17 px instead of 16.3 at 13 px.
+test("fitVertical leaves room for parts the layout rounds up", () => {
+  const widths = [348.8, 322, 322, 241.2];
+  assert.deepEqual(fitVertical(32, widths, 13, 10), { index: 3, pixelSize: 13 });
+  assert.deepEqual(fitVertical(32, widths, 13, 10, [125.5]), { index: 3, pixelSize: 12 });
+});
+test("fitVertical keeps the size when the rounding still fits", () => {
+  assert.deepEqual(fitVertical(32, [307.1, 280.3, 280.3, 199.5], 13, 10, [83.75]), { index: 0, pixelSize: 10 });
+});
+test("fitVertical adds up several rounded parts and ignores whole pixels", () => {
+  assert.deepEqual(fitVertical(32, [300], 13, 1, [100]), { index: 0, pixelSize: 10 });
+  assert.deepEqual(fitVertical(32, [300], 13, 1, [103, 103]), { index: 0, pixelSize: 10 });
+  assert.deepEqual(fitVertical(32, [300], 13, 1, [103, 103, 103]), { index: 0, pixelSize: 9 });
+});
+test("fitVertical never goes below 1 px for rounded parts", () => {
+  assert.deepEqual(fitVertical(1, [300], 13, 1, [150]), { index: 0, pixelSize: 1 });
+});
+
 test("values that have not loaded yet fall back to safe defaults", () => {
   assert.equal(fontPixelSize(NaN, 100), 1); // row height 0
   assert.equal(fontPixelSize(undefined, undefined), 1);
@@ -58,4 +77,6 @@ test("values that have not loaded yet fall back to safe defaults", () => {
   assert.equal(fitPixelSize(32, 160, NaN), 1); // no usable maximum
   assert.equal(fitPixelSize(32, undefined, 14), 14); // nothing measured
   assert.deepEqual(fitVertical(64, [400], 14, undefined), { index: 0, pixelSize: 14 });
+  assert.deepEqual(fitVertical(64, [400], 14, 1, undefined), { index: 0, pixelSize: 14 });
+  assert.deepEqual(fitVertical(64, [400], 14, 1, [Number.NaN]), { index: 0, pixelSize: 14 });
 });
