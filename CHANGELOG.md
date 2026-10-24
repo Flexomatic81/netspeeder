@@ -46,6 +46,18 @@ First pre-release, stage "Kern" (core).
 - Development checks: ESLint, Prettier, coverage floor, strict qmllint,
   shellcheck, one check runner (`node tools/check.mjs`) used locally, as
   pre-commit hook and in CI.
+- Branch coverage of the logic modules is 100 %; the coverage floor for
+  branches is 98 %.
+- Visible texts go through per-file translation helpers (`tr`, `trc`, `trp`)
+  that call Plasma's i18n functions and fall back to English where they are
+  not available. The message catalog is unchanged, and texts in the `.mjs`
+  modules are now extracted as well.
+- The list synchronisation shared by the sensor source and the settings page
+  lives in one tested module, and the tooltip text selection in another.
+- The QML smoke runs are strict: a scene fails on a non-zero exit or on any
+  engine warning outside its per-scene allow-list.
+- Build scripts check for `po/` and `msgfmt` before they act, drop outdated
+  translations and leave editor leftovers out of the package.
 
 ### Addressed (issues of the original Netspeed Widget)
 
