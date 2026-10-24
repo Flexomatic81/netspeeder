@@ -52,14 +52,14 @@ test("the desktop ID is the file name of a chosen launcher without .desktop", ()
   assert.equal(desktopIdFromUrl("/usr/share/applications/firefox.desktop"), "firefox");
 });
 
-const ROOTS = ["/usr/share/applications", "/home/user/.local/share/applications"];
+const ROOTS = ["/usr/share/applications", "/srv/user/.local/share/applications"];
 
 test("the desktop ID of a launcher in a subfolder joins the relative path with dashes", () => {
   assert.equal(desktopIdFromUrl("file:///usr/share/applications/kde4/foo.desktop", ROOTS), "kde4-foo");
   assert.equal(desktopIdFromUrl("file:///usr/share/applications/a/b/c/d.desktop", ROOTS), "a-b-c-d");
   assert.equal(desktopIdFromUrl("file:///usr/share/applications/a/b-c.desktop", ROOTS), "a-b-c");
   assert.equal(
-    desktopIdFromUrl("file:///home/user/.local/share/applications/kde4/foo%20x.desktop", ROOTS),
+    desktopIdFromUrl("file:///srv/user/.local/share/applications/kde4/foo%20x.desktop", ROOTS),
     "kde4-foo x",
   );
   assert.equal(desktopIdFromUrl("file:///usr/share/applications/org.kde.konsole.desktop", ROOTS), "org.kde.konsole");
@@ -81,8 +81,8 @@ test("the longest matching root is the prefix of the desktop ID", () => {
 test("roots and paths match in encoded and decoded form, with spaces and accents", () => {
   const file = "/.local/share/applications/kde4/foo.desktop";
   const dirs = [
-    ["/home/user%20name", "/home/user name"],
-    ["/home/caf%C3%A9", "/home/caf\u00e9"],
+    ["/srv/user%20name", "/srv/user name"],
+    ["/srv/caf%C3%A9", "/srv/caf\u00e9"],
   ];
   for (const [encoded, decoded] of dirs) {
     for (const root of [`file://${encoded}/.local/share/applications`, `${decoded}/.local/share/applications`]) {

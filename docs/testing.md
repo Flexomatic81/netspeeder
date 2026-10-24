@@ -158,6 +158,18 @@ For these checks vnstat 2.0 or newer is installed and its service enabled
 |---|---|---|
 | Run through all items on Plasma 6.3 (Debian 13, VM) | before 1.0 | |
 
+## Release record 1.0.0
+
+Gates the project owner has to pass before anything is published. Fill in the
+date and the result of each row.
+
+| Gate | Date | Result |
+|---|---|---|
+| (a) The full manual checklist in this file, all tables | | |
+| (b) Run on Plasma 6.3 in a VM, as described in [compatibility.md](compatibility.md) | | |
+| (c) Screenshots generated with `scripts/screenshots.sh`, reviewed and committed | | |
+| (d) CMake route verified (`cmake -B build -DCMAKE_INSTALL_PREFIX=$PWD/stage`, build, install, compare `stage/` with the `.plasmoid`), or knowingly released with the caveat in the changelog | | |
+
 ## Automatic acceptance 0.1
 
 Date: 2026-10-24, state `f4846c5`, on the development machine (Node 24.22,

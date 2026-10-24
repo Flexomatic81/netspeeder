@@ -9,7 +9,7 @@
         "License": "GPL-2.0-or-later",
         "Name": "Netspeeder",
         "Name[de]": "Netspeeder",
-        "Version": "0.1.0",
+        "Version": "1.0.0",
         "Website": "https://github.com/Flexomatic81/netspeeder"
     },
     "KPackageStructure": "Plasma/Applet",
