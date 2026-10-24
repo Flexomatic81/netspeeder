@@ -18,6 +18,9 @@ Item {
     property bool applied: false
     property double stepStart: 0
     property var saved: ({})
+    // The freshResult signals so far, and the summary status seen in the last.
+    property int fresh: 0
+    property string freshStatus: ""
     readonly property string v2: Qt.resolvedUrl("../fixtures/vnstat-v2.json").toString().replace("file://", "")
 
     function finish(ok, message) {
@@ -87,6 +90,9 @@ Item {
                 if (model.summary.status !== "ok" || model.view.summary !== model.summary || model.view.status !== "ok") {
                     return "enabled: no ok summary in the view";
                 }
+                if (scene.fresh !== 1 || scene.freshStatus !== "ok") {
+                    return "enabled: " + scene.fresh + " fresh results, summary " + scene.freshStatus;
+                }
                 scene.save();
                 return "";
             }
@@ -98,7 +104,7 @@ Item {
                 model.interfaces = scene.sample(["eth0"]);
                 model.tick();
             },
-            check: () => scene.sameProblem("equal samples")
+            check: () => scene.fresh !== 1 ? "equal samples: " + scene.fresh + " fresh results" : scene.sameProblem("equal samples")
         },
         {
             name: "a new interface",
@@ -109,7 +115,7 @@ Item {
                 if (model.summary === scene.saved.summary || model.view === scene.saved.view) {
                     return "new interface: the summary was not rebuilt";
                 }
-                return model.summary.untracked.indexOf("wlan7") >= 0 ? "" : "new interface: wlan7 is not untracked";
+                return model.summary.untracked.indexOf("wlan7") >= 0 && scene.fresh === 1 ? "" : "new interface: wlan7 untracked or " + scene.fresh + " fresh results";
             }
         },
         {
@@ -122,8 +128,13 @@ Item {
                 if (model.cap === scene.saved.cap || !model.cap.enabled || model.view.cap !== model.cap) {
                     return "cap: the cap did not follow its setting";
                 }
-                return model.summary === scene.saved.summary ? "" : "cap: the summary was rebuilt for a cap setting";
+                return model.summary === scene.saved.summary && scene.fresh === 1 ? "" : "cap: the summary was rebuilt or a fresh result came for a cap setting";
             }
+        },
+        {
+            name: "a new vnStat run",
+            apply: () => model.refresh(),
+            check: () => scene.fresh >= 2 ? "" : "wait"
         }
     ]
 
@@ -168,5 +179,9 @@ Item {
         enabled: false
         command: "cat '" + scene.v2 + "'"
         interfaces: scene.sample(["eth0"])
+        onFreshResult: {
+            scene.fresh++;
+            scene.freshStatus = model.summary.status;
+        }
     }
 }

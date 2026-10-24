@@ -63,9 +63,20 @@ export function hintLines(state, t) {
   }
 }
 
+// The usage of today, after the rate lines; empty without usageToday.
+function usageLines(t, extra) {
+  const today = extra?.usageToday;
+  if (today === null || today === undefined) {
+    return [];
+  }
+  const text = (bytes) => escapeHtml(String(extra.totalText(bytes)));
+  return [t.trc("@info:tooltip", "Today: ↓ %1 ↑ %2", text(today.down), text(today.up))];
+}
+
 // state: { hasData, stale, includedCount, interfaceSelection, online, down,
 // up, primaryIp, errorCode, errorDetail, fallbackNote }; t: { tr, trc };
-// speedText: bytes per second -> "1.5 KiB/s".
-export function tooltipLines(state, t, speedText) {
-  return statusLines(state, t, speedText).concat(hintLines(state, t));
+// speedText: bytes per second -> "1.5 KiB/s"; extra (optional): { usageToday:
+// { down, up } or null, totalText: bytes -> "1.5 GiB" }.
+export function tooltipLines(state, t, speedText, extra) {
+  return statusLines(state, t, speedText).concat(usageLines(t, extra), hintLines(state, t));
 }

@@ -143,3 +143,7 @@
 	vnstat website	
 @title:group	Usage	
 	* incomplete: vnstat lacks some days of this period	
+@info:tooltip	Today: ↓ %1 ↑ %2	
+	You have reached your data cap (%1 of %2).	
+	You have used %1 % of your data cap (%2 of %3).	
+	Data cap %1 % used	

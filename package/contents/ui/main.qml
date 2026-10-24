@@ -21,6 +21,7 @@ import "../code/graph.mjs" as Graph
 import "../code/launchtext.mjs" as LaunchText
 import "../code/text.mjs" as TextTools
 import "../code/tooltip.mjs" as Tooltip
+import "../code/usage.mjs" as Usage
 import "../code/visibility.mjs" as Visibility
 
 PlasmoidItem {
@@ -56,6 +57,58 @@ PlasmoidItem {
     // data cap (see UsageModel).
     readonly property var summary: usageModel.summary
     readonly property var cap: usageModel.cap
+
+    // "1.5 GiB" for an amount of bytes, in the settings of the user.
+    function totalText(bytes: real): string {
+        const total = Format.formatTotal(bytes, root.formatOptions);
+        return total.value + " " + total.unit;
+    }
+
+    // The share of the data cap with the decimal point of the locale.
+    function percentText(percent: real): string {
+        return String(percent).replace(".", root.formatOptions.decimalPoint ?? ".");
+    }
+
+    // Whether the usage is current enough to show: enabled and read.
+    readonly property bool usageOk: usageModel.enabled && usageModel.status === "ok"
+    // The level of the data cap for the panel dot; 0 unless the cap is on and
+    // the usage is current.
+    readonly property int capLevel: root.usageOk && root.cap.enabled ? root.cap.level : 0
+
+    // Takes a new vnStat result: reports the cap level reached once per level
+    // and billing period, and stores what has been seen (see capAction).
+    function handleFreshUsage() {
+        // (configuration is created from main.xml at Plasma runtime)
+        const action = Usage.capAction({
+            usageEnabled: usageModel.enabled,
+            dataCapEnabled: root.cap.enabled,
+            capNotify: Plasmoid.configuration.capNotify === true, // qmllint disable missing-property
+            freshOk: usageModel.status === "ok",
+            level: root.cap.level,
+            cycle: String(root.summary.current.start ?? ""),
+            notified: {
+                cycle: Plasmoid.configuration.capNotifiedCycle, // qmllint disable missing-property
+                level: Plasmoid.configuration.capNotifiedLevel // qmllint disable missing-property
+            }
+        });
+        if (action.store.cycle !== Plasmoid.configuration.capNotifiedCycle) { // qmllint disable missing-property
+            Plasmoid.configuration.capNotifiedCycle = action.store.cycle; // qmllint disable missing-property
+        }
+        if (action.store.level !== Plasmoid.configuration.capNotifiedLevel) { // qmllint disable missing-property
+            Plasmoid.configuration.capNotifiedLevel = action.store.level; // qmllint disable missing-property
+        }
+        if (action.notify > 0) {
+            capNotice.text = root.capNoticeText(action.notify);
+            capNotice.sendEvent();
+        }
+    }
+
+    // The text of the notification for a cap level (1 warning, 2 reached).
+    function capNoticeText(level: int): string {
+        const used = root.totalText(root.summary.current.total);
+        const cap = root.totalText(root.cap.capBytes);
+        return level >= 2 ? root.tr("You have reached your data cap (%1 of %2).", used, cap) : root.tr("You have used %1 % of your data cap (%2 of %3).", root.percentText(root.cap.percent), used, cap);
+    }
 
     // "1.5 KiB/s" for a rate in bytes per second.
     function speedText(bytesPerSecond: real): string {
@@ -131,6 +184,8 @@ PlasmoidItem {
         iconStyle: Appearance.validChoice(Plasmoid.configuration.iconStyle, Appearance.ICON_STYLES, "arrows") // qmllint disable missing-property
         customDownIcon: Plasmoid.configuration.customDownIcon // qmllint disable missing-property
         customUpIcon: Plasmoid.configuration.customUpIcon // qmllint disable missing-property
+        capLevel: root.capLevel
+        capText: root.tr("Data cap %1 % used", root.percentText(root.cap.percent))
         colorMode: Appearance.validChoice(Plasmoid.configuration.colorMode, Appearance.COLOR_MODES, "theme") // qmllint disable missing-property
         downloadColor: Plasmoid.configuration.downloadColor // qmllint disable missing-property
         uploadColor: Plasmoid.configuration.uploadColor // qmllint disable missing-property
@@ -144,7 +199,10 @@ PlasmoidItem {
     }
 
     toolTipMainText: root.provider.primaryLabel || root.tr("Network")
-    toolTipSubText: Tooltip.tooltipLines(root.provider, { tr: root.tr, trc: root.trc }, root.speedText).join("<br>")
+    toolTipSubText: Tooltip.tooltipLines(root.provider, { tr: root.tr, trc: root.trc }, root.speedText, {
+        usageToday: root.usageOk ? root.summary.today : null,
+        totalText: root.totalText
+    }).join("<br>")
     toolTipTextFormat: Text.StyledText
 
     NetworkProvider {
@@ -171,6 +229,7 @@ PlasmoidItem {
         capEnabled: Plasmoid.configuration.dataCapEnabled === true // qmllint disable missing-property
         capGiB: Appearance.validPositive(Plasmoid.configuration.dataCapGiB, 100) // qmllint disable missing-property
         warnPercent: Appearance.validInt(Plasmoid.configuration.capWarnPercent, 1, 99, 80) // qmllint disable missing-property
+        onFreshResult: root.handleFreshUsage()
     }
 
     Launcher {
@@ -195,6 +254,15 @@ PlasmoidItem {
 
     Notification {
         id: failure
+
+        componentName: "plasma_workspace"
+        eventId: "notification"
+        title: root.tr("Netspeeder")
+        iconName: "network-connect"
+    }
+
+    Notification {
+        id: capNotice
 
         componentName: "plasma_workspace"
         eventId: "notification"

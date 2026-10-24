@@ -82,6 +82,14 @@ Item {
     property int minReadablePx: Kirigami.Theme.smallFont.pixelSize
     property int baseFontPx: Kirigami.Theme.defaultFont.pixelSize
 
+    // The data cap level: 0 shows nothing, 1 (warning) and 2 (reached) a dot
+    // in the top right corner. capText is the translated sentence for screen
+    // readers, so the level does not depend on the color alone.
+    property int capLevel: 0
+    property string capText: ""
+    // The dot (for the smoke scene).
+    readonly property Rectangle capDot: dot
+
     // "shown", "hidden" (takes no room, shows nothing, ignores clicks) or
     // "placeholder" (a dimmed icon instead of the values, for edit mode).
     property string presence: "shown"
@@ -164,7 +172,8 @@ Item {
     readonly property string accessibleName: {
         const down = root.plainSpeed(root.provider.down);
         const up = root.plainSpeed(root.provider.up);
-        return root.trc("@info accessible", "Download %1, upload %2", down, up);
+        const speeds = root.trc("@info accessible", "Download %1, upload %2", down, up);
+        return root.capLevel >= 1 && root.capText !== "" ? speeds + ". " + root.capText : speeds;
     }
 
     // Value and unit for a rate; "–" without a unit before the first data.
@@ -534,6 +543,21 @@ Item {
         height: root.placeholderSize
         anchors.centerIn: parent
         opacity: 0.5
+    }
+
+    // Over the corner of the view; takes no room and no clicks.
+    Rectangle {
+        id: dot
+
+        readonly property int diameter: Math.max(4, Math.round(root.pixelSize / 3))
+
+        visible: root.capLevel >= 1 && root.isShown
+        width: dot.diameter
+        height: dot.diameter
+        radius: dot.diameter / 2
+        anchors.top: parent.top
+        anchors.right: parent.right
+        color: root.capLevel >= 2 ? Kirigami.Theme.negativeTextColor : Kirigami.Theme.neutralTextColor
     }
 
     MouseArea {

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: netspeeder\n"
 "Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
-"POT-Creation-Date: 2026-10-24 22:02+0200\n"
+"POT-Creation-Date: 2026-10-24 22:10+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -103,6 +103,11 @@ msgstr ""
 msgid "Reading network data failed: %1"
 msgstr ""
 
+#: package/contents/code/tooltip.mjs:73
+msgctxt "@info:tooltip"
+msgid "Today: ↓ %1 ↑ %2"
+msgstr ""
+
 #: package/contents/config/config.qml:29
 msgid "Display"
 msgstr ""
@@ -121,7 +126,7 @@ msgctxt "@title"
 msgid "Behavior"
 msgstr ""
 
-#: package/contents/ui/compact/CompactRepresentation.qml:167
+#: package/contents/ui/compact/CompactRepresentation.qml:175
 msgctxt "@info accessible"
 msgid "Download %1, upload %2"
 msgstr ""
@@ -643,10 +648,22 @@ msgstr ""
 msgid "vnstat website"
 msgstr ""
 
-#: package/contents/ui/main.qml:146
-msgid "Network"
+#: package/contents/ui/main.qml:110
+msgid "You have reached your data cap (%1 of %2)."
+msgstr ""
+
+#: package/contents/ui/main.qml:110
+msgid "You have used %1 % of your data cap (%2 of %3)."
+msgstr ""
+
+#: package/contents/ui/main.qml:188
+msgid "Data cap %1 % used"
 msgstr ""
 
 #: package/contents/ui/main.qml:201
+msgid "Network"
+msgstr ""
+
+#: package/contents/ui/main.qml:260 package/contents/ui/main.qml:269
 msgid "Netspeeder"
 msgstr ""

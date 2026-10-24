@@ -130,3 +130,34 @@ test("hintLines alone returns just the source note", () => {
     "Reading network data failed: boom",
   ]);
 });
+
+const today = { usageToday: { down: 2048, up: 512 }, totalText: (bytes) => `${bytes / 1024} KiB` };
+
+test("the today line follows the rate lines and the address", () => {
+  assert.deepEqual(tooltipLines(live, t, speedText, today), [
+    "Download: 1500 B/s",
+    "Upload: 20 B/s",
+    "IP address: 192.168.1.5",
+    "Today: ↓ 2 KiB ↑ 0.5 KiB",
+  ]);
+});
+
+test("the today line comes before the source note", () => {
+  const state = { ...live, errorCode: "no-interfaces", fallbackNote: "x" };
+  assert.deepEqual(tooltipLines(state, t, speedText, today).slice(-2), [
+    "Today: ↓ 2 KiB ↑ 0.5 KiB",
+    "Using kernel counters because system sensors report no network interfaces.",
+  ]);
+});
+
+test("without usageToday, or without extra, the tooltip is unchanged", () => {
+  const plain = tooltipLines(live, t, speedText);
+  assert.deepEqual(tooltipLines(live, t, speedText, {}), plain);
+  assert.deepEqual(tooltipLines(live, t, speedText, { usageToday: null, totalText: today.totalText }), plain);
+  assert.deepEqual(tooltipLines(live, t, speedText, undefined), plain);
+});
+
+test("the today line is escaped", () => {
+  const extra = { usageToday: { down: 1, up: 2 }, totalText: (bytes) => `<${bytes}&>` };
+  assert.equal(tooltipLines(live, t, speedText, extra).at(-1), "Today: ↓ &lt;1&amp;&gt; ↑ &lt;2&amp;&gt;");
+});

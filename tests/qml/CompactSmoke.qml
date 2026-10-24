@@ -1131,9 +1131,55 @@ Item {
             }
             const texts = scene.shownTexts(narrowSpark, narrowSpark, []);
             return scene.sparkSeriesProblem("vertical beside", narrowSpark, stub.history, false) || scene.placementProblem("vertical beside", narrowSpark, texts, true, 32);
-        }
+        },
+        () => scene.capDotProblem()
     ]
     property int step: 0
+
+    // "" when the data cap dot of wide44 looks right at the level, else what
+    // is wrong: no room taken, the corner, the color, the accessible name.
+    function capLookProblem(level, plain) {
+        const dot = wide44.capDot;
+        const sizes = scene.layoutSizes(wide44);
+        const name = wide44.accessibleName;
+        const diameter = Math.max(4, Math.round(wide44.pixelSize / 3));
+        if (sizes !== plain.sizes || wide44.implicitWidth !== plain.width) {
+            return "cap " + level + ": sizes " + sizes + " instead of " + plain.sizes;
+        }
+        if (level === 0) {
+            return dot.visible || name !== plain.name ? "cap 0: dot " + dot.visible + ", name '" + name + "'" : "";
+        }
+        const expected = level === 2 ? Kirigami.Theme.negativeTextColor : Kirigami.Theme.neutralTextColor;
+        if (!dot.visible || dot.width !== diameter || dot.height !== diameter || !Qt.colorEqual(dot.color, expected)) {
+            return "cap " + level + ": dot " + dot.visible + " " + dot.width + "x" + dot.height + " " + dot.color + ", expected " + diameter + " " + expected;
+        }
+        const corner = dot.mapToItem(wide44, dot.width, 0);
+        if (Math.abs(corner.x - wide44.width) > 0.01 || Math.abs(corner.y) > 0.01) {
+            return "cap " + level + ": dot corner at " + corner.x + "," + corner.y + " in a view of " + wide44.width;
+        }
+        return name !== plain.name + ". " + wide44.capText ? "cap " + level + ": accessible name '" + name + "'" : "";
+    }
+
+    function capDotProblem() {
+        const plain = { sizes: scene.layoutSizes(wide44), width: wide44.implicitWidth, name: wide44.accessibleName };
+        let problem = scene.capLookProblem(0, plain);
+        for (const level of [1, 2, 0]) {
+            wide44.capText = "Data cap 85.0 % used";
+            wide44.capLevel = level;
+            problem = problem || scene.capLookProblem(level, plain);
+        }
+        wide44.capLevel = 1;
+        for (const presence of ["hidden", "placeholder"]) {
+            wide44.presence = presence;
+            problem = problem || (wide44.capDot.visible ? "cap dot visible while " + presence : "");
+        }
+        wide44.presence = "shown";
+        wide44.capLevel = 0;
+        if (problem === "") {
+            console.log("compact cap dot: none at level 0, a corner dot at 1 and 2, size " + plain.sizes + " unchanged, name '" + plain.name + ". Data cap 85.0 % used'");
+        }
+        return problem;
+    }
 
     Timer {
         interval: 400

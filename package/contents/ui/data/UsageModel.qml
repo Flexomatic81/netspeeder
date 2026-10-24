@@ -54,6 +54,11 @@ Item {
             outdated: root.outdated
         }) : internals.idleView
 
+    // A new vnStat result arrived (a successful run). Not emitted for the data
+    // kept after a failed run, nor for settings or clock changes; summary and
+    // cap are up to date when it comes.
+    signal freshResult
+
     // Reads vnStat again (ignored while disabled or busy).
     function refresh() {
         source.refresh();
@@ -98,7 +103,14 @@ Item {
 
         enabled: root.enabled
         // A new result may come after midnight: the day is taken again.
-        onParsedChanged: root.tick()
+        onParsedChanged: {
+            root.tick();
+            // The first change at creation has no result yet. The signal comes
+            // after the bindings that depend on the new result have run.
+            if (source.parsed !== null) {
+                Qt.callLater(() => root.freshResult());
+            }
+        }
     }
 
     Timer {
