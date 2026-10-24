@@ -75,32 +75,10 @@ PlasmoidItem {
     // the usage is current.
     readonly property int capLevel: root.usageOk && root.cap.enabled ? root.cap.level : 0
 
-    // Takes a new vnStat result: reports the cap level reached once per level
-    // and billing period, and stores what has been seen (see capAction).
-    function handleFreshUsage() {
-        // (configuration is created from main.xml at Plasma runtime)
-        const action = Usage.capAction({
-            usageEnabled: usageModel.enabled,
-            dataCapEnabled: root.cap.enabled,
-            capNotify: Plasmoid.configuration.capNotify === true, // qmllint disable missing-property
-            freshOk: usageModel.status === "ok",
-            level: root.cap.level,
-            cycle: String(root.summary.current.start ?? ""),
-            notified: {
-                cycle: Plasmoid.configuration.capNotifiedCycle, // qmllint disable missing-property
-                level: Plasmoid.configuration.capNotifiedLevel // qmllint disable missing-property
-            }
-        });
-        if (action.store.cycle !== Plasmoid.configuration.capNotifiedCycle) { // qmllint disable missing-property
-            Plasmoid.configuration.capNotifiedCycle = action.store.cycle; // qmllint disable missing-property
-        }
-        if (action.store.level !== Plasmoid.configuration.capNotifiedLevel) { // qmllint disable missing-property
-            Plasmoid.configuration.capNotifiedLevel = action.store.level; // qmllint disable missing-property
-        }
-        if (action.notify > 0) {
-            capNotice.text = root.capNoticeText(action.notify);
-            capNotice.sendEvent();
-        }
+    // Reports a data cap level reached (see UsageBookkeeping).
+    function reportCapLevel(level: int) {
+        capNotice.text = root.capNoticeText(level);
+        capNotice.sendEvent();
     }
 
     // The text of the notification for a cap level (1 warning, 2 reached).
@@ -223,13 +201,19 @@ PlasmoidItem {
         interfaceSelection: root.provider.interfaceSelection
         selectedInterfaces: root.provider.selectedInterfaces
         interfaces: root.provider.interfaces
+        providerReady: root.provider.hasData
         // (configuration is created from main.xml at Plasma runtime)
         enabled: Plasmoid.configuration.usageEnabled // qmllint disable missing-property
         billingDay: Appearance.validInt(Plasmoid.configuration.billingDay, 1, 28, 1) // qmllint disable missing-property
         capEnabled: Plasmoid.configuration.dataCapEnabled === true // qmllint disable missing-property
         capGiB: Appearance.validPositive(Plasmoid.configuration.dataCapGiB, 100) // qmllint disable missing-property
         warnPercent: Appearance.validInt(Plasmoid.configuration.capWarnPercent, 1, 99, 80) // qmllint disable missing-property
-        onFreshResult: root.handleFreshUsage()
+    }
+
+    UsageBookkeeping {
+        usage: usageModel
+        configuration: Plasmoid.configuration
+        onCapReached: level => root.reportCapLevel(level)
     }
 
     Launcher {

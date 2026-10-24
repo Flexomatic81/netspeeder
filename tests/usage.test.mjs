@@ -451,6 +451,7 @@ function action(overrides) {
     dataCapEnabled: true,
     capNotify: true,
     freshOk: true,
+    namesReady: true,
     level: 1,
     cycle: "2026-10-01",
     notified: NONE,
@@ -473,6 +474,12 @@ test("capAction does nothing with usage off", () => {
 test("capAction does nothing after an error that follows a success", () => {
   const stored = { cycle: "2026-10-01", level: 1 };
   assert.deepEqual(capAction(action({ freshOk: false, level: 2, notified: stored })), { notify: 0, store: stored });
+});
+
+test("capAction does nothing before the interfaces are known", () => {
+  const stored = { cycle: "2026-10-01", level: 0 };
+  assert.deepEqual(capAction(action({ namesReady: false, level: 2, notified: stored })), { notify: 0, store: stored });
+  assert.deepEqual(capAction(action({ namesReady: undefined, level: 2 })), { notify: 0, store: NONE });
 });
 
 test("capAction with notifications off stores the level without notifying", () => {

@@ -21,6 +21,8 @@ Item {
     property var selectedInterfaces: []
     // The live interfaces of the NetworkProvider.
     property var interfaces: []
+    // Whether the NetworkProvider has delivered its interfaces yet.
+    property bool providerReady: false
     property int billingDay: 1
     property bool capEnabled: false
     property real capGiB: 100
@@ -33,6 +35,9 @@ Item {
     readonly property int runs: source.runs
     // The names that count, as one string (see namesKey() in usage.mjs).
     readonly property string namesKey: root.enabled ? Usage.namesKey(root.interfaceSelection, root.selectedInterfaces, root.interfaces, Object.keys(source.parsed?.interfaces ?? {})) : ""
+    // Whether the names that count are known: in automatic mode the virtual
+    // interfaces can be left out only once the provider has delivered.
+    readonly property bool ready: root.interfaceSelection === "manual" || root.providerReady
     // The local calendar day, "YYYY-MM-DD".
     readonly property string todayKey: Vnstat.dateKey(clock.now)
     // Whether the vnStat data is more than an hour old.
@@ -56,7 +61,8 @@ Item {
 
     // A new vnStat result arrived (a successful run). Not emitted for the data
     // kept after a failed run, nor for settings or clock changes; summary and
-    // cap are up to date when it comes.
+    // cap are up to date when it comes. A result that arrives before the names
+    // are known (see ready) is announced once they are.
     signal freshResult
 
     // Reads vnStat again (ignored while disabled or busy).
@@ -72,6 +78,9 @@ Item {
     // The constant outputs while disabled.
     QtObject {
         id: internals
+
+        // A result arrived while the names were not known yet.
+        property bool pending: false
 
         readonly property var idleSummary: Usage.emptySummary(Usage.localNow(new Date()), 1)
         readonly property var idleCap: ({
@@ -107,9 +116,21 @@ Item {
             root.tick();
             // The first change at creation has no result yet. The signal comes
             // after the bindings that depend on the new result have run.
-            if (source.parsed !== null) {
-                Qt.callLater(() => root.freshResult());
+            if (source.parsed === null) {
+                return;
             }
+            if (root.ready) {
+                Qt.callLater(() => root.freshResult());
+            } else {
+                internals.pending = true;
+            }
+        }
+    }
+
+    onReadyChanged: {
+        if (root.ready && internals.pending) {
+            internals.pending = false;
+            Qt.callLater(() => root.freshResult());
         }
     }
 

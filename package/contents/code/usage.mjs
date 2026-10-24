@@ -316,11 +316,13 @@ export function capNotification(level, cycle, notified, active) {
   return { notify: level > before ? level : 0, store: store };
 }
 
-// capNotification for the widget's settings and state. With notifications
-// off the level is still stored, so turning them on later does not report a
+// capNotification for the widget's settings and state. Nothing is decided
+// before the interfaces that count are known (`namesReady`): until then
+// automatic mode cannot leave out the virtual ones. With notifications off
+// the level is still stored, so turning them on later does not report a
 // level reached before.
 export function capAction(input) {
-  const active = Boolean(input.usageEnabled && input.dataCapEnabled && input.freshOk);
+  const active = Boolean(input.usageEnabled && input.dataCapEnabled && input.freshOk && input.namesReady);
   const result = capNotification(input.level, input.cycle, input.notified, active);
   return input.capNotify ? result : { notify: 0, store: result.store };
 }

@@ -35,6 +35,8 @@ Fourth pre-release, stage "Verbrauch" (usage).
   are absent. Automatic selection counts the interfaces vnStat knows, minus
   `lo` and those the widget currently sees as virtual; absent virtual
   interfaces cannot be recognized there.
+- The data cap is checked only once the interfaces are known, so a vnStat
+  reading at login cannot count a tunnel.
 - vnStat is read in the background only while usage is enabled.
 
 ## 0.3.0 (unreleased)

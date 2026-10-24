@@ -165,7 +165,9 @@ unplugged keeps its past traffic in the sum). In automatic mode the interfaces
 vnStat knows count, except `lo` and those the widget currently sees as
 virtual. Limitation: an absent virtual interface cannot be recognized in
 automatic mode, so its recorded traffic is counted until you switch to manual
-selection or remove it from vnStat.
+selection or remove it from vnStat. The data cap is checked only once the
+widget knows its interfaces, so a reading right after login cannot count a
+tunnel and report a level too early.
 
 The tooltip leaves out the "Today" line while vnStat tracks none of the
 interfaces that count.

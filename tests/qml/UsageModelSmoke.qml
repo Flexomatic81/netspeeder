@@ -179,6 +179,7 @@ Item {
         enabled: false
         command: "cat '" + scene.v2 + "'"
         interfaces: scene.sample(["eth0"])
+        providerReady: true
         onFreshResult: {
             scene.fresh++;
             scene.freshStatus = model.summary.status;
