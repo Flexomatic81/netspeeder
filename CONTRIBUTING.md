@@ -57,8 +57,9 @@ Some smoke scenes are live: they read the real network and need `ksystemstats` r
 connected physical network interface that has received data. Where that is missing, for example in
 a container, `NETSPEEDER_SMOKE_SKIP_LIVE=1 node tools/check.mjs` skips them; each one is reported as
 `SMOKE SKIPPED (live) <scene>`; the parts of those scenes that need no network are skipped with
-them. Without the variable all scenes run. The list is `live_scenes` in
-`scripts/smoke.sh`; [docs/testing.md](docs/testing.md) has the details.
+them. Without the variable all scenes run. The list is `live_scenes` in `scripts/smoke.sh`;
+[docs/testing.md](docs/testing.md) has the details. Two scenes check a timing contract on purpose
+and can fail on a heavily loaded machine: `HeartbeatSmoke` and `CommandRunnerSmoke`.
 
 The unit tests have a coverage floor; please add tests for new behaviour and for bug fixes. Code is
 formatted with Prettier (`pnpm run format`, which is `prettier --write "**/*.mjs"`).
