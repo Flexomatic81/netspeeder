@@ -120,3 +120,11 @@
 	Remove level	
 	Add level	
 	%1 (not installed)	
+	Hide the widget:	
+	Never	
+	When offline	
+	When offline or idle	
+	In edit mode the widget stays visible so it can be configured.	
+	Idle below:	
+@item:valuesuffix %1 is a number	%1 KiB/s	
+	For at least:	

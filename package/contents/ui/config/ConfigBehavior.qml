@@ -2,7 +2,8 @@
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
 // Settings page "Behavior": what a left and a middle click on the panel view
-// do, and what "start" means (an application or a command). Plasma opens the
+// do, what "start" means (an application or a command), and when the widget
+// hides itself (never, when offline, when offline or idle). Plasma opens the
 // page with the saved values in the cfg_ properties and writes the changed
 // ones back when the user applies. Every control shows its cfg_ property and
 // writes it only on a choice of the user.
@@ -39,6 +40,9 @@ KCM.SimpleKCM {
     property string cfg_launchKind
     property string cfg_launchApp
     property string cfg_launchCommand
+    property string cfg_autoHide
+    property int cfg_idleThreshold
+    property int cfg_idleSeconds
 
     // The controls, for the smoke scene.
     readonly property alias leftBox: leftClickBox
@@ -48,6 +52,9 @@ KCM.SimpleKCM {
     readonly property alias commandField: launchCommandField
     readonly property alias chooseButton: launchChooseButton
     readonly property alias warning: popupWarning
+    readonly property alias autoHideBox: autoHideChoice
+    readonly property alias thresholdBox: idleThresholdBox
+    readonly property alias secondsBox: idleSecondsBox
 
     Kirigami.FormLayout {
         Kirigami.InlineMessage {
@@ -132,6 +139,63 @@ KCM.SimpleKCM {
             placeholderText: "konsole -e nethogs"
             text: root.cfg_launchCommand
             onTextEdited: root.cfg_launchCommand = text
+        }
+
+        Item {
+            Kirigami.FormData.isSection: true
+        }
+
+        ConfigComboBox {
+            id: autoHideChoice
+
+            Kirigami.FormData.label: root.tr("Hide the widget:")
+            options: [
+                { text: root.tr("Never"), value: "never" },
+                { text: root.tr("When offline"), value: "offline" },
+                { text: root.tr("When offline or idle"), value: "idle" }
+            ]
+            configValue: root.cfg_autoHide
+            onPicked: value => root.cfg_autoHide = value
+        }
+
+        QQC2.Label {
+            Layout.fillWidth: true
+            opacity: 0.7
+            text: root.tr("In edit mode the widget stays visible so it can be configured.")
+            wrapMode: Text.WordWrap
+        }
+
+        // The threshold is stored in bytes per second and shown in a fixed
+        // unit, KiB/s; a stored value that is no multiple of 1024 is shown
+        // rounded and stays as it is until the user enters a number.
+        QQC2.SpinBox {
+            id: idleThresholdBox
+
+            Kirigami.FormData.label: root.tr("Idle below:")
+            editable: true
+            enabled: root.cfg_autoHide === "idle"
+            from: 0
+            to: 1024
+            value: Math.round(root.cfg_idleThreshold / 1024)
+            textFromValue: (value, locale) => root.trc("@item:valuesuffix %1 is a number", "%1 KiB/s", Number(value).toLocaleString(locale, "f", 0))
+            // The text carries the unit, so read the leading digits only.
+            valueFromText: (text, locale) => Number.isNaN(parseInt(text, 10)) ? idleThresholdBox.value : parseInt(text, 10)
+            onValueModified: root.cfg_idleThreshold = idleThresholdBox.value * 1024
+        }
+
+        QQC2.SpinBox {
+            id: idleSecondsBox
+
+            Kirigami.FormData.label: root.tr("For at least:")
+            editable: true
+            enabled: root.cfg_autoHide === "idle"
+            from: 5
+            to: 3600
+            value: root.cfg_idleSeconds
+            textFromValue: (value, locale) => root.trc("@item:valuesuffix %1 is a number of seconds", "%1 s", Number(value).toLocaleString(locale, "f", 0))
+            // The text carries the unit, so read the leading digits only.
+            valueFromText: (text, locale) => Number.isNaN(parseInt(text, 10)) ? idleSecondsBox.value : parseInt(text, 10)
+            onValueModified: root.cfg_idleSeconds = idleSecondsBox.value
         }
     }
 

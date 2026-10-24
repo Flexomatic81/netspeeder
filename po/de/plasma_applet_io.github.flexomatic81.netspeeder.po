@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: netspeeder\n"
 "Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
-"POT-Creation-Date: 2026-10-24 20:13+0200\n"
+"POT-Creation-Date: 2026-10-24 20:19+0200\n"
 "PO-Revision-Date: 2026-10-24 01:44+0200\n"
 "Last-Translator: Flexomatic81\n"
 "Language-Team: German\n"
@@ -215,7 +215,7 @@ msgstr "Download-Farbe:"
 
 #: package/contents/ui/config/ConfigAppearance.qml:195
 #: package/contents/ui/config/ConfigAppearance.qml:216
-#: package/contents/ui/config/ThresholdEditor.qml:192
+#: package/contents/ui/config/ThresholdEditor.qml:205
 msgid "Choose a colour"
 msgstr "Farbe auswählen"
 
@@ -257,61 +257,100 @@ msgstr "Hinter den Werten"
 msgid "Beside the values"
 msgstr "Neben den Werten"
 
-#: package/contents/ui/config/ConfigBehavior.qml:58
+#: package/contents/ui/config/ConfigBehavior.qml:65
 msgid "Neither click opens the popup. It stays reachable on the desktop only."
 msgstr "Kein Klick öffnet das Popup. Es bleibt nur auf dem Desktop erreichbar."
 
-#: package/contents/ui/config/ConfigBehavior.qml:65
+#: package/contents/ui/config/ConfigBehavior.qml:72
 msgid "Left click:"
 msgstr "Linksklick:"
 
-#: package/contents/ui/config/ConfigBehavior.qml:67
-#: package/contents/ui/config/ConfigBehavior.qml:80
+#: package/contents/ui/config/ConfigBehavior.qml:74
+#: package/contents/ui/config/ConfigBehavior.qml:87
 msgid "Open the popup"
 msgstr "Popup öffnen"
 
-#: package/contents/ui/config/ConfigBehavior.qml:68
-#: package/contents/ui/config/ConfigBehavior.qml:81
+#: package/contents/ui/config/ConfigBehavior.qml:75
+#: package/contents/ui/config/ConfigBehavior.qml:88
 msgid "Start the application or command"
 msgstr "Anwendung oder Befehl starten"
 
-#: package/contents/ui/config/ConfigBehavior.qml:77
+#: package/contents/ui/config/ConfigBehavior.qml:84
 msgid "Middle click:"
 msgstr "Mittelklick:"
 
-#: package/contents/ui/config/ConfigBehavior.qml:79
+#: package/contents/ui/config/ConfigBehavior.qml:86
 msgid "Do nothing"
 msgstr "Nichts tun"
 
-#: package/contents/ui/config/ConfigBehavior.qml:94
+#: package/contents/ui/config/ConfigBehavior.qml:101
 msgid "Start:"
 msgstr "Starten:"
 
-#: package/contents/ui/config/ConfigBehavior.qml:96
+#: package/contents/ui/config/ConfigBehavior.qml:103
 msgid "Application"
 msgstr "Anwendung"
 
-#: package/contents/ui/config/ConfigBehavior.qml:97
+#: package/contents/ui/config/ConfigBehavior.qml:104
 msgid "Command"
 msgstr "Befehl"
 
-#: package/contents/ui/config/ConfigBehavior.qml:104
+#: package/contents/ui/config/ConfigBehavior.qml:111
 msgid "Application:"
 msgstr "Anwendung:"
 
-#: package/contents/ui/config/ConfigBehavior.qml:120
+#: package/contents/ui/config/ConfigBehavior.qml:127
 msgid "Choose…"
 msgstr "Auswählen …"
 
-#: package/contents/ui/config/ConfigBehavior.qml:129
+#: package/contents/ui/config/ConfigBehavior.qml:136
 msgid "Command:"
 msgstr "Befehl:"
 
-#: package/contents/ui/config/ConfigBehavior.qml:141
+#: package/contents/ui/config/ConfigBehavior.qml:151
+msgid "Hide the widget:"
+msgstr "Widget ausblenden:"
+
+#: package/contents/ui/config/ConfigBehavior.qml:153
+msgid "Never"
+msgstr "Nie"
+
+#: package/contents/ui/config/ConfigBehavior.qml:154
+msgid "When offline"
+msgstr "Wenn offline"
+
+#: package/contents/ui/config/ConfigBehavior.qml:155
+msgid "When offline or idle"
+msgstr "Wenn offline oder untätig"
+
+#: package/contents/ui/config/ConfigBehavior.qml:164
+msgid "In edit mode the widget stays visible so it can be configured."
+msgstr "Im Bearbeitungsmodus bleibt das Widget sichtbar, damit es eingerichtet werden kann."
+
+#: package/contents/ui/config/ConfigBehavior.qml:174
+msgid "Idle below:"
+msgstr "Untätig unter:"
+
+#: package/contents/ui/config/ConfigBehavior.qml:180
+msgctxt "@item:valuesuffix %1 is a number"
+msgid "%1 KiB/s"
+msgstr "%1 KiB/s"
+
+#: package/contents/ui/config/ConfigBehavior.qml:189
+msgid "For at least:"
+msgstr "Mindestens für:"
+
+#: package/contents/ui/config/ConfigBehavior.qml:195
+#: package/contents/ui/config/ConfigDisplay.qml:156
+msgctxt "@item:valuesuffix %1 is a number of seconds"
+msgid "%1 s"
+msgstr "%1 s"
+
+#: package/contents/ui/config/ConfigBehavior.qml:205
 msgid "Choose an application"
 msgstr "Anwendung auswählen"
 
-#: package/contents/ui/config/ConfigBehavior.qml:143
+#: package/contents/ui/config/ConfigBehavior.qml:207
 msgid "Applications (*.desktop)"
 msgstr "Anwendungen (*.desktop)"
 
@@ -475,25 +514,20 @@ msgstr "100 KiB/s"
 msgid "Update interval:"
 msgstr "Aktualisierungsintervall:"
 
-#: package/contents/ui/config/ConfigDisplay.qml:156
-msgctxt "@item:valuesuffix %1 is a number of seconds"
-msgid "%1 s"
-msgstr "%1 s"
-
 #: package/contents/ui/config/ConfigDisplay.qml:165
 msgid "Preview:"
 msgstr "Vorschau:"
 
-#: package/contents/ui/config/ThresholdEditor.qml:200
+#: package/contents/ui/config/ThresholdEditor.qml:213
 msgctxt "@action:button use the colour of the theme"
 msgid "Theme"
 msgstr "Design"
 
-#: package/contents/ui/config/ThresholdEditor.qml:208
+#: package/contents/ui/config/ThresholdEditor.qml:221
 msgid "Remove level"
 msgstr "Stufe entfernen"
 
-#: package/contents/ui/config/ThresholdEditor.qml:223
+#: package/contents/ui/config/ThresholdEditor.qml:236
 msgid "Add level"
 msgstr "Stufe hinzufügen"
 
