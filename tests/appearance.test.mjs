@@ -8,12 +8,19 @@ import {
   COLOR_MODES,
   DEFAULT_THRESHOLDS,
   ICON_STYLES,
+  MAX_LEVELS,
+  BYTE_UNITS,
   SPARKLINE_MODES,
+  joinBytes,
+  newLevelMin,
   parseThresholds,
   serializeThresholds,
   speedColors,
+  splitBytes,
   symbols,
   thresholdColor,
+  toHexColor,
+  unitLimit,
   validChoice,
   validInt,
 } from "../package/contents/code/appearance.mjs";
@@ -219,6 +226,80 @@ test("the choice lists are as specified", () => {
   assert.deepEqual(SPARKLINE_MODES, ["off", "background", "beside"]);
   assert.deepEqual(COLOR_MODES, ["theme", "direction", "thresholds"]);
   assert.deepEqual(ICON_STYLES, ["arrows", "triangles", "icons", "none", "custom"]);
+});
+
+test("splitBytes picks the largest unit that keeps the value whole", () => {
+  assert.deepEqual(splitBytes(0), { value: 0, unitIndex: 0 });
+  assert.deepEqual(splitBytes(1024), { value: 1, unitIndex: 1 });
+  assert.deepEqual(splitBytes(MIB), { value: 1, unitIndex: 2 });
+  assert.deepEqual(splitBytes(1024 * MIB), { value: 1, unitIndex: 3 });
+  assert.deepEqual(splitBytes(1536), { value: 1536, unitIndex: 0 });
+  assert.deepEqual(splitBytes(10001), { value: 10001, unitIndex: 0 });
+  assert.deepEqual(splitBytes(MIB + 1), { value: MIB + 1, unitIndex: 0 });
+  assert.deepEqual(splitBytes(10 * MIB), { value: 10, unitIndex: 2 });
+  assert.deepEqual(splitBytes(3 * 1024), { value: 3, unitIndex: 1 });
+});
+
+test("splitBytes rounds to whole bytes, unusable input gives 0 B/s", () => {
+  assert.deepEqual(splitBytes(1500.4), { value: 1500, unitIndex: 0 });
+  assert.deepEqual(splitBytes(1023.6), { value: 1, unitIndex: 1 });
+  for (const bad of [-5, NaN, Infinity, "1024", undefined]) {
+    assert.deepEqual(splitBytes(bad), { value: 0, unitIndex: 0 }, String(bad));
+  }
+});
+
+test("joinBytes multiplies by the unit and round-trips with splitBytes", () => {
+  assert.equal(joinBytes(0, 0), 0);
+  assert.equal(joinBytes(1, 1), 1024);
+  assert.equal(joinBytes(10, 2), 10 * MIB);
+  assert.equal(joinBytes(1, 3), 1024 * MIB);
+  assert.equal(joinBytes(2.6, 1), 3072);
+  assert.equal(joinBytes(5, 9), 5);
+  assert.equal(joinBytes(5, -1), 5);
+  assert.equal(joinBytes(-3, 2), 0);
+  assert.equal(joinBytes(NaN, 2), 0);
+  for (const bytes of [0, 1, 1023, 1024, 1536, 10001, MIB, MIB + 1, 10 * MIB, 100 * MIB, 2147483647, 1024 * MIB]) {
+    const { value, unitIndex } = splitBytes(bytes);
+    assert.equal(joinBytes(value, unitIndex), bytes, String(bytes));
+  }
+});
+
+test("unitLimit is the largest number a unit can hold", () => {
+  assert.deepEqual(BYTE_UNITS, ["B/s", "KiB/s", "MiB/s", "GiB/s"]);
+  assert.equal(MAX_LEVELS, 6);
+  assert.equal(unitLimit(0), 2147483647);
+  assert.equal(unitLimit(1), 2097151);
+  assert.equal(unitLimit(2), 2047);
+  assert.equal(unitLimit(3), 1);
+  assert.equal(unitLimit(7), 2147483647);
+  for (let unit = 0; unit < 4; unit++) {
+    assert.ok(joinBytes(unitLimit(unit), unit) <= 2147483647);
+  }
+});
+
+test("newLevelMin finds a free minimum above the others", () => {
+  assert.equal(newLevelMin([{ min: 0, color: "" }]), MIB);
+  assert.equal(newLevelMin(DEFAULT_THRESHOLDS), 200 * MIB);
+  assert.equal(newLevelMin([{ min: 0 }, { min: 1500 * MIB }]), Math.ceil((1500 * MIB + 2147483647) / 2));
+  assert.equal(newLevelMin([{ min: 0 }, { min: 10 }, { min: 2147483647 }]), Math.ceil((10 + 2147483647) / 2));
+  assert.equal(newLevelMin([]), MIB);
+  for (const list of [
+    [{ min: 0 }, { min: 1 }, { min: 2147483647 }],
+    [{ min: 0 }, { min: 2147483646 }, { min: 2147483647 }],
+  ]) {
+    const min = newLevelMin(list);
+    assert.ok(Number.isInteger(min) && min >= 0 && min <= 2147483647);
+    assert.ok(!list.some((step) => step.min === min), String(min));
+  }
+});
+
+test("toHexColor writes #rrggbb from channels 0..1", () => {
+  assert.equal(toHexColor(0, 0, 0), "#000000");
+  assert.equal(toHexColor(1, 1, 1), "#ffffff");
+  assert.equal(toHexColor(0.5, 0, 1), "#8000ff");
+  assert.equal(toHexColor(1, 0.5, 0), "#ff8000");
+  assert.equal(toHexColor(-1, 2, 0.2), "#00ff33");
+  assert.equal(toHexColor(NaN, undefined, "x"), "#000000");
 });
 
 // The stored defaults in main.xml agree with the rules above.

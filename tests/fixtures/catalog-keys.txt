@@ -88,3 +88,34 @@
 @info	Copied	
 @info:tooltip	Copy IP address	
 @title	Behavior	
+@title	Appearance	
+	Font:	
+	Theme font	
+	Bold	
+	Text size:	
+@item:valuesuffix %1 is a percentage	%1 %	
+	Symbols:	
+	Arrows	
+	Triangles	
+	Icons	
+	None	
+	Custom	
+	Download symbol:	
+	Upload symbol:	
+	Colours:	
+	Theme colour	
+	By direction	
+	By speed	
+	Download colour:	
+	Choose a colour	
+	Use theme colour	
+	Upload colour:	
+	Speed levels:	
+	Colour units and symbols too	
+	Keep a fixed width	
+	Sparkline:	
+	Behind the values	
+	Beside the values	
+@action:button use the colour of the theme	Theme	
+	Remove level	
+	Add level	

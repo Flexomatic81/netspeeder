@@ -31,6 +31,11 @@ ConfigModel {
         source: "config/ConfigDisplay.qml"
     }
     ConfigCategory {
+        name: root.trc("@title", "Appearance")
+        icon: "preferences-desktop-color"
+        source: "config/ConfigAppearance.qml"
+    }
+    ConfigCategory {
         name: root.tr("Data")
         icon: "network-wired"
         source: "config/ConfigData.qml"

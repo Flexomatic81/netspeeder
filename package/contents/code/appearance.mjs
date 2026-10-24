@@ -12,6 +12,9 @@ const MAX_STEPS = 6;
 const MAX_SYMBOL_LENGTH = 3;
 const COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
 
+// The most levels a threshold list holds.
+export const MAX_LEVELS = MAX_STEPS;
+
 export const SPARKLINE_MODES = ["off", "background", "beside"];
 export const COLOR_MODES = ["theme", "direction", "thresholds"];
 export const ICON_STYLES = ["arrows", "triangles", "icons", "none", "custom"];
@@ -161,4 +164,77 @@ export function validChoice(value, allowed, fallback) {
 // `value` when it is an integer within min..max, otherwise `fallback`.
 export function validInt(value, min, max, fallback) {
   return Number.isInteger(value) && value >= min && value <= max ? value : fallback;
+}
+
+// The units of the threshold editor; each is 1024 times the one before.
+export const BYTE_UNITS = ["B/s", "KiB/s", "MiB/s", "GiB/s"];
+const UNIT_FACTOR = 1024;
+
+function unitFactor(unitIndex) {
+  return Number.isInteger(unitIndex) && unitIndex >= 0 && unitIndex < BYTE_UNITS.length ? UNIT_FACTOR ** unitIndex : 1;
+}
+
+// Bytes per second as a number in the largest unit in which it is whole, so
+// that every valid threshold is shown exactly. Fractions are rounded to whole
+// bytes; anything unusable is 0 B/s.
+export function splitBytes(bytes) {
+  const whole = Number.isFinite(bytes) && bytes > 0 ? Math.round(bytes) : 0;
+  let unitIndex = 0;
+  while (whole > 0 && unitIndex < BYTE_UNITS.length - 1 && whole % unitFactor(unitIndex + 1) === 0) {
+    unitIndex++;
+  }
+  return { value: whole / unitFactor(unitIndex), unitIndex };
+}
+
+// A number in a unit of BYTE_UNITS as bytes per second; an unknown unit counts
+// as B/s, the number is rounded and at least 0.
+export function joinBytes(value, unitIndex) {
+  const whole = Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
+  return whole * unitFactor(unitIndex);
+}
+
+// The largest number a unit can hold without leaving the valid minimums.
+export function unitLimit(unitIndex) {
+  return Math.floor(MAX_MIN / unitFactor(unitIndex));
+}
+
+// The middle of the widest gap between the sorted minimums.
+function widestGapMiddle(mins) {
+  let best = { width: 0, middle: 0 };
+  for (let i = 1; i < mins.length; i++) {
+    const width = mins[i] - mins[i - 1];
+    if (width > best.width) {
+      best = { width, middle: Math.ceil((mins[i - 1] + mins[i]) / 2) };
+    }
+  }
+  return best.middle;
+}
+
+// A minimum for a new level that no step of `list` has, above the others when
+// there is room: twice the highest one while that stays valid (1 MiB/s above
+// a lone 0), else halfway to the limit; at the limit, the middle of the widest
+// gap below it.
+export function newLevelMin(list) {
+  const mins = (Array.isArray(list) ? list : []).map((step) => step.min).sort((a, b) => a - b);
+  const highest = mins.length > 0 ? mins[mins.length - 1] : 0;
+  if (highest === 0) {
+    return MIB;
+  }
+  if (highest * 2 <= MAX_MIN) {
+    return highest * 2;
+  }
+  return highest < MAX_MIN ? Math.ceil((highest + MAX_MIN) / 2) : widestGapMiddle(mins);
+}
+
+function hexChannel(value) {
+  const level = Number.isFinite(value) ? Math.min(Math.max(value, 0), 1) : 0;
+  return Math.round(level * 255)
+    .toString(16)
+    .padStart(2, "0");
+}
+
+// "#rrggbb" from colour channels between 0 and 1 (Qt's color.r/g/b); values
+// outside are limited, unusable ones count as 0. Alpha is left out.
+export function toHexColor(r, g, b) {
+  return "#" + hexChannel(r) + hexChannel(g) + hexChannel(b);
 }

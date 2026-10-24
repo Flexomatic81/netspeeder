@@ -24,6 +24,11 @@ expected_lines() {
       # owns that process when the scene exits.
       echo '^QProcess: Destroyed while process \("/bin/sh"\) is still running\.$'
       ;;
+    ConfigAppearanceSmoke.qml)
+      # The colour buttons of KQuickControls create a translation context that
+      # the offscreen platform reports as living in another thread.
+      echo '^QObject::installEventFilter\(\): Cannot filter events for objects in a different thread\.$'
+      ;;
     LauncherSmoke.qml)
       # The scene abandons a "sleep" through the time limit; the engine still
       # owns that process when the scene exits.
