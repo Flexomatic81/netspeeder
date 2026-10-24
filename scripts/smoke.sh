@@ -24,6 +24,11 @@ expected_lines() {
       # owns that process when the scene exits.
       echo '^QProcess: Destroyed while process \("/bin/sh"\) is still running\.$'
       ;;
+    LauncherSmoke.qml)
+      # The scene abandons a "sleep" through the time limit; the engine still
+      # owns that process when the scene exits.
+      echo '^QProcess: Destroyed while process \("/bin/sh"\) is still running\.$'
+      ;;
     ProviderSmoke.qml)
       # The scene points the provider at a data source that does not exist.
       echo '^file://.*/tests/qml/Missing\.qml: No such file or directory$'

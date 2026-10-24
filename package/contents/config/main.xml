@@ -3,8 +3,8 @@
   SPDX-License-Identifier: GPL-2.0-or-later
   SPDX-FileCopyrightText: 2026 Flexomatic81
 
-  Configuration keys of version 0.1; the table in section 11.2 of the design
-  spec is the reference. Later releases add keys for the other groups.
+  Configuration keys of the widget; this file is the reference for their
+  names, types and defaults.
 -->
 <kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -61,6 +61,31 @@
     </entry>
     <entry name="selectedInterfaces" type="StringList">
       <default></default>
+    </entry>
+  </group>
+
+  <group name="Behavior">
+    <entry name="leftClick" type="String">
+      <default>popup</default>
+    </entry>
+    <entry name="middleClick" type="String">
+      <default>none</default>
+    </entry>
+    <entry name="launchKind" type="String">
+      <default>app</default>
+    </entry>
+    <entry name="launchApp" type="String">
+      <default>org.kde.plasma-systemmonitor</default>
+    </entry>
+    <entry name="launchCommand" type="String">
+      <default></default>
+    </entry>
+  </group>
+
+  <group name="Popup">
+    <!-- Minutes of history in the popup graph; 1, 5 or 15. -->
+    <entry name="graphMinutes" type="Int">
+      <default>5</default>
     </entry>
   </group>
 </kcfg>
