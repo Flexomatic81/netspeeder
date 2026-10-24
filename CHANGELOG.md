@@ -30,7 +30,8 @@ First stable release. The date is set when it is published.
   interface that is gone shows 0 and a note in the tooltip.
 - Robust rates: interfaces that disappear and return and counter resets cause
   no spikes and no stale values. Suspend/resume is guarded against in the
-  `/proc` source; on the sensor path the rates come from `ksystemstats`.
+  `/proc` source; on the sensor path the rates come from `ksystemstats`. To be
+  verified by hand before release.
 - Tooltip with connection name, download, upload, today's usage and IP address,
   and a note about the data source if there is a problem.
 - Popup (also used as the desktop view) with a header showing the live speeds,
@@ -50,7 +51,8 @@ First stable release. The date is set when it is published.
   style (arrows, triangles, icons, none, custom), color mode (theme, by
   direction, by speed with up to six levels), optional coloring of units and
   symbols, fixed width and a sparkline (off, behind or beside the values). The
-  threshold editor keeps the levels distinct.
+  threshold editor keeps the levels distinct; invalid stored levels are
+  dropped, and the defaults apply only when no level is usable.
 - Auto-hide: never, when offline, or when offline or idle, with a threshold of
   1 to 1024 KiB/s and a duration in seconds. The panel collapses a hidden
   widget; in edit mode it shows a dimmed network icon. It never hides on the
@@ -63,10 +65,14 @@ First stable release. The date is set when it is published.
   hint after an hour, and hints when vnStat is missing (with a link), when its
   version is not supported and when an interface is not tracked by vnStat.
 - Optional monthly data cap with a billing day (1 to 28) and a warning level.
-  The popup shows the share as a bar; the panel shows a dot from the warning
-  level on. Desktop notifications at the warning level and at 100 %, once per
-  level and billing period, kept across restarts.
-- Settings pages "Display", "Data", "Appearance", "Behavior" and "Usage".
+  The popup shows the share as a bar (neutral color from the warning level,
+  negative from 100 %); the panel shows a dot from the warning level on.
+  Desktop notifications at the warning level and at 100 %, once per level and
+  billing period, kept across restarts. Turning notifications off still
+  records the level, so turning them on later does not report old levels; a
+  jump straight past 100 % reports only that level.
+- Settings pages "Display", "Data", "Appearance", "Behavior" and "Usage". The
+  page "Behavior" warns when neither click opens the popup.
 - German translation.
 - Accessibility: the panel view has an accessible name and description,
   including the data cap state.
@@ -135,6 +141,8 @@ First stable release. The date is set when it is published.
 ### Known limitations and open checks
 
 - CI is set up but has never run.
+- Suspend/resume (no speed spike and no stale values after waking up) is still
+  to be verified by hand before release.
 - The CMake files were verified against a stub of extra-cmake-modules only;
   the real configure, build and install is still to be done before release.
 - The x axis of the graph is per sample, not a wall-clock scale.

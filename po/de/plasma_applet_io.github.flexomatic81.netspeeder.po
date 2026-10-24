@@ -407,7 +407,7 @@ msgstr ""
 
 #: package/contents/ui/config/ConfigData.qml:216
 msgid "Interfaces counted in the total:"
-msgstr "Im Gesamtwert berücksichtigte Schnittstellen:"
+msgstr "In der Summe gezählte Schnittstellen:"
 
 #: package/contents/ui/config/ConfigData.qml:218
 msgid "Automatic (physical network devices)"
