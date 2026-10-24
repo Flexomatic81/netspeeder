@@ -47,7 +47,7 @@ test("the popup toggles against the state seen at the press", () => {
 
 test("the desktop ID is the file name of a chosen launcher without .desktop", () => {
   assert.equal(desktopIdFromUrl("file:///usr/share/applications/org.kde.konsole.desktop"), "org.kde.konsole");
-  assert.equal(desktopIdFromUrl("file:///home/user/.local/share/applications/my%20app.desktop"), "my app");
+  assert.equal(desktopIdFromUrl("file:///usr/share/applications/my%20app.desktop"), "my app");
   assert.equal(desktopIdFromUrl("file:///usr/share/applications/caf%C3%A9.desktop"), "café");
   assert.equal(desktopIdFromUrl("/usr/share/applications/firefox.desktop"), "firefox");
 });
