@@ -16,6 +16,7 @@ import org.kde.kirigami as Kirigami
 import org.kde.kcmutils as KCM
 import "../data"
 import "../../code/format.mjs" as Format
+import "../../code/listsync.mjs" as ListSync
 import "../../code/selection.mjs" as Selection
 import "../../code/text.mjs" as TextTools
 
@@ -45,16 +46,7 @@ KCM.SimpleKCM {
 
     // The selected interface names as a plain array. The saved value arrives
     // as an array-like list object of the configuration.
-    readonly property var selectedNames: {
-        const names = [];
-        const saved = root.cfg_selectedInterfaces;
-        if (saved !== null && saved !== undefined && typeof saved !== "string" && typeof saved.length === "number") {
-            for (let i = 0; i < saved.length; i++) {
-                names.push(String(saved[i]));
-            }
-        }
-        return names;
-    }
+    readonly property var selectedNames: Selection.toList(root.cfg_selectedInterfaces).map(String)
 
     // The current sample of every interface, by name. The provider hands out
     // a new list with every sample; the rows below look their values up here
@@ -91,27 +83,15 @@ KCM.SimpleKCM {
     // order does not depend on the interface state either, so a row does not
     // jump when it is checked.
     function syncRows() {
-        const wanted = root.listedNames;
-        for (let row = rowModel.count - 1; row >= 0; row--) {
-            if (wanted.indexOf(rowModel.get(row).interfaceName) < 0) {
-                rowModel.remove(row);
-            }
+        const current = [];
+        for (let row = 0; row < rowModel.count; row++) {
+            current.push(rowModel.get(row).interfaceName);
         }
-        for (const name of wanted) {
-            let at = 0;
-            let present = false;
-            for (; at < rowModel.count; at++) {
-                const existing = rowModel.get(at).interfaceName;
-                if (existing === name) {
-                    present = true;
-                    break;
-                }
-                if (Selection.compareNames(existing, name) > 0) {
-                    break;
-                }
-            }
-            if (!present) {
-                rowModel.insert(at, { "interfaceName": name });
+        for (const step of ListSync.syncOps(current, root.listedNames, Selection.compareNames)) {
+            if (step.op === "remove") {
+                rowModel.remove(step.index);
+            } else {
+                rowModel.insert(step.index, { "interfaceName": step.name });
             }
         }
     }

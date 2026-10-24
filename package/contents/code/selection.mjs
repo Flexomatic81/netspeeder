@@ -23,7 +23,7 @@ export function compareNames(a, b) {
 
 // Config values reach the QML side as array-like sequence objects; this
 // copies anything list-shaped into a plain array and everything else to [].
-function toList(value) {
+export function toList(value) {
   if (value === null || value === undefined || typeof value === "string") return [];
   if (typeof value.length !== "number") return [];
   const list = [];

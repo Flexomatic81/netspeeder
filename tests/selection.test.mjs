@@ -3,7 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { summarize, interfaceList, compareNames } from "../package/contents/code/selection.mjs";
+import { summarize, interfaceList, compareNames, toList } from "../package/contents/code/selection.mjs";
 
 const iface = (o) => ({
   down: 0,
@@ -121,4 +121,16 @@ test("null and undefined interface maps behave like an empty map", () => {
   assert.deepEqual(summarize(undefined, "manual", ["eth0"]), empty);
   assert.deepEqual(interfaceList(null, []), []);
   assert.deepEqual(interfaceList(undefined, ["eth0"]), []);
+});
+
+test("toList copies array-like values and turns everything else into an empty list", () => {
+  assert.deepEqual(toList(["a", 1]), ["a", 1]);
+  assert.deepEqual(toList({ length: 1, 0: 7 }), [7], "elements are copied without conversion");
+  assert.deepEqual(toList({ length: 0 }), []);
+  assert.deepEqual(toList("abc"), []);
+  assert.deepEqual(toList(null), []);
+  assert.deepEqual(toList(undefined), []);
+  assert.deepEqual(toList({}), []);
+  assert.deepEqual(toList(42), []);
+  assert.deepEqual(toList({ length: 1, 0: 7 }).map(String), ["7"]);
 });

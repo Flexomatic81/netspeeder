@@ -9,6 +9,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import org.kde.ksysguard.sensors as Sensors
+import "../../code/listsync.mjs" as ListSync
 import "../../code/procnetdev.mjs" as Procnetdev
 import "../../code/sensors.mjs" as SensorCode
 
@@ -124,18 +125,15 @@ Item {
         // appending single rows. Interfaces that stay keep their sensors; a
         // wholesale rebuild would show them with zero values for a moment.
         function syncModel(names) {
-            const present = [];
-            for (let row = interfaceModel.count - 1; row >= 0; row--) {
-                const name = interfaceModel.get(row).interfaceName;
-                if (names.indexOf(name) < 0) {
-                    interfaceModel.remove(row);
-                } else {
-                    present.push(name);
-                }
+            const current = [];
+            for (let row = 0; row < interfaceModel.count; row++) {
+                current.push(interfaceModel.get(row).interfaceName);
             }
-            for (const name of names) {
-                if (present.indexOf(name) < 0) {
-                    interfaceModel.append({ "interfaceName": name });
+            for (const step of ListSync.syncOps(current, names)) {
+                if (step.op === "remove") {
+                    interfaceModel.remove(step.index);
+                } else {
+                    interfaceModel.insert(step.index, { "interfaceName": step.name });
                 }
             }
         }
