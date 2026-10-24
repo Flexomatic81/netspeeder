@@ -176,6 +176,33 @@ test("a release record row without a date or a result fails and is named", () =>
   );
 });
 
+test("a release record row whose result is a failure fails and is named", () => {
+  for (const result of ["Fail: popup cut off", "FAILED", "no", "No, not yet", "not checked"]) {
+    assertFails(
+      (dir) =>
+        writeFileSync(
+          path.join(dir, "docs", "testing.md"),
+          RECORD([FULL_ROWS[0], `| (b) Plasma 6.3 VM | 2026-11-02 | ${result} |`]),
+        ),
+      new RegExp(`gate not passed: \\(b\\) Plasma 6\\.3 VM \\(result: ${result}\\)`),
+    );
+  }
+});
+
+test("results that are not failures pass", () => {
+  for (const result of ["OK", "ok, with notes", "n/a: no VM available", "Passed"]) {
+    const result_ = run(
+      makeTree((dir) =>
+        writeFileSync(
+          path.join(dir, "docs", "testing.md"),
+          RECORD([FULL_ROWS[0], `| (b) Plasma 6.3 VM | 2026-11-02 | ${result} |`]),
+        ),
+      ),
+    );
+    assert.equal(result_.status, 0, result_.stderr);
+  }
+});
+
 test("a missing or empty release record table fails", () => {
   assertFails(
     (dir) =>

@@ -7,7 +7,8 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 
 ## 1.0.0 – unreleased
 
-First stable release. The date is set when it is published.
+First stable release. The date is set in this heading as YYYY-MM-DD when it
+is published (`## 1.0.0 – 2026-11-15`).
 
 ### Added
 
@@ -86,7 +87,9 @@ First stable release. The date is set when it is published.
   integration workflow (tests on Node 22.13 and 24, QML lint, shellcheck,
   actionlint, `.plasmoid` as release asset for version tags) and
   `scripts/release-check.sh`, which stops a release tag while the changelog,
-  the screenshots or the release record are not final.
+  the screenshots or the release record are not final. The changelog heading
+  of a release carries its date as YYYY-MM-DD, for example
+  `## 1.0.0 – 2026-11-15`.
 - Development checks: ESLint, Prettier, coverage floor (branch coverage of the
   logic modules is 100 %, the floor is 98 %), strict qmllint, shellcheck, one
   check runner (`node tools/check.mjs`) used locally, by the pre-commit hook and

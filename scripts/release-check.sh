@@ -11,8 +11,10 @@
 #   that does not say "unreleased";
 # - the screenshots in docs/images exist and are PNG files;
 # - the table "Release record <version>" in docs/testing.md exists and every
-#   row has a date and a result.
-# Needs only bash and the base tools (sed, awk, od), like the build container.
+#   row has a date and a result that is not a failure (a result starting with
+#   "fail" or "no", in any case, counts as not passed).
+# Needs only bash and the base tools (sed, awk, grep, head, od, tr), like the
+# build container.
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
@@ -71,8 +73,9 @@ check_screenshots() {
   done
 }
 
-# Prints one line per row of the release record table that lacks a date or a
-# result, or "missing" when there is no table with at least one row.
+# Prints one line "<reason><tab><gate>" per row of the release record table
+# that lacks a date or a result ("empty") or whose result is a failure
+# ("failed"), or "missing" when there is no table with at least one row.
 incomplete_record_rows() {
   awk -v title="## Release record $version" '
     $0 == title { inside = 1; next }
@@ -83,14 +86,15 @@ incomplete_record_rows() {
       if (rows <= 2) next  # header and separator
       n = split($0, cell, "|")
       for (i = 1; i <= n; i++) gsub(/^[[:space:]]+|[[:space:]]+$/, "", cell[i])
-      if (cell[3] == "" || cell[4] == "") print cell[2]
+      if (cell[3] == "" || cell[4] == "") print "empty\t" cell[2]
+      else if (tolower(cell[4]) ~ /^(fail|no)/) print "failed\t" cell[2] " (result: " cell[4] ")"
     }
     END { if (rows < 3) print "missing" }
   ' docs/testing.md
 }
 
 check_record() {
-  local rows row
+  local rows reason gate
   if [ ! -f docs/testing.md ]; then
     fail "docs/testing.md is missing"
     return
@@ -100,10 +104,11 @@ check_record() {
     fail "docs/testing.md has no table 'Release record $version' with gate rows"
     return
   fi
-  while IFS= read -r row; do
-    if [ -n "$row" ]; then
-      fail "release record $version: no date or result for gate $row"
-    fi
+  while IFS=$'\t' read -r reason gate; do
+    case "$reason" in
+      empty) fail "release record $version: no date or result for gate $gate" ;;
+      failed) fail "release record $version: gate not passed: $gate" ;;
+    esac
   done <<< "$rows"
 }
 
