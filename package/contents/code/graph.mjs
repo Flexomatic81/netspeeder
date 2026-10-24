@@ -14,7 +14,10 @@ const MINUTE_CHOICES = [1, 5, 15];
 const GRID_STEPS = 4;
 const LABEL_ROOM = 1.6;
 const MIN_DISTANCE = 0.3;
-const SPARKLINE_SAMPLES = 60;
+const SPARKLINE_FLOOR = 1024;
+
+// How many of the newest samples the panel sparkline shows.
+export const SPARKLINE_SAMPLES = 60;
 
 // The points of `history` that are at most `minutes` older than the newest
 // one. Selected by time, not by count, so a changed interval or a pause does
@@ -43,6 +46,24 @@ export function lastSamples(history, count) {
   const up = history && history.up ? history.up : [];
   const n = Number.isInteger(count) && count > 0 ? count : SPARKLINE_SAMPLES;
   return { down: down.slice(-n), up: up.slice(-n) };
+}
+
+// The upper end of the sparkline's value axis (bytes per second): the largest
+// value of the shown series (the sums when `combined`), at least 1024 so a
+// quiet link stays near the bottom. Values that are not finite count as 0.
+export function sparklineMax(down, up, combined) {
+  const clean = (v) => (typeof v === "number" && isFinite(v) && v > 0 ? v : 0);
+  let max = SPARKLINE_FLOOR;
+  for (let i = 0; i < down.length; i++) {
+    const value = combined ? clean(down[i]) + clean(up[i]) : Math.max(clean(down[i]), clean(up[i]));
+    max = Math.max(max, value);
+  }
+  if (!combined) {
+    for (let i = down.length; i < up.length; i++) {
+      max = Math.max(max, clean(up[i]));
+    }
+  }
+  return max;
 }
 
 // 1, 5 or 15; anything else (also a string) becomes 5.

@@ -982,7 +982,7 @@ Item {
             // The chart takes the room right of the text and the text stays inside the rest.
             const texts = scene.shownTexts(spark44, spark44, []);
             problem = scene.textProblem("sparkline beside", texts, 2, true) || scene.placementProblem("sparkline beside", spark44, texts, false, 0);
-            if (problem === "" && (Math.abs(spark44.sparkLoaderItem.width - 2 * rowHeight) > 0.01 || texts.some(t => t.right > spark44.width - 2 * rowHeight + 1.5))) {
+            if (problem === "" && (Math.abs(spark44.sparkLoaderItem.width + spark44.sparkGap - 2 * rowHeight) > 0.01 || spark44.sparkGap <= 0 || texts.some(t => t.right > spark44.sparkLoaderItem.x - spark44.sparkGap + 1.5))) {
                 problem = "sparkline beside: the text reaches into the chart: " + scene.describe(texts);
             }
             console.log("compact sparkline beside: implicit " + spark44.implicitWidth.toFixed(1) + " | " + scene.describe(texts));
@@ -994,7 +994,7 @@ Item {
             if (problem !== "") {
                 return problem;
             }
-            if (Math.abs(spark44.implicitWidth - wide44.implicitWidth) > 0.01 || spark44.sparkLoaderItem.opacity !== 0.35 || !spark44.sparkLoaderItem.item.filled) {
+            if (Math.abs(spark44.implicitWidth - wide44.implicitWidth) > 0.01 || Math.abs(spark44.sparkLoaderItem.opacity * spark44.sparkLoaderItem.item.fillOpacity - 0.35) > 0.001 || !spark44.sparkLoaderItem.item.filled) {
                 return "sparkline background: width " + spark44.implicitWidth + ", opacity " + spark44.sparkLoaderItem.opacity + ", filled " + spark44.sparkLoaderItem.item.filled;
             }
             if (spark44.sparkLoaderItem.width !== spark44.width || spark44.sparkLoaderItem.height !== spark44.height) {
@@ -1027,7 +1027,7 @@ Item {
             if (Math.abs(narrowSpark.implicitWidth - narrowPlain.implicitWidth) > 0.01 || Math.abs(narrowSpark.implicitHeight - narrowPlain.implicitHeight) > 0.01) {
                 return "vertical beside: size " + narrowSpark.implicitWidth + "x" + narrowSpark.implicitHeight + " instead of " + narrowPlain.implicitWidth + "x" + narrowPlain.implicitHeight;
             }
-            if (narrowSpark.sparkWidth !== 0 || loader.opacity !== 0.35 || loader.width !== narrowSpark.width || !loader.item || !loader.item.filled) {
+            if (narrowSpark.sparkWidth !== 0 || loader.opacity !== 0.35 || loader.width !== narrowSpark.width || !loader.item || Math.abs(loader.opacity * loader.item.fillOpacity - 0.35) > 0.001) {
                 return "vertical beside: not drawn like background (opacity " + loader.opacity + ", width " + loader.width + ")";
             }
             const texts = scene.shownTexts(narrowSpark, narrowSpark, []);

@@ -254,6 +254,8 @@ Item {
     readonly property bool sparkReady: sparkLoader.status === Loader.Ready
     // A chart that failed to load takes no room.
     readonly property real sparkWidth: root.sparkBeside && root.sparkReady ? 2 * root.rowHeight : 0
+    // The gap between the text and the chart beside it, inside its slot.
+    readonly property real sparkGap: 0.25 * root.pixelSize
     // The loader of the mini chart (for the smoke scenes).
     readonly property Loader sparkLoaderItem: sparkLoader
 
@@ -392,8 +394,8 @@ Item {
         active: root.sparkline !== "off"
         source: root.sparklineSource
         // Beside: right of the text; otherwise behind it over the whole area.
-        x: root.sparkBeside ? root.width - root.sparkWidth : 0
-        width: root.sparkBeside ? root.sparkWidth : root.width
+        x: root.sparkBeside ? root.width - root.sparkWidth + root.sparkGap : 0
+        width: root.sparkBeside ? root.sparkWidth - root.sparkGap : root.width
         height: root.height
         opacity: root.sparkBeside ? 1 : 0.35
         z: -1

@@ -24,19 +24,37 @@ Item {
     // Fill below the lines (the chart behind the text).
     property bool filled: false
 
-    readonly property var samples: Graph.lastSamples(root.history, 60)
+    readonly property var samples: Graph.lastSamples(root.history, Graph.SPARKLINE_SAMPLES)
     // The values as drawn (for the smoke scene); with `combined` only
     // downSeries, holding the sums.
     readonly property var downSeries: root.combined ? root.samples.down.map((v, i) => v + root.samples.up[i]) : root.samples.down
     readonly property var upSeries: root.combined ? [] : root.samples.up
 
+    // The fill opacity as drawn (for the smoke scene).
+    readonly property real fillOpacity: chart.fillOpacity
+
     Charts.LineChart {
+        id: chart
+
         anchors.fill: parent
-        yRange.automatic: true
-        xRange.automatic: true
+        // From zero, so the height tells the magnitude and a flat line sits at
+        // the bottom edge.
+        yRange {
+            from: 0
+            to: Graph.sparklineMax(root.samples.down, root.samples.up, root.combined)
+            automatic: false
+        }
+        // A fixed window of the newest samples: while fewer exist the line
+        // fills from the right instead of stretching.
+        xRange {
+            from: root.downSeries.length - Graph.SPARKLINE_SAMPLES
+            to: Math.max(root.downSeries.length, 2) - 1
+            automatic: false
+        }
         smooth: true
         lineWidth: 1
-        fillOpacity: root.filled ? 0.35 : 0
+        // Full inside the layer that the view dims to 35 %
+        fillOpacity: root.filled ? 1 : 0
         colorSource: Charts.ArraySource {
             array: root.combined ? [root.downColor] : [root.downColor, root.upColor]
         }

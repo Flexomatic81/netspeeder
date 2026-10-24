@@ -8,6 +8,8 @@ import {
   axisScale,
   graphWindow,
   lastSamples,
+  sparklineMax,
+  SPARKLINE_SAMPLES,
   pickDistinct,
   validMinutes,
 } from "../package/contents/code/graph.mjs";
@@ -180,4 +182,27 @@ test("lastSamples takes 60 for an invalid count", () => {
     assert.equal(r.down[0], 20);
     assert.equal(r.up[59], 158);
   }
+});
+
+test("sparklineMax is at least 1024 for empty, zero and quiet series", () => {
+  assert.equal(sparklineMax([], [], false), 1024);
+  assert.equal(sparklineMax([0, 0, 0], [0, 0, 0], false), 1024);
+  assert.equal(sparklineMax([500, 500], [500, 500], false), 1024);
+  assert.equal(sparklineMax([500, 500], [500, 500], true), 1024);
+});
+
+test("sparklineMax is the largest value of the shown series", () => {
+  assert.equal(sparklineMax([10, 5000, 20], [3000, 1, 1], false), 5000);
+  assert.equal(sparklineMax([10, 20], [3000, 9000, 4000], false), 9000);
+  assert.equal(sparklineMax([10, 5000, 20], [3000, 1, 1], true), 5001);
+  assert.equal(sparklineMax([2000, 2000], [1500, 100], true), 3500);
+});
+
+test("sparklineMax counts invalid values as 0", () => {
+  assert.equal(sparklineMax([NaN, Infinity, -5, undefined, "7"], [null, 3000, NaN], false), 3000);
+  assert.equal(sparklineMax([NaN, 4000], [NaN, NaN], true), 4000);
+});
+
+test("the sparkline shows 60 samples", () => {
+  assert.equal(SPARKLINE_SAMPLES, 60);
 });
