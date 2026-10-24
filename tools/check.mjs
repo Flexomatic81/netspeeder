@@ -118,7 +118,7 @@ function actionlintCommand(env) {
 function qmllintCommand(env) {
   const qmllint = findQmllint(env);
   // qmllint exits 0 on warnings unless told otherwise.
-  const files = env.gitFiles(["package", "tests/qml"]).filter((f) => f.endsWith(".qml"));
+  const files = env.gitFiles(["package", "tests/qml", "tools"]).filter((f) => f.endsWith(".qml"));
   if (qmllint && files.length === 0) throw new Error("no QML files found to lint");
   return qmllint ? [qmllint, "--max-warnings", "0", ...files] : null;
 }

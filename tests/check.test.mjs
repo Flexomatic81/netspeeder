@@ -70,6 +70,16 @@ test("qmllint is taken from the Qt directory with --max-warnings 0 and only the 
   assert.deepEqual(command, ["/q/qmllint", "--max-warnings", "0", "package/x.qml"]);
 });
 
+test("qmllint also lints the QML files of the tools", () => {
+  const asked = [];
+  const gitFiles = (patterns) => {
+    asked.push(...patterns);
+    return ["package/x.qml"];
+  };
+  planStep("qmllint", makeEnv({ qtDirs: ["/q"], isFile: (f) => f === "/q/qmllint", gitFiles }));
+  assert.deepEqual(asked, ["package", "tests/qml", "tools"]);
+});
+
 test("without a Qt directory qmllint6 from PATH is used", () => {
   const { command } = planStep("qmllint", makeEnv({ tools: ["qmllint6"] }));
   assert.equal(command[0], "/usr/bin/qmllint6");
