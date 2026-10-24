@@ -98,19 +98,20 @@ QT_FORCE_STDERR_LOGGING=1 QT_LOGGING_RULES="qml.debug=true" QT_QPA_PLATFORM=offs
   timeout 10 plasmawindowed io.github.flexomatic81.netspeeder
 ```
 
-- Smoke-Szenen: jede der acht Szenen einzeln, alle mit Exitstatus 0. Keine
-  unerwartete QML-Warnung (kein TypeError, ReferenceError, Bindungsschleife,
-  „Cannot assign" oder Veraltet-Hinweis). Zu sehen sind nur die erwarteten
-  Meldungen der `ProviderSmoke`-Szene: der Fehler beim Laden der absichtlich
-  fehlenden `Missing.qml` sowie `netspeeder:`-Warnungen zum Wechsel auf `/proc`,
-  dazu die Diagnosezeilen der Szenen selbst.
+- Smoke-Szenen: jede der acht Szenen einzeln. Keine unerwartete QML-Warnung
+  (kein TypeError, ReferenceError, Bindungsschleife, „Cannot assign" oder
+  Veraltet-Hinweis). Zu sehen sind nur die erwarteten Meldungen der
+  `ProviderSmoke`-Szene: der Fehler beim Laden der absichtlich fehlenden
+  `Missing.qml` sowie `netspeeder:`-Warnungen zum Wechsel auf `/proc`, dazu die
+  Diagnosezeilen der Szenen selbst.
 - `plasmawindowed` (endet nach 10 s durch `timeout`, Status 124, das Widget
-  lief also bis dahin) zeigte genau diese Ausgabe: `kf.windowsystem`-,
+  lief also bis dahin) zeigte unter anderem: `kf.windowsystem`-,
   `kf.svg`- und `kf.plasma.core`-Meldungen des Systems (offscreen-Plattform,
   Theme „GruvboxPlusDark" mit veralteter `metadata.desktop`), die Ladezeile
   `qml: netspeeder: loaded`, eine Zeile `qml: 0` und dreimal die Zeile
   `This plugin does not support propagateSizeHints()`. Das Paket selbst
-  enthält kein `console.log`. Dieselben Aufrufe mit
+  enthält kein `console.log`; geprüft mit `grep -rn "console.log" package/`
+  (keine Treffer, auch nicht im Stand `f4846c5`). Dieselben Aufrufe mit
   `org.kde.plasma.digitalclock` und `org.kde.plasma.systemmonitor.net` geben
   ebenfalls `qml: 0` und die `propagateSizeHints()`-Zeile (fünfmal bzw.
   zweimal) aus, die beiden Zeilen stammen also nicht vom Netspeeder.

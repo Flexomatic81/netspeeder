@@ -27,8 +27,10 @@ First pre-release, stage "Kern" (core).
   devices only, so VPN and Docker traffic is not counted twice. Manual
   selection of the interfaces as an alternative. A selection that points to an
   interface that is gone shows 0 and a note in the tooltip.
-- Robust rates: interfaces that disappear and return, counter resets and
-  suspend/resume cause no spikes and no stale values.
+- Robust rates: interfaces that disappear and return and counter resets cause
+  no spikes and no stale values. Suspend/resume is guarded against in the
+  `/proc` source; on the sensor path the rates come from `ksystemstats`. To be
+  verified by hand before release.
 - Tooltip with connection name, download, upload and IP address, and a note
   about the data source if there is a problem.
 - Settings pages "Display" and "Data"; the data page lists all interfaces with
@@ -39,7 +41,7 @@ First pre-release, stage "Kern" (core).
   (tests on Node 22 and 24, QML lint, `.plasmoid` as release asset for version
   tags).
 
-### Fixed (issues of the original Netspeed Widget)
+### Addressed (issues of the original Netspeed Widget)
 
 - #36: settings jump back to their old values. Selection lists share one
   component that sets the index only on creation and on a change of the bound
