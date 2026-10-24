@@ -80,6 +80,44 @@ test("Plasma i18n functions are called only inside the tr/trc/trp helpers", () =
   assert.deepEqual(stray, []);
 });
 
+const helperPlasma = { tr: "i18n", trc: "i18nc", trp: "i18np" };
+
+// name -> whitespace-normalized text of each helper function in the code.
+function helperTexts(code) {
+  const texts = {};
+  for (const head of code.matchAll(/\bfunction\s+(tr|trc|trp)\s*\([^)]*\)[^{]*\{/g)) {
+    const open = head.index + head[0].length - 1;
+    texts[head[1]] = code.slice(head.index, blockEnd(code, open)).replace(/\s+/g, " ");
+  }
+  return texts;
+}
+
+test("every file that uses the helpers defines the same three of them", () => {
+  const files = qmlFiles(join(root, "package"));
+  assert.ok(files.length > 0, "no QML files scanned");
+  const sets = [];
+  for (const file of files) {
+    const source = readFileSync(file, "utf8");
+    const code = blankComments(source);
+    const texts = helperTexts(code);
+    if (/\broot\.trp?c?\(/.test(code)) {
+      assert.deepEqual(Object.keys(texts).sort(), ["tr", "trc", "trp"], `${file.slice(root.length)} lacks helpers`);
+    }
+    if (Object.keys(texts).length > 0) {
+      sets.push([file, texts]);
+    }
+  }
+  assert.ok(sets.length >= 5, `only ${sets.length} helper sets found`);
+  const [, reference] = sets[0];
+  for (const [file, texts] of sets) {
+    assert.deepEqual(texts, reference, `${file.slice(root.length)} differs from the other helper copies`);
+  }
+  for (const [name, text] of Object.entries(reference)) {
+    const calls = new Set([...text.matchAll(/(?<![\w.])(i18n[cnp]*)\s*\(/g)].map((m) => m[1]));
+    assert.deepEqual([...calls], [helperPlasma[name]], `${name} calls the wrong Plasma function`);
+  }
+});
+
 function unescapePo(text) {
   return text.replace(/\\(["\\nt])/g, (_, c) => ({ n: "\n", t: "\t" })[c] ?? c);
 }
@@ -117,6 +155,8 @@ test("the message catalog holds exactly the recorded messages", () => {
     readFileSync(join(root, "tests/fixtures/catalog-keys.txt"), "utf8").split("\n").filter(Boolean),
   );
   const actual = new Set(catalogKeys(pot));
+  assert.ok(actual.size > 0, "the catalog holds no messages");
+  assert.ok(recorded.size > 0, "no recorded messages");
   const show = (keys) => [...keys].map((key) => key.replaceAll("\t", " | "));
   assert.deepEqual(show([...recorded].filter((key) => !actual.has(key))), [], "missing from the catalog");
   assert.deepEqual(show([...actual].filter((key) => !recorded.has(key))), [], "not in the recorded set");

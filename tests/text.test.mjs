@@ -3,7 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { substitute } from "../package/contents/code/text.mjs";
+import { pluralFallback, substitute } from "../package/contents/code/text.mjs";
 
 test("a missing argument leaves its placeholder", () => {
   assert.equal(substitute("a %1 %2", ["x"]), "a x %2");
@@ -29,4 +29,17 @@ test("a placeholder is replaced everywhere it occurs", () => {
 
 test("values are converted with String", () => {
   assert.equal(substitute("%1 %2", [0, false]), "0 false");
+});
+
+test("pluralFallback uses the singular for exactly one", () => {
+  assert.equal(pluralFallback("%1 file", "%1 files", 1, []), "1 file");
+});
+
+test("pluralFallback uses the plural for zero and for more than one", () => {
+  assert.equal(pluralFallback("%1 file", "%1 files", 0, []), "0 files");
+  assert.equal(pluralFallback("%1 file", "%1 files", 2, []), "2 files");
+});
+
+test("pluralFallback passes the count as %1 and shifts the other arguments", () => {
+  assert.equal(pluralFallback("%1 file in %2", "%1 files in %2", 3, ["dir"]), "3 files in dir");
 });

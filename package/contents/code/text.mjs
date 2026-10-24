@@ -13,3 +13,9 @@ export function substitute(text, args) {
     return index < args.length ? String(args[index]) : placeholder;
   });
 }
+
+// The English text for a count: the singular for exactly 1, otherwise the
+// plural. %1 is the count itself, the further arguments follow as %2, %3, …
+export function pluralFallback(singular, plural, n, args) {
+  return substitute(n === 1 ? singular : plural, [n, ...args]);
+}

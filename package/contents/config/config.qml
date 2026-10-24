@@ -22,7 +22,7 @@ ConfigModel {
     }
     function trp(singular: string, plural: string, n: int, ...args): string {
         // Plasma context function, not declared for qmllint
-        return typeof i18np === "function" ? i18np(singular, plural, n, ...args) : TextTools.substitute(n === 1 ? singular : plural, [n, ...args]); // qmllint disable unqualified
+        return typeof i18np === "function" ? i18np(singular, plural, n, ...args) : TextTools.pluralFallback(singular, plural, n, args); // qmllint disable unqualified
     }
 
     ConfigCategory {
