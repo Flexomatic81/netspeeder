@@ -51,12 +51,20 @@ Item {
         launcher.launch();
         // A second call while running must be ignored.
         launcher.launch();
-        // Failures arrive on failed(); give a case time to settle.
+        // Failures arrive on failed() before busy is released; judge then.
         judge.restart();
     }
 
     function judgeCase() {
         const current = scene.cases[scene.step];
+        if (launcher.busy) {
+            if (Date.now() - scene.stepStart > 10000) {
+                judge.stop();
+                scene.fail("'" + current.line + "' still running after 10 s");
+            }
+            return;
+        }
+        judge.stop();
         const codes = scene.failures.map(f => f.code);
         const want = current.expect === "" ? [] : [current.expect];
         if (JSON.stringify(codes) !== JSON.stringify(want)) {
@@ -103,12 +111,14 @@ Item {
         }
     }
 
-    // Judges a case once it has had time to finish: 2 s covers the 500 ms
-    // timeout and the instant exits.
+    // Judges a case once the launcher is no longer busy. A run that was
+    // started twice would keep it busy for a second run and then report a
+    // second failure.
     Timer {
         id: judge
 
-        interval: 2000
+        interval: 50
+        repeat: true
         onTriggered: scene.judgeCase()
     }
 

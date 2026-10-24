@@ -3,8 +3,8 @@
 
 # test:    ESLint, Prettier, the Node unit tests with their coverage floor and
 #          the other Node checks (group "fast" of tools/check.mjs).
-# lint:    shellcheck over the shell scripts, in the version pinned in
-#          tools/requirements-dev.txt.
+# lint:    shellcheck over the shell scripts and actionlint over the
+#          workflows, in the versions pinned in tools/requirements-dev.txt.
 # qml:     qmllint over every QML file, in an Arch Linux container because
 #          that is where the Plasma QML modules are packaged in current versions.
 # package: only for tags v*; builds the .plasmoid and attaches it to the
@@ -60,6 +60,7 @@ jobs:
           python-version: "3.x"
       - run: python -m pip install -r tools/requirements-dev.txt
       - run: node tools/check.mjs shellcheck
+      - run: node tools/check.mjs actionlint
 
   qml:
     runs-on: ubuntu-latest

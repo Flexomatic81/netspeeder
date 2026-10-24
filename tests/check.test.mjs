@@ -26,7 +26,7 @@ function makeEnv(overrides = {}) {
     which: (name) => (tools.includes(name) ? `/usr/bin/${name}` : null),
     qtDirs: [],
     isFile: () => false,
-    pins: { "shellcheck-py": "0.11.0.1" },
+    pins: { "shellcheck-py": "0.11.0.1", "actionlint-py": "1.7.12.25" },
     qtVersion: () => "",
     gitFiles: (patterns) => (patterns.includes("*.sh") ? ["scripts/a.sh"] : ["package/x.qml", "package/y.js"]),
     testFiles: () => ["tests/a.test.mjs", "tests/b.test.mjs"],
@@ -36,7 +36,13 @@ function makeEnv(overrides = {}) {
 
 test("no arguments select every step", () => {
   assert.deepEqual(selectSteps([]), STEPS);
-  assert.equal(STEPS.length, 7);
+  assert.equal(STEPS.length, 8);
+  assert.ok(STEPS.includes("actionlint"));
+});
+
+test("actionlint belongs to the full run, not to the fast group", () => {
+  assert.ok(selectSteps([]).includes("actionlint"));
+  assert.ok(!selectSteps(["fast"]).includes("actionlint"));
 });
 
 test("groups expand and every step runs once, in the order given", () => {
@@ -134,6 +140,67 @@ test("shellcheck falls back to PATH, and is missing without both", () => {
   const step = planStep("shellcheck", env);
   assert.equal(step.command, null);
   assert.equal(classify(step, env), "failed");
+});
+
+const WORKFLOWS = (patterns) =>
+  patterns.includes(".github/workflows") ? [".github/workflows/ci.yml", ".github/workflows/notes.md"] : [];
+
+test("actionlint runs through uvx with the pinned versions of actionlint and shellcheck", () => {
+  const { command } = planStep("actionlint", makeEnv({ tools: ["uvx"], gitFiles: WORKFLOWS }));
+  assert.deepEqual(command, [
+    "uvx",
+    "--from",
+    "actionlint-py==1.7.12.25",
+    "--with",
+    "shellcheck-py==0.11.0.1",
+    "actionlint",
+    ".github/workflows/ci.yml",
+  ]);
+});
+
+test("actionlint without uvx, as in CI, is taken from PATH", () => {
+  const env = makeEnv({ tools: ["actionlint"], gitFiles: WORKFLOWS, inCi: true });
+  const step = planStep("actionlint", env);
+  assert.deepEqual(step.command, ["/usr/bin/actionlint", ".github/workflows/ci.yml"]);
+  assert.equal(classify(step, env), "run");
+});
+
+test("a missing actionlint fails locally and in CI with a hint how to install it", () => {
+  for (const inCi of [false, true]) {
+    const env = makeEnv({ gitFiles: WORKFLOWS, inCi });
+    const step = planStep("actionlint", env);
+    assert.equal(step.command, null);
+    assert.equal(classify(step, env), "failed");
+    const silent = console.log;
+    console.log = () => {};
+    let results;
+    try {
+      results = runSteps([step], env, () => 0);
+    } finally {
+      console.log = silent;
+    }
+    assert.equal(results.actionlint[0], "failed");
+    assert.match(results.actionlint[1], /actionlint not found - .*requirements-dev\.txt/);
+  }
+});
+
+test("actionlint with no workflow file fails instead of passing vacuously", () => {
+  const step = planStep("actionlint", makeEnv({ tools: ["uvx"], gitFiles: () => [] }));
+  assert.equal(step.command, null);
+  assert.match(step.error, /no workflow files/);
+});
+
+test("a missing shellcheck names the Python tool requirements, not pnpm", () => {
+  const env = makeEnv();
+  const silent = console.log;
+  console.log = () => {};
+  let results;
+  try {
+    results = runSteps([planStep("shellcheck", env)], env, () => 0);
+  } finally {
+    console.log = silent;
+  }
+  assert.match(results.shellcheck[1], /shellcheck not found - .*requirements-dev\.txt/);
 });
 
 test("an unknown step cannot be planned", () => {

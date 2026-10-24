@@ -12,6 +12,9 @@
 //   3  the heartbeat stops: samples still pass for the heartbeat window, then
 //      none, and the provider turns stale after its three intervals
 //   4  the heartbeat comes back: the values are fresh again
+//
+// Live scene: needs ksystemstats with its network sensors (the values come
+// from the real sensors).
 
 import QtQuick
 import "../../package/contents/ui/data"

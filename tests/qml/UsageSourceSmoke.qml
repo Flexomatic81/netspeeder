@@ -11,10 +11,14 @@ Item {
     id: scene
 
     property bool done: false
+    property int exitCode: 0
     property int step: 0
     property double stepStart: 0
     property string firstUpdated: ""
     property int stage: 0
+    property double stageStart: 0
+    // Temporary directory for the marker files of the survival stages.
+    property string markerDir: ""
     readonly property string v2: scene.localPath("../fixtures/vnstat-v2.json")
     readonly property string v1: scene.localPath("../fixtures/vnstat-v1.json")
 
@@ -41,7 +45,14 @@ Item {
         }
         scene.done = true;
         console.log(message);
-        Qt.exit(ok ? 0 : 1);
+        scene.exitCode = ok ? 0 : 1;
+        if (scene.markerDir.indexOf("/") !== 0) {
+            Qt.exit(scene.exitCode);
+            return;
+        }
+        // Removes the marker directory first; the exit follows in onFinished.
+        cleaner.command = "rm -rf '" + scene.markerDir + "'";
+        cleaner.run();
     }
 
     function fail(message) {
@@ -112,10 +123,45 @@ Item {
 
     // Two fresh sources (no data yet) make a dropped result visible: a run
     // that is disabled meanwhile, and one that is disabled and enabled again.
+    // Their commands wait for marker files the scene creates, so each stage
+    // waits for the runs to change state, not for a fixed time.
     function startSurvival() {
-        const line = "sleep 1; cat '" + scene.v2 + "'";
-        gone.command = line;
-        flip.command = line;
+        scene.stage = 0;
+        helper.command = "mktemp -d";
+        helper.run();
+    }
+
+    // A command that waits (at most 10 s) for the marker `name`, then prints
+    // the v2 fixture; without the marker it fails.
+    function gatedLine(name) {
+        const marker = "'" + scene.markerDir + "/" + name + "'";
+        return "i=0; while [ ! -e " + marker + " ] && [ $i -lt 200 ]; do sleep 0.05; i=$((i + 1)); done; "
+            + "[ -e " + marker + " ] && cat '" + scene.v2 + "'";
+    }
+
+    function release(name) {
+        helper.command = "touch '" + scene.markerDir + "/" + name + "'";
+        helper.run();
+    }
+
+    function onHelperFinished(exitCode, stdout, stderr) {
+        if (exitCode !== 0) {
+            scene.fail("'" + helper.command + "' gave exit " + exitCode + ": " + stderr);
+            return;
+        }
+        if (scene.stage === 0) {
+            scene.markerDir = stdout.trim();
+            scene.startGatedRuns();
+            return;
+        }
+        // A marker is in place; watch the runs it releases.
+        scene.stageStart = Date.now();
+        survival.restart();
+    }
+
+    function startGatedRuns() {
+        gone.command = scene.gatedLine("first");
+        flip.command = scene.gatedLine("first");
         gone.enabled = true;
         flip.enabled = true;
         gone.enabled = false;
@@ -125,12 +171,26 @@ Item {
             scene.fail("unexpected start: " + gone.status + " " + gone.runs + " " + flip.runs);
             return;
         }
-        survival.restart();
+        // The run restarted after the stale one ends waits for its own marker.
+        flip.command = scene.gatedLine("second");
+        scene.stage = 1;
+        scene.release("first");
     }
 
     function checkSurvival() {
-        if (scene.stage === 0) {
-            // The stale runs have finished by now.
+        if (scene.done) {
+            survival.stop();
+            return;
+        }
+        if (scene.stage === 1) {
+            // Wait until both stale runs have finished: gone is idle and flip
+            // has started its new run.
+            if (gone.busy || flip.runs < 2) {
+                scene.survivalTimeout("the stale runs did not finish (gone busy " + gone.busy
+                    + ", flip runs " + flip.runs + ")");
+                return;
+            }
+            survival.stop();
             if (gone.parsed !== null || gone.lastUpdated !== "" || gone.warnings !== 0) {
                 scene.fail("late result after disabling was not dropped");
                 return;
@@ -139,16 +199,27 @@ Item {
                 scene.fail("stale run was kept or not restarted: runs " + flip.runs);
                 return;
             }
-            scene.stage = 1;
-            survival.interval = 1500;
-            survival.restart();
+            scene.stage = 2;
+            scene.release("second");
             return;
         }
+        if (flip.busy) {
+            scene.survivalTimeout("the restarted run did not finish");
+            return;
+        }
+        survival.stop();
         if (flip.status !== "ok" || !flip.parsed || off.runs !== 0 || off.status !== "disabled") {
             scene.fail("restarted run gave " + flip.status + ", or the disabled source ran");
             return;
         }
         scene.finish(true, "SMOKE OK usage source");
+    }
+
+    function survivalTimeout(message) {
+        if (Date.now() - scene.stageStart > 10000) {
+            survival.stop();
+            scene.fail(message + " within 10 s");
+        }
     }
 
     // Starts disabled, so nothing runs before the first case sets a command.
@@ -188,10 +259,26 @@ Item {
         onTriggered: scene.judgeCase()
     }
 
+    // Runs the shell lines that create the marker directory and the markers.
+    CommandRunner {
+        id: helper
+
+        timeoutMs: 5000
+        onFinished: (exitCode, stdout, stderr) => scene.onHelperFinished(exitCode, stdout, stderr)
+    }
+
+    CommandRunner {
+        id: cleaner
+
+        timeoutMs: 5000
+        onFinished: Qt.exit(scene.exitCode)
+    }
+
     Timer {
         id: survival
 
-        interval: 1500
+        interval: 50
+        repeat: true
         onTriggered: scene.checkSurvival()
     }
 

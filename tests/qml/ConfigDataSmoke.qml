@@ -7,6 +7,9 @@
 // order of compareNames, a selected interface that does not exist shown as
 // "not available" only as long as it is selected, and rows that stay keeping
 // the very same delegate object (a rebuilt row would lose clicks and focus).
+//
+// Live scene: needs ksystemstats and a network interface (the page lists the
+// real interfaces).
 
 import QtQuick
 import "../../package/contents/ui/config"

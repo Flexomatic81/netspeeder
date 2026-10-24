@@ -117,7 +117,12 @@ Item {
             scene.expect("size read back", sizeBox.valueFromText(sizeBox.textFromValue(1234, Qt.locale()), Qt.locale()), 1234);
             break;
         case 6:
-            // The first run of the replaced command reported exit 127.
+            // Waits for the first run of the replaced command, which the page
+            // started when it opened; it reported exit 127.
+            if (usageSource.status === "loading" || usageSource.busy) {
+                scene.step--;
+                break;
+            }
             scene.expect("status missing", page.statusText, "vnstat is not installed");
             scene.expect("status label shows it", statusLabel.text, "vnstat is not installed");
             page.statusCommand = "cat '" + scene.v2 + "'";

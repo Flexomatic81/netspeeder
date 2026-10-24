@@ -41,16 +41,23 @@ CI runs all of these checks except the local-only `smoke` and `load` steps for e
 and they must pass. One command runs the checks locally:
 
 ```bash
-node tools/check.mjs                    # everything: ESLint, Prettier, tests, qmllint, shellcheck, smoke, load
+node tools/check.mjs                    # everything: ESLint, Prettier, tests, qmllint, shellcheck, actionlint, smoke, load
 node tools/check.mjs fast               # the Node checks: ESLint, Prettier and the tests with their coverage floor
 node tools/check.mjs qmllint            # a single step
 node tools/check.mjs --install-hook     # run the fast checks before every commit
 ```
 
 `qmllint` (Qt 6), the QML smoke scenes and the load check need Qt 6's QML tools and a desktop
-session; without them these steps are reported as skipped locally. `shellcheck` runs in the version
-pinned in `tools/requirements-dev.txt` through [uv](https://docs.astral.sh/uv/), or from your
-`PATH` after `python3 -m pip install -r tools/requirements-dev.txt`.
+session; without them these steps are reported as skipped locally. `shellcheck` and `actionlint`
+(which checks the CI workflow) run in the versions pinned in `tools/requirements-dev.txt` through
+[uv](https://docs.astral.sh/uv/), or from your `PATH` after
+`python3 -m pip install -r tools/requirements-dev.txt`.
+
+Some smoke scenes are live: they read the real network and need `ksystemstats` running and a
+connected physical network interface that has received data. Where that is missing, for example in
+a container, `NETSPEEDER_SMOKE_SKIP_LIVE=1 node tools/check.mjs` skips them; each one is reported as
+`SMOKE SKIPPED (live) <scene>`. Without the variable all scenes run. The list is `live_scenes` in
+`scripts/smoke.sh`; [docs/testing.md](docs/testing.md) has the details.
 
 The unit tests have a coverage floor; please add tests for new behaviour and for bug fixes. Code is
 formatted with Prettier (`pnpm run format`, which is `prettier --write "**/*.mjs"`).

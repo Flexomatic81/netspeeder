@@ -18,7 +18,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-export const STEPS = ["eslint", "format", "test", "qmllint", "shellcheck", "smoke", "load"];
+export const STEPS = ["eslint", "format", "test", "qmllint", "shellcheck", "actionlint", "smoke", "load"];
 export const GROUPS = { fast: ["eslint", "format", "test"] };
 export const LOCAL_ONLY = ["smoke", "load"];
 export const QT_STEPS = ["qmllint"];
@@ -27,6 +27,7 @@ export const PLUGIN_ID = "io.github.flexomatic81.netspeeder";
 const QT_DIRS = ["/usr/lib/qt6/bin", "/usr/lib64/qt6/bin"]; // Arch/Debian/Ubuntu, Fedora
 const PINS_FILE = path.join(ROOT, "tools", "requirements-dev.txt");
 const INSTALL_HINT = "install the development tools with: pnpm install";
+const PYTHON_HINT = "install uv, or run: python3 -m pip install -r tools/requirements-dev.txt";
 const CODE_DIR = "package/contents/code";
 
 /** Step and group names to steps in the order given, each once; no names means every step. */
@@ -96,6 +97,24 @@ function shellcheckCommand(env) {
   return [...prefix, ...env.gitFiles(["*.sh"]), "tools/hooks/pre-commit"];
 }
 
+// shellcheck comes along so that actionlint checks the run: scripts as it does in CI.
+function actionlintCommand(env) {
+  const prefix = env.which("uvx")
+    ? [
+        "uvx",
+        "--from",
+        `actionlint-py==${env.pins["actionlint-py"]}`,
+        "--with",
+        `shellcheck-py==${env.pins["shellcheck-py"]}`,
+        "actionlint",
+      ]
+    : [env.which("actionlint")];
+  if (!prefix[0]) return null;
+  const files = env.gitFiles([".github/workflows"]).filter((f) => /\.ya?ml$/.test(f));
+  if (files.length === 0) throw new Error("no workflow files found to lint");
+  return [...prefix, ...files];
+}
+
 function qmllintCommand(env) {
   const qmllint = findQmllint(env);
   // qmllint exits 0 on warnings unless told otherwise.
@@ -109,7 +128,8 @@ const PLANNERS = {
   format: { tool: "prettier", command: () => ["pnpm", "exec", "prettier", "--check", "**/*.mjs"], needs: "pnpm" },
   test: { tool: "node", command: testCommand },
   qmllint: { tool: "Qt 6 qmllint", command: qmllintCommand },
-  shellcheck: { tool: "shellcheck", command: shellcheckCommand },
+  shellcheck: { tool: "shellcheck", command: shellcheckCommand, hint: PYTHON_HINT },
+  actionlint: { tool: "actionlint", command: actionlintCommand, hint: PYTHON_HINT },
   smoke: { tool: "qml6", command: () => ["scripts/smoke.sh"], needs: "qml6" },
   load: { tool: "plasmawindowed", command: () => ["scripts/load-check.sh"], needs: "plasmawindowed" },
 };
@@ -125,7 +145,7 @@ export function planStep(name, env) {
   const planner = PLANNERS[name];
   if (!planner) throw new Error(`unknown step: ${name}`);
   const present = !planner.needs || Boolean(env.which(planner.needs));
-  const step = { name, command: null, missing: planner.tool, cwd: ROOT };
+  const step = { name, command: null, missing: planner.tool, hint: planner.hint ?? INSTALL_HINT, cwd: ROOT };
   try {
     if (present) step.command = planner.command(env);
   } catch (e) {
@@ -213,7 +233,7 @@ function detectEnv() {
   const inCi = Boolean(process.env.CI);
   return {
     inCi,
-    // CI installs shellcheck-py with pip; uvx is only used for local runs.
+    // CI installs shellcheck-py and actionlint-py with pip; uvx is only used for local runs.
     which: (name) => (inCi && name === "uvx" ? null : which(name)),
     qtDirs: QT_DIRS,
     isFile: (file) => fs.existsSync(file) && fs.statSync(file).isFile(),
@@ -271,7 +291,7 @@ export function runSteps(steps, env, run = execute) {
     } else if (verdict === "skipped") {
       results[step.name] = ["skipped", skipReason(step, env)];
     } else {
-      results[step.name] = ["failed", `${step.missing} not found - ${INSTALL_HINT}`];
+      results[step.name] = ["failed", `${step.missing} not found - ${step.hint}`];
     }
     console.log(results[step.name].filter(Boolean).join(" - "));
   }

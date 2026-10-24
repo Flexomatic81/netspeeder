@@ -309,12 +309,12 @@ msginit --no-translator --locale=fr --input=po/plasma_applet_io.github.flexomati
 
 | Command | Purpose |
 |---|---|
-| `node tools/check.mjs` | All steps: `eslint`, `format`, `test`, `qmllint`, `shellcheck`, `smoke`, `load` |
+| `node tools/check.mjs` | All steps: `eslint`, `format`, `test`, `qmllint`, `shellcheck`, `actionlint`, `smoke`, `load` |
 | `node tools/check.mjs fast` | Group `fast`: the Node checks (`eslint`, `format`, `test` with its coverage floor); a few seconds |
 | `node tools/check.mjs <step>...` | Only the named steps, e.g. `qmllint` or `shellcheck qmllint` |
 | `node tools/check.mjs --install-hook` | Installs a pre-commit hook that runs the `fast` group |
 | `pnpm test` | Only the unit tests of the logic modules (`package/contents/code/*.mjs`) |
-| `scripts/smoke.sh` | QML smoke scenes with `qml6`; local only, needs `ksystemstats` and a desktop session |
+| `scripts/smoke.sh` | QML smoke scenes with `qml6`; local only, needs `ksystemstats`, a connected network interface and a desktop session (`NETSPEEDER_SMOKE_SKIP_LIVE=1` skips the scenes that read the real network) |
 | `scripts/load-check.sh` | Starts the installed widget offscreen and checks that it loads; needs a desktop session |
 | `scripts/build-plasmoid.sh <version>` | Builds `dist/netspeeder-<version>.plasmoid` |
 
@@ -325,7 +325,7 @@ run, and `smoke` and `load` are skipped. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow.
 
 Continuous integration (`.github/workflows/ci.yml`) runs the `fast` group on
-Node 22.13 and 24, shellcheck and `qmllint`, and builds the `.plasmoid` for
+Node 22.13 and 24, shellcheck, actionlint and `qmllint`, and builds the `.plasmoid` for
 version tags. [docs/testing.md](docs/testing.md) is the manual checklist that
 is worked through before each release.
 

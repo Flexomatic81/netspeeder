@@ -3,6 +3,9 @@
 
 // Smoke scene for ProcSource: polls the real /proc/net/dev and checks the
 // third sample against the sample contract.
+//
+// Live scene: needs a connected physical network interface (it reads the
+// real /proc/net/dev).
 
 import QtQuick
 import "../../package/contents/ui/data"

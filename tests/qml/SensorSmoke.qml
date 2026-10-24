@@ -4,6 +4,9 @@
 // Smoke scene for SensorSource: reads the real ksystemstats and checks the
 // third sample against the sample contract, plus the sensor IDs the delegates
 // built (a wrong ID, e.g. "network//download", delivers no values at all).
+//
+// Live scene: needs ksystemstats and a network interface that has received
+// data.
 
 import QtQuick
 import "../../package/contents/ui/data"

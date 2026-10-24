@@ -25,6 +25,9 @@
 //      source that cannot be loaded either: no data, "source-failed"
 // The phases run one after another; each waits for settled data, at most
 // 12 seconds.
+//
+// Live scene: needs ksystemstats and a connected physical network interface
+// (phases 1, 2, 4, 6 and 7 expect real data that is online).
 
 import QtQuick
 import "../../package/contents/ui/data"
@@ -443,11 +446,13 @@ Item {
         if (!scene.interfaceAdded) {
             if (p.hasData) {
                 scene.fail("data without an interface (" + scene.describe() + ")");
-            } else if (now - scene.phaseStart >= 2200) {
-                if (p.errorCode !== "no-interfaces" || p.activeSource !== "") {
-                    scene.fail("expected 'no-interfaces' without data after 2 s (" + scene.describe() + ")");
-                    return;
+            } else if (p.errorCode !== "no-interfaces" || p.activeSource !== "") {
+                // The error follows the fallback delay; wait for it.
+                if (now - scene.phaseStart > scene.phaseTimeoutMs) {
+                    scene.fail("expected 'no-interfaces' without data within " + scene.phaseTimeoutMs / 1000
+                        + " s (" + scene.describe() + ")");
                 }
+            } else {
                 const source = scene.findSource();
                 if (source === null) {
                     scene.fail("test double not found in the provider");

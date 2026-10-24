@@ -7,8 +7,31 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 
 This checklist is worked through before every release. The
 automatic tests (`node tools/check.mjs`; CI runs the steps of the group `fast`,
-`shellcheck` and `qmllint`) do not replace it: they check logic and single
-scenes, not the behavior in a real panel.
+`shellcheck`, `actionlint` and `qmllint`) do not replace it: they check logic
+and single scenes, not the behavior in a real panel.
+
+The CI workflow (`.github/workflows/ci.yml`) is set up and checked with
+`actionlint`, but it has never run: the repository has no remote yet. Until it
+has, every result here comes from local runs.
+
+## Automatic smoke scenes
+
+`scripts/smoke.sh` (the `smoke` step) runs the QML scenes in `tests/qml` with
+`qml6` on the offscreen platform. Most of them use test doubles. The live
+scenes read the real network and need:
+
+- `ksystemstats` running (the Plasma system monitor service), and
+- a connected physical network interface that has received data.
+
+They are listed in `live_scenes` in `scripts/smoke.sh` and each says so in
+its header comment ("Live scene: needs ..."). On a machine without these, for
+example in a container, `NETSPEEDER_SMOKE_SKIP_LIVE=1 scripts/smoke.sh` skips
+them and prints `SMOKE SKIPPED (live) <scene>` for each one. Without the
+variable every scene runs, and a live scene that finds no network fails.
+
+Scenes that start commands or wait for data follow state changes (a run that
+ends, a status that changes) and use their time limits only as an upper bound,
+so a slow or busy machine makes them slower, not red.
 
 Procedure: install the current version (`scripts/dev-install.sh`), restart
 plasmashell (`systemctl --user restart plasma-plasmashell`), go through the
@@ -135,8 +158,7 @@ Qt/qmllint 6.12, Plasma 6.8). These runs do not replace the manual checks
 above. There the "Result" column stays empty until they have been worked
 through by hand.
 
-Command (npm is not installed on this machine; `pnpm test` runs the same
-script `test` from `package.json`):
+Command (`pnpm test` runs the script `test` from `package.json`):
 
 ```
 pnpm test && scripts/lint.sh && scripts/smoke.sh && scripts/dev-install.sh \

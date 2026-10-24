@@ -9,10 +9,39 @@
 # output) counts as a warning, unless the scene lists it in expected_lines.
 # The output of a failing scene is shown in full.
 # Usage: scripts/smoke.sh [scene.qml ...]   (default: tests/qml/*Smoke.qml)
-# Runs locally only: the scenes need ksystemstats and /sys.
+# Runs locally only: the scenes need qml6 with the Plasma QML modules, and the
+# live scenes (see live_scenes) also need ksystemstats and a connected
+# physical network interface. NETSPEEDER_SMOKE_SKIP_LIVE=1 skips the live
+# scenes and prints "SMOKE SKIPPED (live) <scene>" for each; without it every
+# scene runs.
 set -uo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
+
+# Scenes that read the real network: ksystemstats and /proc/net/dev with a
+# connected physical interface. Each one says so in its header comment
+# ("// Live scene: needs ..."); tests/smoke-live.test.mjs keeps both in step.
+live_scenes=(
+  ConfigDataSmoke.qml
+  HeartbeatSmoke.qml
+  ProcSmoke.qml
+  ProviderSmoke.qml
+  SensorSmoke.qml
+)
+
+is_live() {
+  local name scene
+  name="$(basename "$1")"
+  for scene in "${live_scenes[@]}"; do
+    [ "$scene" = "$name" ] && return 0
+  done
+  return 1
+}
+
+skip_live="${NETSPEEDER_SMOKE_SKIP_LIVE:-}"
+if [ -n "$skip_live" ] && [ "$skip_live" != "1" ]; then
+  echo "smoke: NETSPEEDER_SMOKE_SKIP_LIVE=$skip_live is ignored; only 1 skips the live scenes" >&2
+fi
 
 # Messages that are a scene's expected behaviour, as extended regular
 # expressions for whole lines (one per output line). Keep them as narrow as
@@ -92,6 +121,10 @@ fi
 
 status=0
 for scene in "${scenes[@]}"; do
+  if [ "$skip_live" = "1" ] && is_live "$scene"; then
+    echo "SMOKE SKIPPED (live) $(basename "$scene")"
+    continue
+  fi
   # Qt logs to journald unless stderr is a terminal; force it to stderr so
   # console.log output reaches the capture.
   output="$(QT_FORCE_STDERR_LOGGING=1 QT_QPA_PLATFORM=offscreen timeout 40 qml6 "$scene" 2>&1)"
