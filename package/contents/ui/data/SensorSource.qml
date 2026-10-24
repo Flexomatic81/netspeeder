@@ -22,6 +22,21 @@ Item {
     // True while at least one network interface is known.
     readonly property bool available: internals.interfaceNames.length > 0
 
+    // Test seams: the sign of life, whether its sensor exists, and how long
+    // the start-up probe waits before it decides that the sensor is missing.
+    // Bound to the heartbeat sensor below; tests replace them to play a sensor
+    // service that starts late or stops.
+    property var heartbeatValue: heartbeat.value
+    property bool heartbeatSensorReady: heartbeat.status === Sensors.Sensor.Ready
+    property int heartbeatProbeMs: 10000
+
+    // The sensor also signals once on creation, before it has a value.
+    onHeartbeatValueChanged: {
+        if (root.heartbeatValue !== undefined) {
+            internals.updateGate({ type: "heartbeat", now: Date.now() });
+        }
+    }
+
     // sample: { timestamp, source, interfaces } as built by buildSensorSample().
     signal sampleReady(var sample)
     // Part of the shared source interface. Never emitted here: a stalled
@@ -54,10 +69,20 @@ Item {
         // has answered or when it failed (then every interface counts as
         // physical).
         property var physical: null
-        // Time of the last change of the heartbeat sensor, 0 before the first.
-        property double lastHeartbeatAt: 0
-        // False once the heartbeat sensor turned out not to exist.
-        property bool heartbeatRequired: true
+        // Whether samples need a fresh heartbeat, and when the last one came;
+        // see heartbeatGate() in sensors.mjs.
+        property var heartbeatGate: SensorCode.initialHeartbeatGate()
+
+        // Applies a heartbeat event and logs when the check goes off or on.
+        function updateGate(event) {
+            const next = SensorCode.heartbeatGate(internals.heartbeatGate, event);
+            if (next.required !== internals.heartbeatGate.required) {
+                console.warn("netspeeder: heartbeat sensor " + SensorCode.HEARTBEAT_SENSOR
+                    + (next.required ? " is back, staleness check enabled"
+                                     : " unavailable, staleness check disabled"));
+            }
+            internals.heartbeatGate = next;
+        }
 
         // objectAt() is typed QObject; the properties of the delegate are only
         // known at runtime, hence the untyped result.
@@ -140,8 +165,7 @@ Item {
 
         function emitSample() {
             const now = Date.now();
-            if (internals.heartbeatRequired
-                    && !SensorCode.isHeartbeatFresh(internals.lastHeartbeatAt, now, root.interval)) {
+            if (!SensorCode.heartbeatAllows(internals.heartbeatGate, now, root.interval)) {
                 return;
             }
             const values = {};
@@ -289,26 +313,15 @@ Item {
 
         sensorId: SensorCode.HEARTBEAT_SENSOR
         updateRateLimit: 1000
-        onValueChanged: {
-            // The sensor also signals once on creation, before it has a value.
-            if (heartbeat.value !== undefined) {
-                internals.lastHeartbeatAt = Date.now();
-            }
-        }
     }
 
-    // Without a heartbeat sensor (missing in this Plasma version) the check
-    // would block all samples, so it is switched off.
+    // Without a heartbeat sensor (missing in this Plasma version, or
+    // ksystemstats not running yet) the check would block all samples, so it
+    // is switched off until a heartbeat arrives.
     Timer {
-        interval: 10000
+        interval: root.heartbeatProbeMs
         running: true
-        onTriggered: {
-            if (heartbeat.status !== Sensors.Sensor.Ready) {
-                internals.heartbeatRequired = false;
-                console.warn("netspeeder: heartbeat sensor " + SensorCode.HEARTBEAT_SENSOR
-                    + " unavailable, staleness check disabled");
-            }
-        }
+        onTriggered: internals.updateGate({ type: "probe-expired", sensorReady: root.heartbeatSensorReady })
     }
 
     Timer {

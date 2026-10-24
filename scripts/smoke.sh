@@ -49,8 +49,10 @@ expected_lines() {
       echo '^file://.*/tests/qml/BrokenGraph\.qml:[0-9]+:[0-9]+: module "org\.kde\.netspeeder\.missingcharts" is not installed$'
       ;;
     ProviderSmoke.qml)
-      # The scene points the provider at a data source that does not exist.
+      # The scene points the provider at a data source that does not exist,
+      # and at a /proc source that imports a module that does not exist.
       echo '^file://.*/tests/qml/Missing\.qml: No such file or directory$'
+      echo '^file://.*/tests/qml/BrokenSource\.qml:[0-9]+:[0-9]+: module "org\.kde\.netspeeder\.missingsource" is not installed$'
       ;;
   esac
 }

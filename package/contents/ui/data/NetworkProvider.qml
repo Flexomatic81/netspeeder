@@ -27,9 +27,10 @@ Item {
     property int idleThreshold: 1024
     property int idleSeconds: 30
 
-    // Test seams. A relative sensorSourceUrl is resolved against this file
-    // (the default depends on it); tests pass absolute URLs.
+    // Test seams. Relative source URLs are resolved against this file (the
+    // defaults depend on it); tests pass absolute URLs.
     property url sensorSourceUrl: "SensorSource.qml"
+    property url procSourceUrl: "ProcSource.qml"
     // How long a loaded sensor source may report no interface before it
     // counts as unavailable.
     property int fallbackDelayMs: 10000
@@ -61,6 +62,7 @@ Item {
 
     onDataSourceChanged: internals.applyChoice()
     onSensorSourceUrlChanged: internals.applyChoice()
+    onProcSourceUrlChanged: internals.applyChoice()
 
     // Choosing the source must wait until all initial property values are in.
     Component.onCompleted: {
@@ -71,7 +73,7 @@ Item {
     QtObject {
         id: internals
 
-        readonly property url procUrl: "ProcSource.qml"
+        readonly property url procUrl: root.procSourceUrl
         readonly property int intervalMs: {
             const seconds = Number(root.updateInterval);
             return Math.round(Math.min(10, Math.max(0.5, isFinite(seconds) ? seconds : 1)) * 1000);

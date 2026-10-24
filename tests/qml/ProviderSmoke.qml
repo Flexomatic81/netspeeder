@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
-// Smoke scene for NetworkProvider with the real data sources, in nine phases:
+// Smoke scene for NetworkProvider with the real data sources, in ten phases:
 //   1  auto mode takes data from ksystemstats; after three samples the
 //      history holds at least three points and its peak covers every one
 //   2  the same instance switched to /proc: no old values, virtual interfaces
@@ -21,6 +21,8 @@
 //      between samples), and `stale` still follows the clock
 //   9  `idle` turns true on the clock alone, at least 5 s after the data began
 //      and without a new sample, and a source switch resets it
+//  10  auto mode with an unloadable sensor source falls back to a /proc
+//      source that cannot be loaded either: no data, "source-failed"
 // The phases run one after another; each waits for settled data, at most
 // 12 seconds.
 
@@ -238,6 +240,9 @@ Item {
             scene.idleStep = 0;
             scene.replaceProvider(idleComponent);
             break;
+        case 10:
+            scene.replaceProvider(brokenFallbackComponent);
+            break;
         }
     }
 
@@ -292,6 +297,9 @@ Item {
         case 9:
             scene.tickIdle(now);
             break;
+        case 10:
+            scene.tickBrokenFallback(now);
+            break;
         }
     }
 
@@ -340,8 +348,24 @@ Item {
             }
             break;
         case 3:
-            scene.finish(true, "SMOKE OK provider");
+            scene.enter(10);
             break;
+        }
+    }
+
+    // Phase 10. Both loads fail; the second failure is no status change of
+    // the loader, so only the provider's own check can report it.
+    function tickBrokenFallback(now) {
+        const p = scene.provider;
+        scene.expectCleared();
+        if (p.errorCode === "source-failed") {
+            if (p.errorDetail.indexOf("BrokenSource.qml") < 0) {
+                scene.fail("errorDetail '" + p.errorDetail + "' does not name the /proc source");
+                return;
+            }
+            scene.finish(true, "SMOKE OK provider");
+        } else if (now - scene.phaseStart > 2000) {
+            scene.fail("errorCode is '" + p.errorCode + "' after 2 s (" + scene.describe() + ")");
         }
     }
 
@@ -525,6 +549,17 @@ Item {
             dataSource: "sensors"
             updateInterval: 0.5
             sensorSourceUrl: Qt.resolvedUrl("Missing.qml")
+        }
+    }
+
+    Component {
+        id: brokenFallbackComponent
+
+        NetworkProvider {
+            dataSource: "auto"
+            updateInterval: 0.5
+            sensorSourceUrl: Qt.resolvedUrl("Missing.qml")
+            procSourceUrl: Qt.resolvedUrl("BrokenSource.qml")
         }
     }
 

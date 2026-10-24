@@ -34,6 +34,35 @@ export function isHeartbeatFresh(lastHeartbeatAt, now, intervalMs) {
   return now - lastHeartbeatAt <= heartbeatWindowMs(intervalMs);
 }
 
+// State of the heartbeat check: whether samples need a fresh heartbeat, and
+// the time of the last heartbeat (0 before the first). Samples wait for the
+// first heartbeat.
+export function initialHeartbeatGate() {
+  return { required: true, lastHeartbeatAt: 0 };
+}
+
+// Next state of the heartbeat check. Events:
+//   { type: "heartbeat", now }               the heartbeat sensor changed
+//   { type: "probe-expired", sensorReady }   the start-up probe is over
+// The probe switches the check off only when the sensor is missing and no
+// heartbeat has come so far (a Plasma version without it). Any later heartbeat
+// switches it on again, so a service that starts late, or stops after that,
+// is noticed. Returns the same object when nothing changes.
+export function heartbeatGate(state, event) {
+  if (event.type === "heartbeat") {
+    return { required: true, lastHeartbeatAt: event.now };
+  }
+  if (event.type === "probe-expired" && !event.sensorReady && state.lastHeartbeatAt === 0 && state.required) {
+    return { required: false, lastHeartbeatAt: 0 };
+  }
+  return state;
+}
+
+// True when a sample taken at `now` may be passed on.
+export function heartbeatAllows(state, now, intervalMs) {
+  return !state.required || isHeartbeatFresh(state.lastHeartbeatAt, now, intervalMs);
+}
+
 const SENSOR_ID = /^network\/([^/]+)\/[^/]+$/;
 // Sensor IDs with regex syntax stand for a group of interfaces, not for one.
 const REGEX_CHARS = /[()*?[\]|\\]/;
