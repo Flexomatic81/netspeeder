@@ -1,0 +1,180 @@
+{
+  "vnstatversion": "1.18",
+  "jsonversion": "1",
+  "interfaces": [
+    {
+      "name": "eth0",
+      "alias": "",
+      "created": {
+        "date": {
+          "year": 2026,
+          "month": 8,
+          "day": 1
+        },
+        "timestamp": 1785542400
+      },
+      "updated": {
+        "date": {
+          "year": 2026,
+          "month": 10,
+          "day": 24
+        },
+        "time": {
+          "hour": 18,
+          "minute": 30
+        },
+        "timestamp": 1792866600
+      },
+      "traffic": {
+        "total": {
+          "rx": 11400000000,
+          "tx": 1155000000
+        },
+        "day": [
+          {
+            "id": 1,
+            "date": {
+              "year": 2026,
+              "month": 8,
+              "day": 20
+            },
+            "timestamp": 1787184000,
+            "rx": 1200000000,
+            "tx": 150000000
+          },
+          {
+            "id": 2,
+            "date": {
+              "year": 2026,
+              "month": 8,
+              "day": 21
+            },
+            "timestamp": 1787270400,
+            "rx": 800000000,
+            "tx": 90000000
+          },
+          {
+            "id": 3,
+            "date": {
+              "year": 2026,
+              "month": 9,
+              "day": 3
+            },
+            "timestamp": 1788393600,
+            "rx": 5400000000,
+            "tx": 420000000
+          },
+          {
+            "id": 4,
+            "date": {
+              "year": 2026,
+              "month": 9,
+              "day": 30
+            },
+            "timestamp": 1790726400,
+            "rx": 310000000,
+            "tx": 40000000
+          },
+          {
+            "id": 5,
+            "date": {
+              "year": 2026,
+              "month": 10,
+              "day": 1
+            },
+            "timestamp": 1790812800,
+            "rx": 2100000000,
+            "tx": 260000000
+          },
+          {
+            "id": 6,
+            "date": {
+              "year": 2026,
+              "month": 10,
+              "day": 23
+            },
+            "timestamp": 1792713600,
+            "rx": 950000000,
+            "tx": 120000000
+          },
+          {
+            "id": 7,
+            "date": {
+              "year": 2026,
+              "month": 10,
+              "day": 24
+            },
+            "timestamp": 1792800000,
+            "rx": 640000000,
+            "tx": 75000000
+          }
+        ]
+      }
+    },
+    {
+      "name": "wlan0",
+      "alias": "",
+      "created": {
+        "date": {
+          "year": 2026,
+          "month": 10,
+          "day": 10
+        },
+        "timestamp": 1791590400
+      },
+      "updated": {
+        "date": {
+          "year": 2026,
+          "month": 10,
+          "day": 24
+        },
+        "time": {
+          "hour": 18,
+          "minute": 30
+        },
+        "timestamp": 1792866600
+      },
+      "traffic": {
+        "total": {
+          "rx": 1120000000,
+          "tx": 112000000
+        },
+        "day": [
+          {
+            "id": 1,
+            "date": {
+              "year": 2026,
+              "month": 10,
+              "day": 10
+            },
+            "timestamp": 1791590400,
+            "rx": 300000000,
+            "tx": 30000000
+          },
+          {
+            "id": 2,
+            "date": {
+              "year": 2026,
+              "month": 10,
+              "day": 12
+            },
+            "timestamp": 1791763200,
+            "rx": 700000000,
+            "tx": 64000000
+          },
+          {
+            "id": 3,
+            "date": {
+              "year": 2026,
+              "month": 10,
+              "day": 24
+            },
+            "timestamp": 1792800000,
+            "rx": 120000000,
+            "tx": 18000000
+          }
+        ]
+      }
+    }
+  ]
+}

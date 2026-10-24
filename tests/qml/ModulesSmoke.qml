@@ -25,6 +25,7 @@ import "../../package/contents/code/sensors.mjs" as Sensors
 import "../../package/contents/code/text.mjs" as Text
 import "../../package/contents/code/tooltip.mjs" as Tooltip
 import "../../package/contents/code/visibility.mjs" as Visibility
+import "../../package/contents/code/vnstat.mjs" as Vnstat
 
 Item {
     id: scene
@@ -50,7 +51,8 @@ Item {
             Sensors.HEARTBEAT_SENSOR.length > 0,
             Text.substitute("%1", ["x"]) === "x",
             Tooltip.escapeHtml("<") === "&lt;",
-            Visibility.autoHideState("never", { hasData: true, online: true, idle: false }, { editMode: false, expanded: false }) === "shown"
+            Visibility.autoHideState("never", { hasData: true, online: true, idle: false }, { editMode: false, expanded: false }) === "shown",
+            Vnstat.parseVnstat("{}").status === "invalid"
         ];
         const bad = results.indexOf(false);
         if (bad >= 0) {
