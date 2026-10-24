@@ -17,6 +17,7 @@ import "full"
 import "../code/clicks.mjs" as Clicks
 import "../code/format.mjs" as Format
 import "../code/graph.mjs" as Graph
+import "../code/launchtext.mjs" as LaunchText
 import "../code/text.mjs" as TextTools
 import "../code/tooltip.mjs" as Tooltip
 
@@ -58,23 +59,10 @@ PlasmoidItem {
     // The state of the popup at the last press (see CompactRepresentation).
     property bool wasExpanded: false
 
-    // The text of the notification for a failed launch.
-    function launchFailureText(code: string, target: string): string {
-        switch (code) {
-        case "invalid":
-            return root.trc("@info", "The launch target “%1” is not valid.", target);
-        case "not-found":
-            return root.trc("@info", "Could not find “%1”.", target);
-        case "timeout":
-            return root.trc("@info", "Starting “%1” did not respond.", target);
-        default:
-            return root.trc("@info", "Could not start “%1”.", target);
-        }
-    }
-
-    // Reports a failed launch as a notification.
-    function reportLaunchFailure(code: string, target: string) {
-        failure.text = root.launchFailureText(code, target);
+    // Reports a failed launch as a notification; kind is "app" or "command".
+    function reportLaunchFailure(code: string, target: string, kind: string) {
+        console.warn("netspeeder: launch failed (" + code + "): " + target);
+        failure.text = LaunchText.launchFailureText(code, target, kind, { tr: root.tr, trc: root.trc });
         failure.sendEvent();
     }
 
@@ -140,7 +128,7 @@ PlasmoidItem {
         kind: Plasmoid.configuration.launchKind // qmllint disable missing-property
         app: Plasmoid.configuration.launchApp // qmllint disable missing-property
         command: Plasmoid.configuration.launchCommand // qmllint disable missing-property
-        onFailed: (code, target) => root.reportLaunchFailure(code, target)
+        onFailed: (code, target) => root.reportLaunchFailure(code, target, launcher.kind)
     }
 
     // The button in the popup: always the system monitor, whatever the click
@@ -150,7 +138,7 @@ PlasmoidItem {
 
         kind: "app"
         app: "org.kde.plasma-systemmonitor"
-        onFailed: (code, target) => root.reportLaunchFailure(code, target)
+        onFailed: (code, target) => root.reportLaunchFailure(code, target, "app")
     }
 
     Notification {

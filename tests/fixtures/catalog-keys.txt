@@ -64,6 +64,8 @@
 	Waiting for network data…	
 @info	Could not find “%1”.	
 @info	Could not start “%1”.	
+@info	No application is set. Choose one in the widget settings.	
+@info	No command is set. Choose one in the widget settings.	
 @info	Source: %1	
 @info	Starting “%1” did not respond.	
 @info	The launch target “%1” is not valid.	

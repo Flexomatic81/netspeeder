@@ -78,7 +78,12 @@ Item {
     Timer {
         id: limit
 
-        onTriggered: internals.complete(-2, "", "timed out after " + internals.activeTimeoutMs + " ms")
+        onTriggered: {
+            if (internals.activeSource === "") {
+                return;
+            }
+            internals.complete(-2, "", "timed out after " + internals.activeTimeoutMs + " ms");
+        }
     }
 
     Plasma5Support.DataSource {

@@ -66,6 +66,7 @@ because the checker compares it against the German interface.
 | The popup shows the header with live values, the status and, on a data source problem, an error hint | 0.2 | |
 | Switch the graph window between 1, 5 and 15 minutes; after a plasmashell restart the chosen window is kept | 0.2 | |
 | Peaks and session totals appear and rise under load (e.g. a download) | 0.2 | |
+| Restart ksystemstats while the popup is open: the session totals do not jump | 0.2 | |
 | Copy an IP address in the interface list: "Copied" (German: “Kopiert”) appears and the address is on the clipboard | 0.2 | |
 | "Open System Monitor" (German: “Systemmonitor öffnen”) starts the system monitor | 0.2 | |
 | Popup with 12 or more interfaces in a real session (e.g. with Docker, VPN, virtual bridges): the list scrolls, nothing is cut off, the popup stays usable | 0.2 | |

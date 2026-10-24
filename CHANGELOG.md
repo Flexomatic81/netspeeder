@@ -29,7 +29,8 @@ Second pre-release, stage "Popup".
   command gives a notification, and a start that does not respond times out.
 - Settings page "Behavior" with a warning when neither click opens the popup.
 - The provider keeps a rolling traffic history with peaks and session totals;
-  it follows the data only while the popup or the desktop view is visible.
+  it records all the time, and only the popup redraws while it or the desktop
+  view is visible.
 - German translation of the new texts.
 
 ### Known limitations
