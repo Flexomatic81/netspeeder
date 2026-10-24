@@ -40,6 +40,9 @@ Column {
 
     // The user changed the levels; carries the new list as stored JSON.
     signal edited(string json)
+    // The row at `index` is to show its level again (after a choice that the
+    // editor changed or refused).
+    signal reshow(int index)
 
     readonly property int rowCount: levelModel.count
 
@@ -80,19 +83,31 @@ Column {
         root.edited(Appearance.serializeThresholds(root.rowLevels()));
     }
 
-    function setAmount(index: int, amount: int) {
-        const unit = levelModel.get(index).unit;
-        levelModel.setProperty(index, "amount", Math.min(amount, Appearance.unitLimit(unit)));
+    // Sets the number and unit of a level as the user chose them, with two
+    // corrections: a number too large for the unit is set to the unit's
+    // limit, and a minimum another level has moves on to a free one (see
+    // freeThreshold); without a free one the level stays as it was.
+    function setLevel(index: int, amount: int, unit: int) {
+        const old = levelModel.get(index);
+        const factor = Appearance.joinBytes(1, unit);
+        const wanted = Appearance.joinBytes(Math.min(amount, Appearance.unitLimit(unit)), unit);
+        const previous = Appearance.joinBytes(old.amount, old.unit);
+        const min = Appearance.freeThreshold(root.rowLevels(), index, wanted, previous, factor);
+        if (min !== previous) {
+            levelModel.setProperty(index, "amount", min / factor);
+            levelModel.setProperty(index, "unit", unit);
+        }
+        // The controls show the level again, also when nothing changed.
+        root.reshow(index);
         root.send();
     }
 
-    // A unit in which the number would be too large sets the number to the
-    // limit first, so the level stays valid.
+    function setAmount(index: int, amount: int) {
+        root.setLevel(index, amount, levelModel.get(index).unit);
+    }
+
     function setUnit(index: int, unit: int) {
-        const amount = levelModel.get(index).amount;
-        levelModel.setProperty(index, "amount", Math.min(amount, Appearance.unitLimit(unit)));
-        levelModel.setProperty(index, "unit", unit);
-        root.send();
+        root.setLevel(index, levelModel.get(index).amount, unit);
     }
 
     function setColor(index: int, color: string) {
@@ -142,7 +157,24 @@ Column {
             readonly property alias themeButton: levelThemeButton
             readonly property alias removeButton: removeLevelButton
 
+            // Puts the controls back on the level after a choice of the user
+            // that the editor changed or refused.
+            function showLevel() {
+                amountBox.value = Qt.binding(() => levelRow.amount);
+                unitChoice.showConfigValue();
+            }
+
             spacing: Kirigami.Units.smallSpacing
+
+            Connections {
+                target: root
+
+                function onReshow(index: int) {
+                    if (index === levelRow.index) {
+                        levelRow.showLevel();
+                    }
+                }
+            }
 
             // Typed numbers need more than the arrows: a level can be any
             // number of bytes.

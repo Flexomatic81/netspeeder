@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import {
   COLOR_MODES,
   DEFAULT_THRESHOLDS,
+  freeThreshold,
   ICON_STYLES,
   MAX_LEVELS,
   BYTE_UNITS,
@@ -291,6 +292,48 @@ test("newLevelMin finds a free minimum above the others", () => {
     assert.ok(Number.isInteger(min) && min >= 0 && min <= 2147483647);
     assert.ok(!list.some((step) => step.min === min), String(min));
   }
+});
+
+const levels = (...mins) => mins.map((min) => ({ min, color: "" }));
+
+test("freeThreshold keeps a value that no other level has", () => {
+  assert.equal(freeThreshold(levels(0, MIB, 10 * MIB), 1, 5 * MIB, MIB, MIB), 5 * MIB);
+  assert.equal(freeThreshold(levels(0, MIB, 10 * MIB), 1, MIB, MIB, MIB), MIB);
+});
+
+test("freeThreshold steps over a level when moving up into it", () => {
+  assert.equal(freeThreshold(levels(0, 9 * MIB, 10 * MIB, 100 * MIB), 1, 10 * MIB, 9 * MIB, MIB), 11 * MIB);
+});
+
+test("freeThreshold steps over a level when moving down into it", () => {
+  assert.equal(freeThreshold(levels(0, 9 * MIB, 10 * MIB), 2, 9 * MIB, 10 * MIB, MIB), 8 * MIB);
+});
+
+test("freeThreshold moves a typed duplicate on in the direction of the change", () => {
+  assert.equal(freeThreshold(levels(0, MIB, 10 * MIB, 100 * MIB), 1, 100 * MIB, MIB, MIB), 101 * MIB);
+  assert.equal(freeThreshold(levels(0, MIB, 10 * MIB, 100 * MIB), 3, MIB, 100 * MIB, 1024), MIB - 1024);
+});
+
+test("freeThreshold steps over several levels in a row", () => {
+  assert.equal(freeThreshold(levels(0, MIB, 2 * MIB, 3 * MIB, 4 * MIB), 1, 2 * MIB, MIB, MIB), 5 * MIB);
+  assert.equal(freeThreshold(levels(0, 2 * MIB, 3 * MIB, 4 * MIB), 3, 3 * MIB, 4 * MIB, MIB), MIB);
+});
+
+test("freeThreshold keeps the previous value when the way is blocked", () => {
+  const gib = 1024 * MIB;
+  // Up: the next free GiB step is beyond the limit.
+  assert.equal(freeThreshold(levels(0, 100 * MIB, gib), 1, gib, 100 * MIB, gib), 100 * MIB);
+  // Down: only 0 is left, which belongs to the first level.
+  assert.equal(freeThreshold(levels(0, MIB, 2 * MIB), 2, MIB, 2 * MIB, MIB), 2 * MIB);
+  // A wanted value outside 1..limit is never returned.
+  assert.equal(freeThreshold(levels(0, 5), 1, 2147483648, 5, 1), 5);
+  assert.equal(freeThreshold(levels(0, 5), 1, 0, 5, 1), 5);
+});
+
+test("freeThreshold leaves the first level at 0 and copes with odd input", () => {
+  assert.equal(freeThreshold(levels(0, MIB), 0, 0, 0, 1), 0);
+  assert.equal(freeThreshold(levels(0, 3, 4), 1, 4, 3, 0), 5);
+  assert.equal(freeThreshold(undefined, 1, 7, 3, 1), 7);
 });
 
 test("toHexColor writes #rrggbb from channels 0..1", () => {

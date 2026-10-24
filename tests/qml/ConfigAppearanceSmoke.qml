@@ -271,6 +271,45 @@ Item {
             scene.expect("switch set to the limit", scene.row(3).numberBox.value, 1);
             scene.expect("switch unit", scene.row(3).unitBox.currentValue, 3);
             scene.expect("saved after switch", scene.mins(scene.saved("switch")), "0,1048576,104857600," + 1024 * scene.mib);
+            // 100 MiB/s switched to GiB/s would be 1 GiB/s, which the last
+            // level has, and there is no free GiB/s value above it.
+            scene.pickUnit(2, 3);
+            break;
+        case 21:
+            scene.expect("rows after blocked switch", editor.rowCount, 4);
+            scene.expect("blocked switch keeps the unit", scene.row(2).unitBox.currentValue, 2);
+            scene.expect("blocked switch keeps the number", scene.row(2).numberBox.value, 100);
+            scene.expect("saved after blocked switch", scene.mins(scene.saved("blocked")), "0,1048576,104857600," + 1024 * scene.mib);
+            page.cfg_colorThresholds = scene.defaultLevels;
+            break;
+        case 22:
+            // Arrows up from 1 MiB/s: 9 MiB/s first, then the step onto the
+            // 10 MiB/s level jumps over it.
+            scene.typeNumber(1, 9);
+            break;
+        case 23:
+            scene.expect("saved at 9 MiB", scene.mins(scene.saved("9 MiB")), "0," + 9 * scene.mib + ",10485760,104857600");
+            scene.row(1).numberBox.increase();
+            scene.row(1).numberBox.valueModified();
+            break;
+        case 24:
+            scene.expect("rows after arrow onto a level", editor.rowCount, 4);
+            scene.expect("arrow onto a level keeps both", page.cfg_colorThresholds,
+                '[{"min":0,"color":""},{"min":10485760,"color":"#f67400"},{"min":11534336,"color":"#1d99f3"},{"min":104857600,"color":"#da4453"}]');
+            scene.expect("jumped row shows its number", scene.row(2).numberBox.value, 11);
+            // A number beyond the unit's limit, past the box's own range check.
+            editor.setAmount(1, 5000);
+            break;
+        case 25:
+            scene.expect("rows after 5000 MiB", editor.rowCount, 4);
+            scene.expect("5000 MiB set to the limit", scene.mins(scene.saved("5000 MiB")), "0,11534336,104857600," + 2047 * scene.mib);
+            page.cfg_fontFamily = "No Such Font 4711";
+            break;
+        case 26:
+            scene.expect("missing font shown", fontBox.currentText, "No Such Font 4711 (not installed)");
+            scene.expect("missing font value", fontBox.currentValue, "No Such Font 4711");
+            scene.expect("missing font kept", page.cfg_fontFamily, "No Such Font 4711");
+            scene.expect("theme font still first", fontBox.options[0].value, "");
             scene.checkTypes();
             if (scene.failures.length === 0) {
                 scene.finish(true, "SMOKE OK config appearance");
@@ -314,7 +353,7 @@ Item {
     }
 
     Timer {
-        interval: 12000
+        interval: 15000
         running: true
         onTriggered: scene.finish(false, "SMOKE FAIL config appearance: timeout at step " + scene.step)
     }

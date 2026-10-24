@@ -17,8 +17,8 @@
 // indexOfValue(...)`: while the component is being created, such a binding
 // finds the wrong index (measured on 2026-10-23). It is set at the end of the
 // creation and whenever the setting changes, also from outside, for example by
-// the "Defaults" button of the dialog. `options` is read once and meant to stay
-// as it is.
+// the "Defaults" button of the dialog, and when `options` is replaced (which
+// resets the list).
 
 import QtQuick
 import QtQuick.Controls as QQC2
@@ -45,6 +45,7 @@ QQC2.ComboBox {
     implicitContentWidthPolicy: QQC2.ComboBox.WidestText
 
     onConfigValueChanged: root.showConfigValue()
+    onModelChanged: root.showConfigValue()
     Component.onCompleted: root.showConfigValue()
     // Emitted only for a choice of the user, after currentIndex has moved.
     onActivated: root.picked(root.currentValue)

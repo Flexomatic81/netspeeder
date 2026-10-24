@@ -170,7 +170,7 @@ export function validInt(value, min, max, fallback) {
 export const BYTE_UNITS = ["B/s", "KiB/s", "MiB/s", "GiB/s"];
 const UNIT_FACTOR = 1024;
 
-function unitFactor(unitIndex) {
+function factorOf(unitIndex) {
   return Number.isInteger(unitIndex) && unitIndex >= 0 && unitIndex < BYTE_UNITS.length ? UNIT_FACTOR ** unitIndex : 1;
 }
 
@@ -180,22 +180,22 @@ function unitFactor(unitIndex) {
 export function splitBytes(bytes) {
   const whole = Number.isFinite(bytes) && bytes > 0 ? Math.round(bytes) : 0;
   let unitIndex = 0;
-  while (whole > 0 && unitIndex < BYTE_UNITS.length - 1 && whole % unitFactor(unitIndex + 1) === 0) {
+  while (whole > 0 && unitIndex < BYTE_UNITS.length - 1 && whole % factorOf(unitIndex + 1) === 0) {
     unitIndex++;
   }
-  return { value: whole / unitFactor(unitIndex), unitIndex };
+  return { value: whole / factorOf(unitIndex), unitIndex };
 }
 
 // A number in a unit of BYTE_UNITS as bytes per second; an unknown unit counts
 // as B/s, the number is rounded and at least 0.
 export function joinBytes(value, unitIndex) {
   const whole = Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
-  return whole * unitFactor(unitIndex);
+  return whole * factorOf(unitIndex);
 }
 
 // The largest number a unit can hold without leaving the valid minimums.
 export function unitLimit(unitIndex) {
-  return Math.floor(MAX_MIN / unitFactor(unitIndex));
+  return Math.floor(MAX_MIN / factorOf(unitIndex));
 }
 
 // The middle of the widest gap between the sorted minimums.
@@ -237,4 +237,25 @@ function hexChannel(value) {
 // outside are limited, unusable ones count as 0. Alpha is left out.
 export function toHexColor(r, g, b) {
   return "#" + hexChannel(r) + hexChannel(g) + hexChannel(b);
+}
+
+// The minimum for level `index` when the user changes it from `previous` to
+// `wanted`, without meeting another level: parseThresholds would merge two
+// levels with the same minimum and lose one. A taken value moves on in steps
+// of `unitFactor` in the direction of the change; when no free value is left
+// within 1..limit that way, the level keeps `previous`. The first level stays at 0.
+export function freeThreshold(list, index, wanted, previous, unitFactor) {
+  if (index === 0) {
+    return 0;
+  }
+  const taken = new Set((Array.isArray(list) ? list : []).filter((_, i) => i !== index).map((step) => step.min));
+  const step = (wanted > previous ? 1 : -1) * (unitFactor >= 1 ? unitFactor : 1);
+  let value = wanted;
+  while (value >= 1 && value <= MAX_MIN) {
+    if (!taken.has(value)) {
+      return value;
+    }
+    value += step;
+  }
+  return previous;
 }

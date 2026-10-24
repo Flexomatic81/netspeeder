@@ -119,3 +119,4 @@
 @action:button use the colour of the theme	Theme	
 	Remove level	
 	Add level	
+	%1 (not installed)	

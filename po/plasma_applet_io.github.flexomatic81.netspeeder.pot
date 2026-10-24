@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: netspeeder\n"
 "Report-Msgid-Bugs-To: https://github.com/Flexomatic81/netspeeder/issues\n"
-"POT-Creation-Date: 2026-10-24 20:03+0200\n"
+"POT-Creation-Date: 2026-10-24 20:13+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -126,120 +126,124 @@ msgctxt "@info accessible"
 msgid "Download %1, upload %2"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:81
-msgid "Font:"
-msgstr ""
-
-#: package/contents/ui/config/ConfigAppearance.qml:82
+#: package/contents/ui/config/ConfigAppearance.qml:76
 msgid "Theme font"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:90
+#: package/contents/ui/config/ConfigAppearance.qml:78
+msgid "%1 (not installed)"
+msgstr ""
+
+#: package/contents/ui/config/ConfigAppearance.qml:105
+msgid "Font:"
+msgstr ""
+
+#: package/contents/ui/config/ConfigAppearance.qml:114
 msgid "Bold"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:98
+#: package/contents/ui/config/ConfigAppearance.qml:122
 msgid "Text size:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:103
+#: package/contents/ui/config/ConfigAppearance.qml:127
 msgctxt "@item:valuesuffix %1 is a percentage"
 msgid "%1 %"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:114
+#: package/contents/ui/config/ConfigAppearance.qml:138
 msgid "Symbols:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:116
+#: package/contents/ui/config/ConfigAppearance.qml:140
 msgid "Arrows"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:117
+#: package/contents/ui/config/ConfigAppearance.qml:141
 msgid "Triangles"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:118
+#: package/contents/ui/config/ConfigAppearance.qml:142
 msgid "Icons"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:119
+#: package/contents/ui/config/ConfigAppearance.qml:143
 msgid "None"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:120
+#: package/contents/ui/config/ConfigAppearance.qml:144
 msgid "Custom"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:129
+#: package/contents/ui/config/ConfigAppearance.qml:153
 msgid "Download symbol:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:139
+#: package/contents/ui/config/ConfigAppearance.qml:163
 msgid "Upload symbol:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:153
+#: package/contents/ui/config/ConfigAppearance.qml:177
 msgid "Colours:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:155
+#: package/contents/ui/config/ConfigAppearance.qml:179
 msgid "Theme colour"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:156
+#: package/contents/ui/config/ConfigAppearance.qml:180
 msgid "By direction"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:157
+#: package/contents/ui/config/ConfigAppearance.qml:181
 msgid "By speed"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:164
+#: package/contents/ui/config/ConfigAppearance.qml:188
 msgid "Download colour:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:171
-#: package/contents/ui/config/ConfigAppearance.qml:192
-#: package/contents/ui/config/ThresholdEditor.qml:173
+#: package/contents/ui/config/ConfigAppearance.qml:195
+#: package/contents/ui/config/ConfigAppearance.qml:216
+#: package/contents/ui/config/ThresholdEditor.qml:192
 msgid "Choose a colour"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:179
-#: package/contents/ui/config/ConfigAppearance.qml:198
+#: package/contents/ui/config/ConfigAppearance.qml:203
+#: package/contents/ui/config/ConfigAppearance.qml:222
 msgid "Use theme colour"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:185
+#: package/contents/ui/config/ConfigAppearance.qml:209
 msgid "Upload colour:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:206
+#: package/contents/ui/config/ConfigAppearance.qml:230
 msgid "Speed levels:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:215
+#: package/contents/ui/config/ConfigAppearance.qml:239
 msgid "Colour units and symbols too"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:228
+#: package/contents/ui/config/ConfigAppearance.qml:252
 msgid "Keep a fixed width"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:236
+#: package/contents/ui/config/ConfigAppearance.qml:260
 msgid "Sparkline:"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:238
+#: package/contents/ui/config/ConfigAppearance.qml:262
 #: package/contents/ui/config/ConfigDisplay.qml:137
 msgid "Off"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:239
+#: package/contents/ui/config/ConfigAppearance.qml:263
 msgid "Behind the values"
 msgstr ""
 
-#: package/contents/ui/config/ConfigAppearance.qml:240
+#: package/contents/ui/config/ConfigAppearance.qml:264
 msgid "Beside the values"
 msgstr ""
 
@@ -468,16 +472,16 @@ msgstr ""
 msgid "Preview:"
 msgstr ""
 
-#: package/contents/ui/config/ThresholdEditor.qml:181
+#: package/contents/ui/config/ThresholdEditor.qml:200
 msgctxt "@action:button use the colour of the theme"
 msgid "Theme"
 msgstr ""
 
-#: package/contents/ui/config/ThresholdEditor.qml:189
+#: package/contents/ui/config/ThresholdEditor.qml:208
 msgid "Remove level"
 msgstr ""
 
-#: package/contents/ui/config/ThresholdEditor.qml:204
+#: package/contents/ui/config/ThresholdEditor.qml:223
 msgid "Add level"
 msgstr ""
 

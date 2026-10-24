@@ -65,6 +65,30 @@ KCM.SimpleKCM {
     readonly property alias fixedWidthBox: fixedWidthCheck
     readonly property alias sparklineBox: sparklineChoice
 
+    // The installed font families, read once.
+    readonly property var fontFamilies: Qt.fontFamilies()
+    // A saved font family that is not installed. It gets an entry of its own
+    // so the list does not show a blank; it stays listed once seen, so that
+    // the list keeps its entries while the page is open.
+    property string missingFont: ""
+
+    readonly property var fontOptions: {
+        const options = [{ text: root.tr("Theme font"), value: "" }];
+        if (root.missingFont !== "") {
+            options.push({ text: root.tr("%1 (not installed)", root.missingFont), value: root.missingFont });
+        }
+        return options.concat(root.fontFamilies.map(family => ({ text: family, value: family })));
+    }
+
+    function noteMissingFont() {
+        if (root.cfg_fontFamily !== "" && root.fontFamilies.indexOf(root.cfg_fontFamily) < 0) {
+            root.missingFont = root.cfg_fontFamily;
+        }
+    }
+
+    onCfg_fontFamilyChanged: root.noteMissingFont()
+    Component.onCompleted: root.noteMissingFont()
+
     // The colour a button shows for a setting; "" is the theme's text colour.
     function shownColor(value: string): color {
         return value !== "" ? value : Kirigami.Theme.textColor;
@@ -79,7 +103,7 @@ KCM.SimpleKCM {
             id: fontFamilyBox
 
             Kirigami.FormData.label: root.tr("Font:")
-            options: [{ text: root.tr("Theme font"), value: "" }].concat(Qt.fontFamilies().map(family => ({ text: family, value: family })))
+            options: root.fontOptions
             configValue: root.cfg_fontFamily
             onPicked: value => root.cfg_fontFamily = value
         }
