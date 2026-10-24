@@ -36,8 +36,9 @@ Daniel Faust, see [Origin](#origin).
   only. VPN tunnels, Docker bridges and other virtual interfaces are not
   counted twice. You can also pick the interfaces by hand.
 - **Robust against change:** interfaces that disappear and come back (VPN
-  reconnect, Wi-Fi, USB tethering), counter resets and suspend/resume do not
-  cause speed spikes or stale values.
+  reconnect, Wi-Fi, USB tethering) and counter resets do not cause speed
+  spikes or stale values. Suspend/resume is guarded against in the `/proc`
+  source; to be verified by hand.
 - **Tooltip** with the connection name, download, upload and IP address, and a
   note when the data source has a problem.
 - **Settings** pages "Display" and "Data". The data page lists every network

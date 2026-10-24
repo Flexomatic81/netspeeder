@@ -38,6 +38,11 @@ if ! command -v bsdtar > /dev/null; then
   exit 1
 fi
 
+if ! command -v msgfmt > /dev/null; then
+  echo "build-plasmoid: msgfmt not found (package gettext)" >&2
+  exit 1
+fi
+
 # The locale directory is pure build output. Starting from an empty one keeps
 # the translation of a removed language out of the package.
 rm -rf package/contents/locale
@@ -46,6 +51,11 @@ scripts/build-mo.sh
 mkdir -p dist
 out="$PWD/dist/netspeeder-${version}.plasmoid"
 rm -f "$out"
-(cd package && bsdtar --format zip -cf "$out" metadata.json contents)
+# Editor and build leftovers stay out of the package. No git here: the release
+# job builds from a source archive that has no git index.
+(cd package && bsdtar --format zip -cf "$out" \
+  --exclude '*.qmlc' --exclude '*.jsc' --exclude '*~' \
+  --exclude '.*.swp' --exclude '.#*' \
+  metadata.json contents)
 
 echo "build-plasmoid: wrote ${out#"$PWD"/}"
