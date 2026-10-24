@@ -66,27 +66,25 @@ Item {
 
     Layout.preferredWidth: Kirigami.Units.gridUnit * 22
     Layout.preferredHeight: Kirigami.Units.gridUnit * 30
-    // The minimum follows the content: everything that is shown at its own
-    // minimum (or, without one, its implicit size) plus the gaps and margins,
-    // so the footer never overflows, with or without the hint.
-    Layout.minimumWidth: Math.max(Kirigami.Units.gridUnit * 18, root.contentMinimum(false))
-    Layout.minimumHeight: Math.max(Kirigami.Units.gridUnit * 20, root.contentMinimum(true))
+    // The width minimum is fixed: long names, addresses and texts elide
+    // instead of widening the popup. The height minimum follows the content:
+    // everything that is shown at its own minimum (or, without one, its
+    // implicit size) plus the gaps and margins, so the footer never overflows,
+    // with or without the hint.
+    Layout.minimumWidth: Kirigami.Units.gridUnit * 18
+    Layout.minimumHeight: Math.max(Kirigami.Units.gridUnit * 20, root.contentMinimum())
 
-    // The least height (or width) the shown children of the column need.
-    function contentMinimum(vertical: bool): real {
+    // The least height the shown children of the column need.
+    function contentMinimum(): real {
         let total = 0;
         let shownCount = 0;
         for (const child of column.children) {
-            if (!child.visible) {
-                continue;
+            if (child.visible) {
+                total += child.Layout.minimumHeight > 0 ? child.Layout.minimumHeight : child.implicitHeight;
+                shownCount++;
             }
-            const set = vertical ? child.Layout.minimumHeight : child.Layout.minimumWidth;
-            const size = set > 0 ? set : (vertical ? child.implicitHeight : child.implicitWidth);
-            total = vertical ? total + size : Math.max(total, size);
-            shownCount++;
         }
-        const margins = column.anchors.margins * 2;
-        return vertical ? total + Math.max(0, shownCount - 1) * column.spacing + margins : total + margins;
+        return total + Math.max(0, shownCount - 1) * column.spacing + column.anchors.margins * 2;
     }
 
     // Copies the provider values into `shown`; does nothing while inactive.

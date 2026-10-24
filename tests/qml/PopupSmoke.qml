@@ -489,6 +489,32 @@ Item {
             check: () => view.height === view.Layout.preferredHeight ? "" : "restore: the popup is " + view.height + " px high"
         },
         {
+            name: "a very long name",
+            apply: () => {
+                stub.primaryLabel = "N".repeat(120);
+                stub.primaryIp = "fe80::" + "abcd:".repeat(6) + "1";
+            },
+            check: () => {
+                const unit = Kirigami.Units.gridUnit;
+                if (view.Layout.minimumWidth !== unit * 18) {
+                    return "long name: the minimum width is " + view.Layout.minimumWidth + ", expected " + unit * 18;
+                }
+                const label = scene.itemWithText(view, stub.primaryLabel);
+                if (label === null || !label.truncated) {
+                    return "long name: the name is not elided at the preferred width";
+                }
+                return label.x + label.width <= view.width ? "" : "long name: the name reaches past the popup";
+            }
+        },
+        {
+            name: "the long name goes",
+            apply: () => {
+                stub.primaryLabel = "Ethernet";
+                stub.primaryIp = "192.168.1.5";
+            },
+            check: () => scene.textProblem("long name gone", ["Ethernet"], [])
+        },
+        {
             name: "a row comes back",
             apply: () => {
                 stub.interfaces = scene.interfaceRows(1000);
