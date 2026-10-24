@@ -24,6 +24,7 @@ import "../../package/contents/code/selection.mjs" as Selection
 import "../../package/contents/code/sensors.mjs" as Sensors
 import "../../package/contents/code/text.mjs" as Text
 import "../../package/contents/code/tooltip.mjs" as Tooltip
+import "../../package/contents/code/usage.mjs" as Usage
 import "../../package/contents/code/visibility.mjs" as Visibility
 import "../../package/contents/code/vnstat.mjs" as Vnstat
 
@@ -51,6 +52,9 @@ Item {
             Sensors.HEARTBEAT_SENSOR.length > 0,
             Text.substitute("%1", ["x"]) === "x",
             Tooltip.escapeHtml("<") === "&lt;",
+            Usage.addDays("2028-02-28", 1) === "2028-02-29",
+            Usage.usageSummary(null, [], { year: 2026, month: 10, day: 24 }, 25).current.start === "2026-09-25",
+            !Usage.isOutdated("2026-10-31T23:45", { year: 2026, month: 11, day: 1, hour: 0, minute: 15 }),
             Visibility.autoHideState("never", { hasData: true, online: true, idle: false }, { editMode: false, expanded: false }) === "shown",
             Vnstat.parseVnstat("{}").status === "invalid"
         ];
