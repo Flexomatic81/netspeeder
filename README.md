@@ -41,7 +41,7 @@ Daniel Faust, see [Origin](#origin).
   source; to be verified by hand.
 - **Tooltip** with the connection name, download, upload and IP address, and a
   note when the data source has a problem.
-- **Settings** pages "Display", "Data" and (0.2) "Behavior". The data page lists every network
+- **Settings** pages "Display", "Data", (0.2) "Behavior" and (0.3) "Appearance". The data page lists every network
   interface with its kind and current speed.
 - **Translations:** English and German.
 
@@ -67,6 +67,34 @@ desktop); there it is always shown and has no popup. It contains:
 
 The popup follows the data only while it is visible, so a closed popup costs
 nothing.
+
+## Appearance and auto-hide (0.3)
+
+The settings page "Appearance" controls how the panel view looks:
+
+- **Font:** the theme font by default, or any installed font; optional bold;
+  text size from 50 to 200 %. Above 100 % the size is capped so that the text
+  line still fits its row.
+- **Symbols:** arrows (default), triangles, icons, none, or custom text for
+  the download and the upload symbol.
+- **Colours:** the theme colour (default), a fixed colour per direction, or
+  colours by speed. By speed uses up to six levels, each with a minimum speed
+  and a colour; the editor keeps the minimums distinct, and invalid stored
+  levels fall back to the defaults (0, 1, 10 and 100 MiB/s). A level without a
+  colour uses the theme colour. Optionally the units and symbols take the
+  colour too.
+- **Fixed width:** on by default; the panel keeps the width of the widest
+  value, also with bold or another font.
+- **Sparkline:** a small traffic graph, off by default, drawn behind the
+  values or beside them. In a vertical panel "beside" behaves like "behind".
+  Its scale starts at 0 and covers at least 1 KiB/s.
+
+The page "Behavior" gets an auto-hide setting: never (default), when offline,
+or when offline or idle. The connection counts as idle when the traffic stays
+below a threshold (default 1 KiB/s) for a duration (default 30 seconds, 5 to
+3600). A hidden widget is collapsed by the panel; in edit mode it shows as a
+dimmed network icon so that it can still be found. It never hides on the
+desktop, while the popup is open, or before the first data has arrived.
 
 ## Click behavior and launch target (0.2)
 
@@ -94,7 +122,7 @@ Limitations:
 |---|---|
 | 0.1 "Kern" | Core: both data sources, interface selection, panel view, tooltip, settings for display and data, German |
 | 0.2 "Popup" | Popup with graph, key figures and interface list; desktop view; click actions; behavior page |
-| 0.3 "Darstellung" | Complete appearance page: font, icons, color modes and thresholds, mini graph; automatic hiding |
+| 0.3 "Darstellung" | Appearance page: font, symbols, color modes and thresholds, sparkline; automatic hiding on the behavior page |
 | 0.4 "Verbrauch" | Data usage through vnstat, billing period, data cap, notifications |
 | 1.0 | Fixes from the pre-releases, test on Plasma 6.3, screenshots, store text, guide for users of the Netspeed Widget |
 

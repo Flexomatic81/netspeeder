@@ -5,6 +5,31 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 
 # Changelog
 
+## 0.3.0 (unreleased)
+
+Third pre-release, stage "Darstellung" (appearance).
+
+### Added
+
+- Settings page "Appearance": font and bold, text size (50 to 200 %), symbol
+  style (arrows, triangles, icons, none, custom), colour mode (theme, by
+  direction, by speed with up to six levels), optional colouring of units and
+  symbols, fixed width and a sparkline (off, behind or beside the values).
+- Threshold editor that keeps the levels distinct; invalid stored levels fall
+  back to the defaults.
+- Auto-hide on the page "Behavior": never, when offline, or when offline or
+  idle, with a threshold in KiB/s and a duration in seconds. The panel
+  collapses a hidden widget; in edit mode it shows a dimmed network icon. It
+  never hides on the desktop, while the popup is open, or before the first
+  data arrives.
+- German translation of the new texts.
+
+### Notes
+
+- Text sizes above 100 % are capped so the text line fits its row.
+- In a vertical panel the sparkline "beside" behaves like "behind".
+- The sparkline scale starts at 0 and covers at least 1 KiB/s.
+
 ## 0.2.0 (unreleased)
 
 Second pre-release, stage "Popup".
