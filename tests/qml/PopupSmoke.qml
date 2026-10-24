@@ -446,6 +446,49 @@ Item {
             }
         },
         {
+            name: "two interfaces and the hint",
+            apply: () => {
+                stub.interfaces = scene.interfaceRows(1000).slice(0, 2);
+                stub.errorCode = "source-failed";
+            },
+            check: () => scene.textProblem("minimum data", ["Reading network data failed: boom"], [])
+        },
+        {
+            name: "minimum size with the hint",
+            apply: () => {
+                const problem = scene.minimumProblem("minimum with hint");
+                if (problem !== "") {
+                    scene.fail(problem);
+                }
+            },
+            check: () => scene.layoutProblem("minimum with hint")
+        },
+        {
+            name: "the hint goes",
+            apply: () => {
+                stub.errorCode = "";
+            },
+            check: () => scene.textProblem("minimum data", [], ["Reading network data failed"])
+        },
+        {
+            name: "minimum size without the hint",
+            apply: () => {
+                const problem = scene.minimumProblem("minimum without hint");
+                if (problem !== "") {
+                    scene.fail(problem);
+                }
+            },
+            check: () => scene.layoutProblem("minimum without hint")
+        },
+        {
+            name: "back to the preferred size",
+            apply: () => {
+                view.width = Qt.binding(() => view.Layout.preferredWidth);
+                view.height = Qt.binding(() => view.Layout.preferredHeight);
+            },
+            check: () => view.height === view.Layout.preferredHeight ? "" : "restore: the popup is " + view.height + " px high"
+        },
+        {
             name: "a row comes back",
             apply: () => {
                 stub.interfaces = scene.interfaceRows(1000);
@@ -455,6 +498,45 @@ Item {
     ]
 
     property var before: ({})
+
+    // "" when the view, sized to its own minimum, keeps the graph and the list
+    // at their minimum and the footer completely inside, nothing overlapping.
+    function minimumProblem(where: string): string {
+        const unit = Kirigami.Units.gridUnit;
+        const graph = view.graphItem;
+        if (graph === null || view.Layout.minimumHeight < unit * 20 || view.Layout.minimumWidth < unit * 18) {
+            return where + ": no graph or the minimum is " + view.Layout.minimumWidth + "x" + view.Layout.minimumHeight;
+        }
+        view.width = view.Layout.minimumWidth;
+        view.height = view.Layout.minimumHeight;
+        return "";
+    }
+
+    function layoutProblem(where: string): string {
+        const unit = Kirigami.Units.gridUnit;
+        const graph = view.graphItem;
+        const list = view.interfaceList;
+        const footer = view.footer;
+        if (graph.height < unit * 6 - 0.5) {
+            return where + ": the graph is " + graph.height + " px high at the minimum size";
+        }
+        if (list.height < list.twoRowsHeight - 0.5) {
+            return where + ": the list is " + list.height + " px high, below " + list.twoRowsHeight;
+        }
+        const items = [graph, list, footer];
+        let previousBottom = 0;
+        for (const item of items) {
+            const top = item.mapToItem(view, 0, 0).y;
+            if (top < previousBottom - 0.5) {
+                return where + ": an item starts at " + top + ", above the end of the previous one at " + previousBottom;
+            }
+            previousBottom = top + item.height;
+        }
+        if (previousBottom > view.height + 0.5 || footer.height < footer.implicitHeight - 0.5) {
+            return where + ": the footer ends at " + previousBottom + " of " + view.height + " (height " + footer.height + " of " + footer.implicitHeight + ")";
+        }
+        return "";
+    }
 
     function sizeProblem(): string {
         const unit = Kirigami.Units.gridUnit;

@@ -61,11 +61,33 @@ Item {
     readonly property Item graphItem: graphLoader.item as Item
     // The list of the interfaces (for the smoke scene).
     readonly property Item interfaceList: list
+    // The row with the System Monitor button (for the smoke scene).
+    readonly property Item footer: footerRow
 
     Layout.preferredWidth: Kirigami.Units.gridUnit * 22
     Layout.preferredHeight: Kirigami.Units.gridUnit * 30
-    Layout.minimumWidth: Kirigami.Units.gridUnit * 18
-    Layout.minimumHeight: Kirigami.Units.gridUnit * 20
+    // The minimum follows the content: everything that is shown at its own
+    // minimum (or, without one, its implicit size) plus the gaps and margins,
+    // so the footer never overflows, with or without the hint.
+    Layout.minimumWidth: Math.max(Kirigami.Units.gridUnit * 18, root.contentMinimum(false))
+    Layout.minimumHeight: Math.max(Kirigami.Units.gridUnit * 20, root.contentMinimum(true))
+
+    // The least height (or width) the shown children of the column need.
+    function contentMinimum(vertical: bool): real {
+        let total = 0;
+        let shownCount = 0;
+        for (const child of column.children) {
+            if (!child.visible) {
+                continue;
+            }
+            const set = vertical ? child.Layout.minimumHeight : child.Layout.minimumWidth;
+            const size = set > 0 ? set : (vertical ? child.implicitHeight : child.implicitWidth);
+            total = vertical ? total + size : Math.max(total, size);
+            shownCount++;
+        }
+        const margins = column.anchors.margins * 2;
+        return vertical ? total + Math.max(0, shownCount - 1) * column.spacing + margins : total + margins;
+    }
 
     // Copies the provider values into `shown`; does nothing while inactive.
     function refresh() {
@@ -255,10 +277,12 @@ Item {
             }
 
             QQC2.Label {
+                Layout.minimumWidth: 0
                 visible: text !== ""
                 text: root.shown.primaryIp
                 font: Kirigami.Theme.smallFont
                 opacity: 0.7
+                elide: Text.ElideRight
             }
 
             QQC2.Label {
@@ -269,7 +293,7 @@ Item {
             }
 
             QQC2.Label {
-                Layout.fillWidth: !(root.shown.primaryLabel !== "")
+                Layout.fillWidth: root.shown.primaryLabel === ""
                 Layout.minimumWidth: 0
                 text: root.statusText(root.shown)
                 font: Kirigami.Theme.smallFont
@@ -409,6 +433,8 @@ Item {
         }
 
         RowLayout {
+            id: footerRow
+
             Layout.fillWidth: true
             spacing: Kirigami.Units.largeSpacing
 
