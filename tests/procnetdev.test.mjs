@@ -4,7 +4,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { parseProcNetDev, parseOperstate, parseDeviceList, parseProcOutput, toProcSample } from "../package/contents/code/procnetdev.mjs";
+import {
+  parseProcNetDev,
+  parseOperstate,
+  parseDeviceList,
+  parseProcOutput,
+  toProcSample,
+} from "../package/contents/code/procnetdev.mjs";
 
 const full = readFileSync(new URL("./fixtures/proc-output.txt", import.meta.url), "utf8");
 const procPart = full.split("#operstate")[0];
@@ -41,11 +47,21 @@ test("toProcSample classifies and maps fields", () => {
   const s = toProcSample(42, p, { enp7s0: { down: 10, up: 20 } });
   assert.equal(s.source, "proc");
   assert.equal(s.timestamp, 42);
-  assert.deepEqual(s.interfaces.enp7s0, { down: 10, up: 20, totalDown: 1315645898, totalUp: 51368610,
-    kind: "physical", online: true, label: "", ipv4: "", ipv6: "", signal: null });
+  assert.deepEqual(s.interfaces.enp7s0, {
+    down: 10,
+    up: 20,
+    totalDown: 1315645898,
+    totalUp: 51368610,
+    kind: "physical",
+    online: true,
+    label: "",
+    ipv4: "",
+    ipv6: "",
+    signal: null,
+  });
   assert.equal(s.interfaces.docker0.kind, "virtual");
   assert.equal(s.interfaces.docker0.online, false);
-  assert.equal(s.interfaces.WorkVPN.online, true);           // unknown + counters > 0
+  assert.equal(s.interfaces.WorkVPN.online, true); // unknown + counters > 0
   assert.equal(s.interfaces["br-1a2b3c4d5e6f"].online, false); // down
-  assert.equal(s.interfaces.eth1.down, 0);                     // missing rate → 0
+  assert.equal(s.interfaces.eth1.down, 0); // missing rate → 0
 });

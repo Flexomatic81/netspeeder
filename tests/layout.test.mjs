@@ -17,9 +17,11 @@ test("explicit modes are honored, also in vertical panels", () => {
 });
 test("auto: vertical stacks", () => assert.equal(resolveLayout({ ...base, vertical: true, thickness: 32 }), "rows"));
 test("auto: normal panel uses two rows", () => assert.equal(resolveLayout(base), "rows"));
-test("auto: thin 20px panel falls back to columns", () => assert.equal(resolveLayout({ ...base, thickness: 20 }), "columns"));
+test("auto: thin 20px panel falls back to columns", () =>
+  assert.equal(resolveLayout({ ...base, thickness: 20 }), "columns"));
 test("auto: thick 96px panel uses rows", () => assert.equal(resolveLayout({ ...base, thickness: 96 }), "rows"));
-test("unknown mode behaves like auto", () => assert.equal(resolveLayout({ ...base, mode: "x", thickness: 20 }), "columns"));
+test("unknown mode behaves like auto", () =>
+  assert.equal(resolveLayout({ ...base, mode: "x", thickness: 20 }), "columns"));
 
 test("fontPixelSize", () => {
   assert.equal(fontPixelSize(22, 100), 15);

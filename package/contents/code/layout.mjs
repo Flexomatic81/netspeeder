@@ -38,9 +38,7 @@ export function resolveLayout({ mode, vertical, combined, thickness, fontScale, 
   if (combined) return "single";
   if (mode === "rows" || mode === "columns") return mode;
   if (vertical) return "rows";
-  return fontPixelSize(finiteOr(thickness, 0) / 2, fontScale) >= finiteOr(minReadablePx, 0)
-    ? "rows"
-    : "columns";
+  return fontPixelSize(finiteOr(thickness, 0) / 2, fontScale) >= finiteOr(minReadablePx, 0) ? "rows" : "columns";
 }
 
 // Largest pixel size (at most `maxPx`, at least 1) at which text that measures

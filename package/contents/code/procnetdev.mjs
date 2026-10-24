@@ -13,12 +13,11 @@
 // `true` keeps the exit status 0 when one of the optional parts fails.
 export const PROC_COMMAND =
   "cat /proc/net/dev && echo '#operstate' && grep -H . /sys/class/net/*/operstate; " +
-  "echo '#devices'; for d in /sys/class/net/*; do [ -e \"$d/device\" ] && echo \"${d##*/}\"; done; true";
+  'echo \'#devices\'; for d in /sys/class/net/*; do [ -e "$d/device" ] && echo "${d##*/}"; done; true';
 
 // Only the hardware part of PROC_COMMAND, for refreshing the physical-device
 // list on its own.
-export const DEVICES_COMMAND =
-  "for d in /sys/class/net/*; do [ -e \"$d/device\" ] && echo \"${d##*/}\"; done; true";
+export const DEVICES_COMMAND = 'for d in /sys/class/net/*; do [ -e "$d/device" ] && echo "${d##*/}"; done; true';
 
 const OPERSTATE_MARKER = "#operstate";
 const DEVICES_MARKER = "#devices";
@@ -117,12 +116,8 @@ export function toProcSample(timestamp, parsed, rates) {
   const interfaces = {};
   for (const name of Object.keys(parsed.counters)) {
     const counter = parsed.counters[name];
-    const rate = rates && Object.prototype.hasOwnProperty.call(rates, name)
-      ? rates[name]
-      : { down: 0, up: 0 };
-    const state = Object.prototype.hasOwnProperty.call(parsed.operstate, name)
-      ? parsed.operstate[name]
-      : "";
+    const rate = rates && Object.prototype.hasOwnProperty.call(rates, name) ? rates[name] : { down: 0, up: 0 };
+    const state = Object.prototype.hasOwnProperty.call(parsed.operstate, name) ? parsed.operstate[name] : "";
     interfaces[name] = {
       down: rate.down,
       up: rate.up,

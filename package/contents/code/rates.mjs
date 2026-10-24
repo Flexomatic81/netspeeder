@@ -48,9 +48,7 @@ export function computeRates(prev, next, intervalMs) {
   const rates = {};
   for (const name of Object.keys(next.counters)) {
     const now = next.counters[name];
-    const was = prev && Object.prototype.hasOwnProperty.call(prev.counters, name)
-      ? prev.counters[name]
-      : null;
+    const was = prev && Object.prototype.hasOwnProperty.call(prev.counters, name) ? prev.counters[name] : null;
     // First sample of an interface (or of the whole series) yields 0.
     rates[name] = was
       ? { down: directionRate(was.rx, now.rx, dtMs), up: directionRate(was.tx, now.tx, dtMs) }

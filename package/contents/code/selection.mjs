@@ -73,7 +73,8 @@ export function summarize(interfaces, mode, selected) {
   const chosen = toList(selected);
   const manual = mode === "manual";
   const included = candidateNames(all).filter((name) =>
-    manual ? chosen.indexOf(name) >= 0 : all[name].kind === "physical");
+    manual ? chosen.indexOf(name) >= 0 : all[name].kind === "physical",
+  );
 
   let down = 0;
   let up = 0;

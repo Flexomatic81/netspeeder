@@ -50,9 +50,7 @@ function normalize(opts) {
   const o = opts || {};
   const threshold = o.lowSpeedThreshold;
   return {
-    unitSystem: Object.prototype.hasOwnProperty.call(SYSTEMS, o.unitSystem)
-      ? o.unitSystem
-      : DEFAULT_FORMAT.unitSystem,
+    unitSystem: Object.prototype.hasOwnProperty.call(SYSTEMS, o.unitSystem) ? o.unitSystem : DEFAULT_FORMAT.unitSystem,
     shortUnits: o.shortUnits === undefined ? DEFAULT_FORMAT.shortUnits : Boolean(o.shortUnits),
     decimals: VALID_DECIMALS.indexOf(o.decimals) >= 0 ? o.decimals : DEFAULT_FORMAT.decimals,
     lowSpeedThreshold:
@@ -60,9 +58,7 @@ function normalize(opts) {
         ? threshold
         : DEFAULT_FORMAT.lowSpeedThreshold,
     decimalPoint:
-      typeof o.decimalPoint === "string" && o.decimalPoint.length > 0
-        ? o.decimalPoint
-        : DEFAULT_FORMAT.decimalPoint,
+      typeof o.decimalPoint === "string" && o.decimalPoint.length > 0 ? o.decimalPoint : DEFAULT_FORMAT.decimalPoint,
   };
 }
 
