@@ -21,6 +21,7 @@ on:
     branches: [main, dev]   # other branches are checked through their pull request
     tags: ["v*"]
   pull_request:
+  workflow_dispatch:      # start the checks by hand, e.g. for the commit to be tagged
 
 permissions:
   contents: read
