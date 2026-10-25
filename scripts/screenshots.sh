@@ -14,7 +14,7 @@
 #
 #   scripts/screenshots.sh           Breeze Dark, into docs/images/ (the published images)
 #   scripts/screenshots.sh --light   Breeze Light, the same files into docs/images/light/
-#   scripts/screenshots.sh --store   at twice the size, into docs/store/shots/ (the parts of
+#   scripts/screenshots.sh --store   at three times the size, into docs/store/shots/ (the parts of
 #                                    the store images, see docs/store.md); combines with --light
 #
 # Afterwards check-images.mjs checks the files: all are there, carry no
@@ -33,7 +33,7 @@ scale=1
 for arg in "$@"; do
   case "$arg" in
     --light) variant="Light" ;;
-    --store) scale=2 ;;
+    --store) scale=3 ;;
     *)
       echo "usage: scripts/screenshots.sh [--light] [--store]" >&2
       exit 2

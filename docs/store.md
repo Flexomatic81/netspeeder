@@ -127,22 +127,39 @@ Quellcode, Fehlermeldungen und Übersetzungen: https://github.com/Flexomatic81/n
 ## Images
 
 The store takes at most five images. Upload in this order; the files are in
-[`images/`](images/) and are made with `scripts/screenshots.sh` in the stock
-Breeze Dark color scheme.
+[`store/`](store/), 1920 × 1080 each, in the stock Breeze Dark color scheme.
 
-1. `panel-rows.png`: download and upload in two rows
-2. `panel-single.png`: both values side by side in one row
-3. `panel-vertical.png`: a vertical panel
-4. `panel-colors.png`: colors by speed
-5. `popup.png`: the popup with graph, interfaces and usage
+1. `store-1-overview.png`: name, the three main points, the panel view and the
+   open popup on a desktop
+2. `store-2-popup.png`: the popup, its parts labeled
+3. `store-3-panel-views.png`: the panel views side by side: two rows, colors by
+   speed, sparkline, one row, vertical panel
+4. `store-4-settings.png`: the settings page Appearance in the settings dialog
+5. `store-5-usage.png`: data usage, the data cap bar and the cap notification
 
-`panel-sparkline.png` (the sparkline behind the values) and
-`settings-appearance.png` (the settings page Appearance) are used in the README
-only.
+### How the images are made
 
-The project logo for the store page is `logo.png` (512 × 512), rendered from
-`logo.svg` with `rsvg-convert -w 512 -h 512 logo.svg -o logo.png`. The widget
-itself keeps the theme icon `network-connect`.
+The widget in the images is real: `scripts/screenshots.sh --store` renders
+every view from the fixed demo data at three times the size into
+[`store/shots/`](store/shots/): `panel-rows.png`, `panel-single.png`,
+`panel-vertical.png`, `panel-colors.png`, `panel-sparkline.png`, `popup.png`
+and `settings-appearance.png`. The README shows the same views at their real
+size from [`images/`](images/).
+
+Background, frames, labels and the notification are drawn in
+[VectorCraft](https://getartcraft.com); the document is
+[`store/netspeeder-store.vectorcraft`](store/netspeeder-store.vectorcraft),
+one artboard per image, with the views embedded. The notification is a
+drawing of the Plasma notification in Breeze Dark with the text the widget
+sends at 85 % of the data cap; the icons of the settings dialog are the Breeze
+icons of its pages. After new shots, replace the embedded images (Links →
+Relink, keeping their bounds, then Embed) and export each artboard as PNG at
+scale 1. Strip the text chunks before committing (title and creation time).
+
+The project logo for the store page is `logo.png` (512 × 512) in
+[`images/`](images/), rendered from `logo.svg` with
+`rsvg-convert -w 512 -h 512 logo.svg -o logo.png`. The widget itself keeps the
+theme icon `network-connect`.
 
 ## Changelog 1.0.0
 
