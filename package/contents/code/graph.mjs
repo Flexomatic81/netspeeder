@@ -13,9 +13,10 @@ const DEFAULT_MINUTES = 5;
 const MINUTE_CHOICES = [1, 5, 15];
 const GRID_STEPS = 4;
 const LABEL_ROOM = 1.6;
-// Two colors are distinct when their hues are this many degrees apart (both
-// saturated at least this much) or their lightness differs this much.
-const MIN_HUE_DEGREES = 45;
+// Two colors are distinct when their lightness differs this much, when one is
+// colored (saturated at least this much) and the other gray, or when both are
+// colored and their hues are this many degrees apart.
+const MIN_HUE_DEGREES = 40;
 const MIN_SATURATION = 0.25;
 const MIN_LIGHTNESS = 0.3;
 const SPARKLINE_FLOOR = 1024;
@@ -146,15 +147,20 @@ function toHsl(color) {
   };
 }
 
-// Whether two colors are told apart at a glance: hues far apart on the color
-// circle (both clearly colored), or one much lighter than the other.
+// Whether two colors are told apart at a glance: one much lighter than the
+// other, a colored against a gray tone, or two colors far apart on the color
+// circle.
 function isDistinct(a, b) {
   const first = toHsl(a);
   const second = toHsl(b);
   if (Math.abs(first.lightness - second.lightness) >= MIN_LIGHTNESS) {
     return true;
   }
-  if (first.saturation < MIN_SATURATION || second.saturation < MIN_SATURATION) {
+  const firstColored = first.saturation >= MIN_SATURATION;
+  if (firstColored !== second.saturation >= MIN_SATURATION) {
+    return true;
+  }
+  if (!firstColored) {
     return false;
   }
   const apart = Math.abs(first.hue - second.hue);
