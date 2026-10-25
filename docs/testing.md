@@ -63,7 +63,7 @@ because the checker compares it against the German interface.
 | Panel sizes: horizontal 20 px, 44 px and 96 px and vertical about 32 px wide: display readable, no overlap, nothing cut off | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK at 20, 44, 96 px horizontal and 32 px vertical |
 | Desktop placement (planar, widget directly on the desktop): shows something sensible in 0.1; the popup view for the desktop belongs to 0.2 (see below) | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK; the desktop shows the full view |
 | Light and dark theme: text easy to read in both | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK in Breeze Light and a dark theme (Gruvbox) |
-| Font scaling 150 %: panel view and settings pages stay readable and are not cut off | 0.1 | 2026-10-25, Plasma 6.8, scripted: panel OK (switches to one row); Display page OK; popup at default size elides labels; other settings pages not checked |
+| Font scaling 150 %: panel view and settings pages stay readable and are not cut off | 0.1 | 2026-10-25, Plasma 6.8, scripted: panel OK (switches to one row); Display page OK; the popup elided labels because the grid unit is fixed in Plasma 6, fixed: a new popup grows with the font; other settings pages not checked |
 | Tooltip in a real panel: connection name, download line, upload line and IP address appear | 0.1 | |
 
 ## Network situations
@@ -99,7 +99,7 @@ because the checker compares it against the German interface.
 | Restart ksystemstats while the popup is open: the session totals do not jump | 0.2 | 2026-10-25, Plasma 6.8, scripted: OK; session totals unchanged |
 | Copy an IP address in the interface list: "Copied" (German: “Kopiert”) appears and the address is on the clipboard | 0.2 | |
 | "Open System Monitor" (German: “Systemmonitor öffnen”) starts the system monitor | 0.2 | |
-| Popup with 12 or more interfaces in a real session (e.g. with Docker, VPN, virtual bridges): the list scrolls, nothing is cut off, the popup stays usable | 0.2 | 2026-10-25, Plasma 6.8, scripted: FINDING: with 15 interfaces the list is one row high at the default popup size |
+| Popup with 12 or more interfaces in a real session (e.g. with Docker, VPN, virtual bridges): the list scrolls, nothing is cut off, the popup stays usable | 0.2 | 2026-10-25, Plasma 6.8, scripted: the list was one row high at the default popup size; fixed, a new popup shows three rows |
 | Page "Behavior", launch target "Application" (chosen through the file dialog) and click action "Start the application or command" (German: “Anwendung oder Befehl starten”): the application really starts | 0.2 | |
 | Launch target "Command" (e.g. `konsole`): the command really starts | 0.2 | |
 | Unknown desktop ID or missing command (e.g. `doesnotexist`): a notification instead of a silent failure | 0.2 | |
