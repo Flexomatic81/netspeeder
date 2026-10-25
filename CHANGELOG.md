@@ -152,5 +152,7 @@ is published (`## 1.0.0 – 2026-11-15`).
   replaced by `-`; IDs that do not follow this rule are not found.
 - A command is pre-checked only when its first word is a plain name or a path.
 - A program that crashes after it started is not detected.
-- The manual checks, including a run on Plasma 6.3, are listed in
-  [docs/testing.md](docs/testing.md) and are still to be done before release.
+- Tested on Plasma 6.8 only. Plasma 6.3 to 6.7 are checked against their
+  source code, not run; see [docs/compatibility.md](docs/compatibility.md).
+- The manual checks are listed in [docs/testing.md](docs/testing.md) and are
+  still to be done before release.

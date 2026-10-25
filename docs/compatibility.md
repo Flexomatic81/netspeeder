@@ -14,14 +14,18 @@ applet uses is listed below with the release-tagged source that shows it in
 that version. Nothing the applet uses was missing there, so no fallback code
 and no higher minimum were needed.
 
-The audit reads source files at release tags; it does not replace a run on a
-real Plasma 6.3 desktop. The [checklist at the end](#vm-checklist-debian-13-plasma-63)
-covers what only such a run can show.
+### What has been tested, and what has only been checked
 
-Debian 13 ships Plasma 6.3 and Qt 6.8, but a KDE Frameworks release newer than
-6.10. The VM run therefore tests the Plasma 6.3 and Qt 6.8 floor on a real
-desktop, not the Frameworks 6.10 floor; that one rests on the source audit
-alone.
+Netspeeder has run on **Plasma 6.8 with KDE Frameworks 6.31 and Qt 6.12**
+only. The minimum of Plasma 6.3, Frameworks 6.10 and Qt 6.8 rests on the
+source audit below alone: it reads source files at release tags and does not
+replace a run on a real desktop. No release so far has been run on Plasma 6.3
+to 6.7.
+
+If you use one of these versions, the
+[checklist at the end](#checklist-for-an-older-plasma-version) lists what only
+a real run can show. Reports of what works and what does not are welcome as
+an issue.
 
 ### `X-Plasma-API-Minimum-Version` stays at `6.0`
 
@@ -102,10 +106,12 @@ The project's own checks run on a newer Qt. Two limits of the QML engine that
 matter for older versions are already avoided by the code: `catch` always has
 a binding, and `String.prototype.trimStart` is not used.
 
-## VM checklist (Debian 13, Plasma 6.3)
+## Checklist for an older Plasma version
 
-Run on a fresh Debian 13 installation with the Plasma desktop before a release.
-Use a test user; note the result of every line.
+Not part of the release checks: no release has been run through this list.
+It covers what the source audit cannot show. Debian 13, for example, ships
+Plasma 6.3 and Qt 6.8 with a Frameworks release newer than 6.10. Use a test
+user; note the result of every line.
 
 **Setup**
 

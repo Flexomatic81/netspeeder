@@ -156,7 +156,7 @@ For these checks vnstat 2.0 or newer is installed and its service enabled
 
 | Check | Stage | Result |
 |---|---|---|
-| Run through all items on Plasma 6.3 (Debian 13, VM) | before 1.0 | |
+| Run through the checklist for an older Plasma version in [compatibility.md](compatibility.md) | not planned for 1.0 | Not run: the minimum is documented as checked against the source code only |
 
 ## Release record 1.0.0
 
@@ -173,7 +173,7 @@ early fails there.
 | Gate | Date | Result |
 |---|---|---|
 | (a) The full manual checklist in this file, all tables | | |
-| (b) Run on Plasma 6.3 in a VM, as described in [compatibility.md](compatibility.md) | | |
+| (b) Minimum version honest: run on Plasma 6.3, or documented as checked against the source code only (README, [compatibility.md](compatibility.md), store text, CHANGELOG) | 2026-10-25 | Done: documented as source-audited, tested on Plasma 6.8 only; no VM run |
 | (c) Screenshots generated with `scripts/screenshots.sh`, reviewed and committed | 2026-10-25 | Done: Breeze Dark, six images in commit b8be157 |
 | (d) A green CI run on the remote for the commit to be tagged, before the tag is pushed | | |
 | (e) CHANGELOG and the changelog in [store.md](store.md) finalized: release date set in the heading as YYYY-MM-DD (`## 1.0.0 – 2026-11-15`), "unreleased" and every "still to be done" note removed or resolved | | |

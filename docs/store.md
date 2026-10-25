@@ -55,7 +55,8 @@ It is the successor of the Netspeed Widget by Daniel Faust.
   the kernel counters (`/proc/net/dev`) as an automatic fallback.
 - English and German.
 
-Requires Plasma 6.3 or newer. Coming from the Netspeed Widget? The README has
+Requires Plasma 6.3 or newer (tested on Plasma 6.8, older versions checked
+against their source code). Coming from the Netspeed Widget? The README has
 a table that maps every old setting to its new place; settings are not taken
 over automatically, and both widgets can run side by side.
 
@@ -91,7 +92,8 @@ Plasma-6-Leiste. Es ist der Nachfolger des Netspeed Widget von Daniel Faust.
   Ausweichweg.
 - Englisch und Deutsch.
 
-Benötigt Plasma 6.3 oder neuer. Umstieg vom Netspeed Widget? Die README
+Benötigt Plasma 6.3 oder neuer (getestet mit Plasma 6.8, ältere Versionen
+am Quellcode geprüft). Umstieg vom Netspeed Widget? Die README
 enthält eine Tabelle, die jede alte Einstellung ihrem neuen Platz zuordnet;
 Einstellungen werden nicht automatisch übernommen, und beide Widgets können
 nebeneinander laufen.
@@ -132,5 +134,6 @@ First stable release.
 - The sensor data recovers when the system sensor service starts late or
   restarts.
 - Launch targets in subfolders of the applications directory are found.
-- Checked against the APIs of Plasma 6.3, KDE Frameworks 6.10 and Qt 6.8.
+- Checked against the APIs of Plasma 6.3, KDE Frameworks 6.10 and Qt 6.8;
+  tested on Plasma 6.8.
 - English and German.

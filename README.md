@@ -266,10 +266,11 @@ and where to find it in Netspeeder (settings page › option).
 
 ## Requirements
 
-- KDE Plasma 6.3 or newer, with KDE Frameworks 6.10 and Qt 6.8 or newer (see
-  [docs/compatibility.md](docs/compatibility.md)). The widget declares API 6.0
-  in its metadata; that value names the applet API generation, not the
-  minimum.
+- KDE Plasma 6.3 or newer, with KDE Frameworks 6.10 and Qt 6.8 or newer.
+  Tested on Plasma 6.8; Plasma 6.3 to 6.7 are checked against their source
+  code only, not run (see [docs/compatibility.md](docs/compatibility.md)).
+  The widget declares API 6.0 in its metadata; that value names the applet
+  API generation, not the minimum.
 - Nothing else for the default data source: it uses the system sensors
   (`ksystemstats`) that every Plasma installation ships.
 - Optional: vnStat 2.0 or newer for the usage statistics and the data cap, see
