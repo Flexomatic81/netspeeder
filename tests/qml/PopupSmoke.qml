@@ -6,8 +6,9 @@
 // without a following sample), a selection change without a new sample, the
 // button, the minimum size, the figures (peaks and session totals), the list
 // of interfaces (12 rows scroll, the popup keeps its preferred size with the
-// error hint shown, rows that stay keep their delegate, a click on an address
-// copies it) and the snapshot: while the popup is not active a
+// error hint shown, rows that stay keep their delegate, the counted
+// interfaces come first and a row moves with its delegate when that changes,
+// a click on an address copies it) and the snapshot: while the popup is not active a
 // new provider value changes neither `shown` nor the displayed text, and
 // after it becomes active again both are current at once. The usage section:
 // hidden while disabled (the minimum height stays), the hints per status, the
@@ -555,8 +556,53 @@ Item {
                 stub.interfaces = scene.interfaceRows(1000);
             },
             check: () => view.interfaceList.rowFor("veth3") !== null ? scene.sameRow("eth0") : "rows: veth3 is not back"
+        },
+        {
+            name: "counted interfaces come first",
+            apply: () => {
+                stub.interfaces = [scene.dockerRow(false), scene.interfaceRows(1000)[0]];
+            },
+            check: () => scene.orderProblem("counted first", ["eth0", "docker0"])
+        },
+        {
+            name: "a row moves when it becomes counted",
+            apply: () => {
+                const list = view.interfaceList;
+                scene.rowsBefore = { eth0: list.rowFor("eth0"), docker0: list.rowFor("docker0") };
+                stub.interfaces = [scene.interfaceRows(1000)[0], scene.dockerRow(true)];
+            },
+            check: () => scene.orderProblem("counted", ["docker0", "eth0"]) || scene.sameRow("eth0") || scene.sameRow("docker0")
+        },
+        {
+            name: "a row moves back when it is no longer counted",
+            apply: () => {
+                stub.interfaces = [scene.dockerRow(false), scene.interfaceRows(1000)[0]];
+            },
+            check: () => scene.orderProblem("not counted", ["eth0", "docker0"]) || scene.sameRow("eth0") || scene.sameRow("docker0")
+        },
+        {
+            name: "the full list again",
+            apply: () => {
+                stub.interfaces = scene.interfaceRows(1000);
+            },
+            check: () => scene.orderProblem("full list", ["eth0", "wlan0"].concat([0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => "veth" + i)))
         }
     ]
+
+    // A virtual docker0, counted or not.
+    function dockerRow(included: bool): var {
+        return {
+            name: "docker0", label: "", kind: "virtual", included: included, online: true,
+            down: 0, up: 0, totalDown: 0, totalUp: 0, totalsKnown: false,
+            ipv4: "", ipv6: "", signal: null
+        };
+    }
+
+    // "" when the list shows its rows in the order of `names`.
+    function orderProblem(where: string, names: var): string {
+        const shown = view.interfaceList.rowNames();
+        return shown.join(" ") === names.join(" ") ? "" : where + ": the rows are [" + shown.join(" ") + "], expected [" + names.join(" ") + "]";
+    }
 
     // --- usage -----------------------------------------------------------
 

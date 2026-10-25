@@ -3,7 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { syncOps } from "../package/contents/code/listsync.mjs";
+import { orderOps, syncOps } from "../package/contents/code/listsync.mjs";
 import { compareNames } from "../package/contents/code/selection.mjs";
 
 // The two procedures as they stood in the QML files before they shared this
@@ -49,6 +49,7 @@ function apply(rows, ops) {
   const result = rows.slice();
   for (const op of ops) {
     if (op.op === "remove") result.splice(op.index, 1);
+    else if (op.op === "move") result.splice(op.to, 0, result.splice(op.from, 1)[0]);
     else result.splice(op.index, 0, op.name);
   }
   return result;
@@ -165,5 +166,49 @@ test("fixed random cases: same result as the procedures they replace, survivors 
     assert.ok(removedNames.every((name) => !wanted.includes(name)));
     const firstInsert = ops.findIndex((op) => op.op === "insert");
     assert.ok(firstInsert < 0 || ops.slice(firstInsert).every((op) => op.op === "insert"));
+  }
+});
+
+// --- orderOps ---------------------------------------------------------------
+
+test("orderOps leaves a list that is in order alone", () => {
+  assert.deepEqual(orderOps(["a", "b"], ["a", "b"]), []);
+  assert.deepEqual(orderOps([], []), []);
+});
+
+test("orderOps moves a row to its new place instead of rebuilding it", () => {
+  assert.deepEqual(orderOps(["docker0", "eth0"], ["eth0", "docker0"]), [{ op: "move", from: 1, to: 0 }]);
+  assert.deepEqual(orderOps(["a", "b", "c"], ["c", "a", "b"]), [{ op: "move", from: 2, to: 0 }]);
+});
+
+test("orderOps removes, then inserts and moves, indexes after the operations before", () => {
+  assert.deepEqual(orderOps(["a", "b", "c", "d"], ["d", "e", "b"]), [
+    { op: "remove", index: 2 },
+    { op: "remove", index: 0 },
+    { op: "move", from: 1, to: 0 },
+    { op: "insert", index: 1, name: "e" },
+  ]);
+});
+
+test("orderOps handles a name wanted twice once", () => {
+  assert.deepEqual(orderOps([], ["x", "x"]), [{ op: "insert", index: 0, name: "x" }]);
+  assert.deepEqual(orderOps(["x"], ["x", "x"]), []);
+});
+
+test("fixed random cases: orderOps gives exactly the wanted order and never rebuilds a row that stays", () => {
+  const next = generator(20261025);
+  for (let n = 0; n < 500; n++) {
+    const current = [...new Set(pick(next, 7))];
+    const wanted = pick(next, 8);
+    const ops = orderOps(current, wanted);
+    assert.deepEqual(apply(current, ops), [...new Set(wanted)], JSON.stringify([current, wanted]));
+    for (const name of current.filter((entry) => wanted.includes(entry))) {
+      assert.ok(!ops.some((op) => op.op === "insert" && op.name === name));
+    }
+    const removedNames = ops.filter((op) => op.op === "remove").map((op) => current[op.index]);
+    assert.ok(removedNames.every((name) => !wanted.includes(name)));
+    const firstOther = ops.findIndex((op) => op.op !== "remove");
+    assert.ok(firstOther < 0 || ops.slice(firstOther).every((op) => op.op !== "remove"));
+    for (const op of ops.filter((entry) => entry.op === "move")) assert.ok(op.from > op.to);
   }
 });

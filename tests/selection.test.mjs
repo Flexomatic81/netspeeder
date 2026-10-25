@@ -3,7 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { summarize, interfaceList, compareNames, toList } from "../package/contents/code/selection.mjs";
+import { summarize, interfaceList, compareNames, listOrder, toList } from "../package/contents/code/selection.mjs";
 
 const iface = (o) => ({
   down: 0,
@@ -133,4 +133,31 @@ test("toList copies array-like values and turns everything else into an empty li
   assert.deepEqual(toList({}), []);
   assert.deepEqual(toList(42), []);
   assert.deepEqual(toList({ length: 1, 0: 7 }).map(String), ["7"]);
+});
+
+test("listOrder puts the counted interfaces first, each group by name", () => {
+  const rows = [
+    { name: "docker0", included: false },
+    { name: "wlan0", included: true },
+    { name: "Tun0", included: false },
+    { name: "eth0", included: true },
+  ];
+  assert.deepEqual(listOrder(rows), ["eth0", "wlan0", "docker0", "Tun0"]);
+  assert.deepEqual(rows[0].name, "docker0", "the input stays as it is");
+  // Only true counts as counted.
+  assert.deepEqual(listOrder([{ name: "b" }, { name: "a", included: "yes" }, { name: "c", included: true }]), [
+    "c",
+    "a",
+    "b",
+  ]);
+  assert.deepEqual(listOrder([]), []);
+  assert.deepEqual(listOrder(null), []);
+});
+
+test("listOrder gives the order of interfaceList", () => {
+  const list = interfaceList(ifs, ["enp7s0", "wlp3s0"]);
+  assert.deepEqual(
+    listOrder(list.slice().reverse()),
+    list.map((row) => row.name),
+  );
 });

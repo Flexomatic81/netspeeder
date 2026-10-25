@@ -101,11 +101,25 @@ export function interfaceList(interfaces, included) {
     row.included = members.indexOf(name) >= 0;
     rows.push(row);
   }
-  // Array.prototype.sort is not guaranteed stable on every engine; the name
-  // comparison makes the order total, so stability does not matter.
-  rows.sort((x, y) => {
-    if (x.included !== y.included) return x.included ? -1 : 1;
-    return compareNames(x.name, y.name);
-  });
+  rows.sort(compareRows);
   return rows;
+}
+
+// The popup order: counted interfaces (`included` true) first, each group by
+// compareNames. Array.prototype.sort is not guaranteed stable on every
+// engine; the name comparison makes the order total, so stability does not
+// matter.
+function compareRows(x, y) {
+  const a = x.included === true;
+  const b = y.included === true;
+  if (a !== b) return a ? -1 : 1;
+  return compareNames(x.name, y.name);
+}
+
+// The names of `rows` (entries with `name` and `included`) in the order of
+// the popup list; `rows` itself is left as it is.
+export function listOrder(rows) {
+  return toList(rows)
+    .sort(compareRows)
+    .map((row) => row.name);
 }

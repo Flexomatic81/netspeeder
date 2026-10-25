@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
-// Brings a list model in line with a list of wanted names by single removals
-// and insertions. Rows that stay are never touched, so the delegates behind
-// them keep their state; a wholesale rebuild would lose it. Pure function
+// Brings a list model in line with a list of wanted names by single removals,
+// insertions and moves. Rows that stay are never rebuilt, so the delegates
+// behind them keep their state; a wholesale rebuild would lose it. Pure function
 // without Qt or Plasma dependencies: the caller applies the operations to its
 // ListModel in the order given.
 
@@ -45,4 +45,32 @@ function insertionIndex(rows, name, compare) {
   let index = 0;
   while (index < rows.length && compare(rows[index], name) <= 0) index++;
   return index;
+}
+
+// The operations that turn `current` (names, one per row) into exactly the
+// order of `wanted`: the removals of syncOps, then, from the top down,
+//   { op: "move", from, to }       move the row at `from` up to `to`
+//   { op: "insert", index, name }  insert a row for `name` at `index`
+// so a row whose place changes is moved, not removed and inserted again.
+// Indexes refer to the list as it is after the operations before; `from` is
+// always below `to`. A name that is wanted several times is handled once.
+export function orderOps(current, wanted) {
+  const ops = [];
+  for (let at = current.length - 1; at >= 0; at--) {
+    if (wanted.indexOf(current[at]) < 0) ops.push({ op: "remove", index: at });
+  }
+  const rows = current.filter((name) => wanted.indexOf(name) >= 0);
+  let index = 0;
+  for (const name of new Set(wanted)) {
+    const at = rows.indexOf(name);
+    if (at < 0) {
+      rows.splice(index, 0, name);
+      ops.push({ op: "insert", index: index, name: name });
+    } else if (at !== index) {
+      rows.splice(index, 0, rows.splice(at, 1)[0]);
+      ops.push({ op: "move", from: at, to: index });
+    }
+    index++;
+  }
+  return ops;
 }

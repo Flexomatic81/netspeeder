@@ -3,9 +3,10 @@
 
 // The scrollable list of the network interfaces in the popup: name, speeds,
 // totals since the interface became active, the IPv4 address (a click copies
-// it) and, for Wi-Fi, the signal. The rows are a name-keyed ListModel brought
-// in line with `interfaces` by single removals and insertions, so a row keeps
-// its delegate (and the "Copied" note) while the values change.
+// it) and, for Wi-Fi, the signal. Counted interfaces come first, each group
+// sorted by name. The rows are a name-keyed ListModel brought in line with
+// `interfaces` by single removals, insertions and moves, so a row keeps its
+// delegate (and the "Copied" note) while the values or its place change.
 
 pragma ComponentBehavior: Bound
 
@@ -63,6 +64,15 @@ Item {
         root.oneRowHeight = tallest;
     }
 
+    // The names of the rows, in the order shown (for the smoke scene).
+    function rowNames(): var {
+        const names = [];
+        for (let i = 0; i < rowModel.count; i++) {
+            names.push(rowModel.get(i).interfaceName);
+        }
+        return names;
+    }
+
     // The row item of `name`; null if there is none.
     function rowFor(name: string): var {
         for (let i = 0; i < rowModel.count; i++) {
@@ -88,10 +98,11 @@ Item {
         for (let row = 0; row < rowModel.count; row++) {
             current.push(rowModel.get(row).interfaceName);
         }
-        const wanted = root.interfaces.map(entry => entry.name);
-        for (const step of ListSync.syncOps(current, wanted, Selection.compareNames)) {
+        for (const step of ListSync.orderOps(current, Selection.listOrder(root.interfaces))) {
             if (step.op === "remove") {
                 rowModel.remove(step.index);
+            } else if (step.op === "move") {
+                rowModel.move(step.from, step.to, 1);
             } else {
                 rowModel.insert(step.index, { "interfaceName": step.name });
             }
