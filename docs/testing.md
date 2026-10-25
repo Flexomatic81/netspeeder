@@ -174,7 +174,7 @@ early fails there.
 |---|---|---|
 | (a) The full manual checklist in this file, all tables | | |
 | (b) Run on Plasma 6.3 in a VM, as described in [compatibility.md](compatibility.md) | | |
-| (c) Screenshots generated with `scripts/screenshots.sh`, reviewed and committed | | |
+| (c) Screenshots generated with `scripts/screenshots.sh`, reviewed and committed | 2026-10-25 | Done: Breeze Dark, six images in commit b8be157 |
 | (d) CMake route verified (`cmake -B build -DCMAKE_INSTALL_PREFIX=$PWD/stage`, build, install, compare `stage/` with the `.plasmoid`), or knowingly released with the caveat in the changelog | | |
 | (e) A green CI run on the remote for the commit to be tagged, before the tag is pushed | | |
 | (f) CHANGELOG and the changelog in [store.md](store.md) finalized: release date set in the heading as YYYY-MM-DD (`## 1.0.0 – 2026-11-15`), "unreleased" and every "still to be done" note removed or resolved | | |
