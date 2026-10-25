@@ -39,10 +39,11 @@ run_scene() {
   local dir="$1" log="$2" config="$3" root rc
   root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
   # Qt logs to journald unless stderr is a terminal; force it to stderr so
-  # console.log output reaches the log. The user's own configuration and the
-  # defaults of the desktop theme (in XDG_CONFIG_DIRS) are left out; the
-  # Plasma style reads the colors from kdeglobals in XDG_CONFIG_HOME.
-  XDG_CONFIG_HOME="$config" XDG_CONFIG_DIRS=/etc/xdg QT_QUICK_CONTROLS_STYLE=org.kde.desktop \
+  # console.log output reaches the log. The user's own configuration, the
+  # defaults of the desktop theme and the system-wide ones (XDG_CONFIG_DIRS,
+  # here a directory that does not exist) are left out; the Plasma style
+  # reads the colors from kdeglobals in XDG_CONFIG_HOME.
+  XDG_CONFIG_HOME="$config" XDG_CONFIG_DIRS="$config/none" QT_QUICK_CONTROLS_STYLE=org.kde.desktop \
     QT_FORCE_STDERR_LOGGING=1 timeout 60 qml6 "$root/tools/screenshots/Screenshots.qml" -- "$dir" >"$log" 2>&1
   rc=$?
   cat "$log"

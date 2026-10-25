@@ -65,8 +65,9 @@ dir="$(cd "$dir" && pwd)"
 # pasted output carries no home path.
 shown="${dir#"$root"/}"
 
-log="$(mktemp)"
-config="$(mktemp -d)"
+log="$(mktemp)" || exit 1
+trap 'rm -f "$log"' EXIT
+config="$(mktemp -d)" || exit 1
 trap 'rm -rf "$log" "$config"' EXIT
 if ! setup_theme "$variant" "$config"; then
   echo "screenshots: no stock color scheme, nothing rendered" >&2
