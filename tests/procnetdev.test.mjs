@@ -4,11 +4,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import {
   parseProcNetDev,
   parseOperstate,
   parseDeviceList,
+  parseDeviceKinds,
   parseProcOutput,
+  DEVICES_COMMAND,
   toProcSample,
 } from "../package/contents/code/procnetdev.mjs";
 
@@ -31,6 +34,21 @@ test("parses operstate", () => {
 });
 test("parses device list", () => {
   assert.deepEqual(parseDeviceList("enp7s0\n\n  wlan0 \n"), ["enp7s0", "wlan0"]);
+});
+test("parseDeviceKinds splits hardware-backed from other present interfaces", () => {
+  assert.deepEqual(parseDeviceKinds("enp7s0\n wlan0 \n#virtual\nWorkVPN\n\ndocker0\n"), {
+    physical: ["enp7s0", "wlan0"],
+    virtual: ["WorkVPN", "docker0"],
+  });
+});
+test("parseDeviceKinds without the virtual section knows no virtual interfaces", () => {
+  assert.deepEqual(parseDeviceKinds("enp7s0\n"), { physical: ["enp7s0"], virtual: [] });
+  assert.deepEqual(parseDeviceKinds(""), { physical: [], virtual: [] });
+});
+test("DEVICES_COMMAND lists the loopback device as present without hardware", () => {
+  const kinds = parseDeviceKinds(execFileSync("sh", ["-c", DEVICES_COMMAND], { encoding: "utf8" }));
+  assert.ok(kinds.virtual.includes("lo"));
+  assert.equal(kinds.physical.filter((name) => kinds.virtual.includes(name)).length, 0);
 });
 test("parseProcOutput splits sections", () => {
   const p = parseProcOutput(full);

@@ -2,7 +2,9 @@
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
 // Smoke scene for SensorSource: reads the real ksystemstats and checks the
-// third sample against the sample contract, plus the sensor IDs the delegates
+// first sample from the third on that lists the loopback device in
+// `systemVirtual` (the device query has answered, and the list survived the
+// signal) against the sample contract, plus the sensor IDs the delegates
 // built (a wrong ID, e.g. "network//download", delivers no values at all).
 //
 // Live scene: needs ksystemstats and a network interface that has received
@@ -50,6 +52,12 @@ Item {
         return "";
     }
 
+    // Whether the sample lists the loopback device as present without
+    // hardware. The list crosses a signal and arrives array-like.
+    function listsLoopback(sample): bool {
+        return Array.prototype.indexOf.call(sample.systemVirtual ?? [], "lo") >= 0;
+    }
+
     function check(sample) {
         if (sample.source !== "sensors") {
             scene.finish(false, "SMOKE FAIL sensors: source is '" + sample.source + "'");
@@ -95,7 +103,7 @@ Item {
         interval: 500
         onSampleReady: sample => {
             scene.received += 1;
-            if (scene.received === 3) {
+            if (scene.received >= 3 && scene.listsLoopback(sample)) {
                 scene.check(sample);
             }
         }
@@ -106,6 +114,6 @@ Item {
         interval: 10000
         running: true
         onTriggered: scene.finish(false, "SMOKE FAIL sensors: timeout after 10 s ("
-            + scene.received + " samples)")
+            + scene.received + " samples, none from the third on with lo in systemVirtual)")
     }
 }

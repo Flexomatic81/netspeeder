@@ -15,12 +15,18 @@ export const PROC_COMMAND =
   "cat /proc/net/dev && echo '#operstate' && grep -H . /sys/class/net/*/operstate; " +
   'echo \'#devices\'; for d in /sys/class/net/*; do [ -e "$d/device" ] && echo "${d##*/}"; done; true';
 
-// Only the hardware part of PROC_COMMAND, for refreshing the physical-device
-// list on its own.
-export const DEVICES_COMMAND = 'for d in /sys/class/net/*; do [ -e "$d/device" ] && echo "${d##*/}"; done; true';
+// The device query of the sensor source: the names of the interfaces backed
+// by hardware, then "#virtual" followed by the other present interfaces. The
+// second list matters because the system sensors may not report every
+// interface (a VPN tunnel, a container bridge) while vnStat counts it.
+export const DEVICES_COMMAND =
+  'for d in /sys/class/net/*; do [ -e "$d/device" ] && echo "${d##*/}"; done; ' +
+  "echo '#virtual'; " +
+  'for d in /sys/class/net/*; do [ -e "$d" ] && [ ! -e "$d/device" ] && echo "${d##*/}"; done; true';
 
 const OPERSTATE_MARKER = "#operstate";
 const DEVICES_MARKER = "#devices";
+const VIRTUAL_MARKER = "#virtual";
 
 // "name:" directly followed by the counters, with or without a space after the
 // colon (large counters fill the column and leave none).
@@ -73,6 +79,16 @@ export function parseDeviceList(text) {
     if (name !== "") names.push(name);
   }
   return names;
+}
+
+// Parses the output of DEVICES_COMMAND into { physical, virtual }, both lists
+// of names. Without the "#virtual" section no interface is known as virtual.
+export function parseDeviceKinds(text) {
+  const parts = String(text).split(VIRTUAL_MARKER);
+  return {
+    physical: parseDeviceList(parts[0]),
+    virtual: parts.length > 1 ? parseDeviceList(parts.slice(1).join(VIRTUAL_MARKER)) : [],
+  };
 }
 
 // Splits the output of PROC_COMMAND into its three sections and parses them.

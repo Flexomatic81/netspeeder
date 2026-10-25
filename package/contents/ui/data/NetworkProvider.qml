@@ -47,6 +47,9 @@ Item {
     readonly property string activeSource: internals.view.activeSource
     // Rows for the popup: the sample fields plus name and included.
     readonly property var interfaces: internals.view.interfaces
+    // Present interfaces without hardware that the sensors do not report
+    // (see buildSensorSample() in sensors.mjs); empty for the kernel counters.
+    readonly property var systemVirtual: internals.view.systemVirtual
     readonly property int includedCount: internals.view.includedCount
     readonly property string primaryLabel: internals.view.primaryLabel
     readonly property string primaryIp: internals.view.primaryIp

@@ -132,6 +132,16 @@ Item {
             }
         },
         {
+            name: "a system virtual interface",
+            apply: () => {
+                model.systemVirtual = ["wlan0"];
+            },
+            check: () => {
+                const names = model.namesKey.split("\n");
+                return names.indexOf("wlan0") < 0 && names.indexOf("eth0") >= 0 ? "" : "system virtual: names key '" + model.namesKey + "'";
+            }
+        },
+        {
             name: "a new vnStat run",
             apply: () => model.refresh(),
             check: () => scene.fresh >= 2 ? "" : "wait"

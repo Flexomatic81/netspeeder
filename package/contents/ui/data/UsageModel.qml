@@ -21,6 +21,10 @@ Item {
     property var selectedInterfaces: []
     // The live interfaces of the NetworkProvider.
     property var interfaces: []
+    // Present interfaces without hardware the provider does not report
+    // (NetworkProvider.systemVirtual); they count as virtual here.
+    property var systemVirtual: []
+    readonly property var liveRows: Usage.withSystemVirtual(root.interfaces, root.systemVirtual)
     // Whether the NetworkProvider has delivered its interfaces yet.
     property bool providerReady: false
     // The names once seen as virtual (see nextKnownVirtual() in usage.mjs).
@@ -36,13 +40,13 @@ Item {
     // Number of vnStat runs started (for the smoke scene).
     readonly property int runs: source.runs
     // The names that count, as one string (see namesKey() in usage.mjs).
-    readonly property string namesKey: root.enabled ? Usage.namesKey(root.interfaceSelection, root.selectedInterfaces, root.interfaces, Object.keys(source.parsed?.interfaces ?? {}), root.knownVirtual) : ""
+    readonly property string namesKey: root.enabled ? Usage.namesKey(root.interfaceSelection, root.selectedInterfaces, root.liveRows, Object.keys(source.parsed?.interfaces ?? {}), root.knownVirtual) : ""
     // Whether the names that count are known: in automatic mode the virtual
     // interfaces can be left out only once the provider has delivered.
     readonly property bool ready: root.interfaceSelection === "manual" || root.providerReady
     // The next list of names once seen as virtual, or null when it stays the
     // same (see nextKnownVirtual() in usage.mjs).
-    readonly property var knownVirtualUpdate: root.enabled ? Usage.nextKnownVirtual(root.knownVirtual, root.interfaces, source.parsed === null ? null : Object.keys(source.parsed.interfaces)) : null
+    readonly property var knownVirtualUpdate: root.enabled ? Usage.nextKnownVirtual(root.knownVirtual, root.liveRows, source.parsed === null ? null : Object.keys(source.parsed.interfaces)) : null
     // The local calendar day, "YYYY-MM-DD".
     readonly property string todayKey: Vnstat.dateKey(clock.now)
     // Whether the vnStat data is more than an hour old.

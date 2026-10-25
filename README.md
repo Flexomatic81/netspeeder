@@ -220,9 +220,13 @@ and the notification switch.
 page "Data" count, even while they are absent (a USB tethering device that is
 unplugged keeps its past traffic in the sum). In automatic mode the interfaces
 vnStat knows count, except `lo`, the interfaces the widget currently sees as
-virtual and those it has seen as virtual before. The widget remembers every
-virtual interface it sees, so a VPN tunnel stays out of the totals after a
-disconnect; names that vnStat no longer knows are forgotten again. A virtual
+virtual and those it has seen as virtual before. Virtual means present without
+hardware behind it (no `/sys/class/net/<name>/device`); with the system
+sensors this also covers VPN tunnels and container bridges that the sensors do
+not list, so their traffic does not enter the totals twice. The widget
+remembers every virtual interface it sees, so a VPN tunnel stays out of the
+totals after a disconnect; names that vnStat no longer knows are forgotten
+again. A virtual
 interface that vnStat recorded but the widget has never seen (for example one
 from before the widget was installed) still counts until it appears once,
 until you switch to manual selection, or until you remove it from vnStat. The
@@ -335,7 +339,9 @@ automatic:
 
 1. **System sensors (`ksystemstats`)**, the default. The values come straight
    from the system monitor backend of Plasma. No process is started at an
-   update. This source lists the devices that NetworkManager manages.
+   update. This source lists the devices that NetworkManager manages; once
+   a minute a short query reads which interfaces exist without hardware, for
+   the usage totals.
 2. **Kernel counters (`/proc/net/dev`)**, the fallback. It sees every
    interface, including VPN tunnels and containers, but it starts a small
    process at every update.

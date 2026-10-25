@@ -136,6 +136,9 @@ is published (`## 1.0.0 – 2026-11-15`).
 - Empty window when scrolling over the widget (upstream #24) and crash when
   deselecting an option (upstream #47) are addressed by the design; to be
   verified by hand before release.
+- With the system sensors, VPN tunnels and container bridges that the sensors
+  do not list no longer enter the usage totals and the data cap: every present
+  interface without hardware counts as virtual.
 - Remembered virtual interfaces no longer enter the usage totals, data cap
   notifications wait until the interfaces are known, and an empty usage line
   no longer shows in the tooltip.

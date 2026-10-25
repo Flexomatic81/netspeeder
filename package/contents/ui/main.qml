@@ -201,6 +201,7 @@ PlasmoidItem {
         interfaceSelection: root.provider.interfaceSelection
         selectedInterfaces: root.provider.selectedInterfaces
         interfaces: root.provider.interfaces
+        systemVirtual: root.provider.systemVirtual
         providerReady: root.provider.hasData
         // (configuration is created from main.xml at Plasma runtime)
         enabled: Plasmoid.configuration.usageEnabled // qmllint disable missing-property

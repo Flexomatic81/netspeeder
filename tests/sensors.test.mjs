@@ -113,7 +113,25 @@ test("buildSensorSample without device info treats all as physical", () => {
   assert.equal(s.interfaces.eth0.down, 0);
 });
 test("buildSensorSample with no interfaces is a valid empty sample", () => {
-  assert.deepEqual(buildSensorSample(3, {}, []), { timestamp: 3, source: "sensors", interfaces: {} });
+  assert.deepEqual(buildSensorSample(3, {}, []), {
+    timestamp: 3,
+    source: "sensors",
+    interfaces: {},
+    systemVirtual: [],
+  });
+});
+test("buildSensorSample carries the present interfaces without hardware", () => {
+  const s = buildSensorSample(1, { enp7s0: {} }, ["enp7s0"], ["WorkVPN", "docker0"]);
+  assert.deepEqual(s.systemVirtual, ["WorkVPN", "docker0"]);
+  assert.equal(s.interfaces.enp7s0.kind, "physical");
+  assert.equal(s.interfaces.WorkVPN, undefined);
+});
+test("buildSensorSample copies a virtual list that arrives as a sequence object", () => {
+  assert.deepEqual(buildSensorSample(1, {}, ["eth0"], { length: 1, 0: "WorkVPN" }).systemVirtual, ["WorkVPN"]);
+});
+test("buildSensorSample without a virtual list knows no system virtual interfaces", () => {
+  assert.deepEqual(buildSensorSample(1, {}, ["eth0"]).systemVirtual, []);
+  assert.deepEqual(buildSensorSample(1, {}, null, null).systemVirtual, []);
 });
 test("heartbeat window", () => {
   assert.equal(heartbeatWindowMs(500), 3000);

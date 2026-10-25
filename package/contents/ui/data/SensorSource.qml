@@ -69,6 +69,9 @@ Item {
         // has answered or when it failed (then every interface counts as
         // physical).
         property var physical: null
+        // Names of the other present interfaces, from the same query; also
+        // those ksystemstats does not offer (null like `physical`).
+        property var virtualNames: null
         // Whether samples need a fresh heartbeat, and when the last one came;
         // see heartbeatGate() in sensors.mjs.
         property var heartbeatGate: SensorCode.initialHeartbeatGate()
@@ -97,8 +100,9 @@ Item {
             return devicesLoader.item;
         }
 
-        // Asks which interfaces are hardware-backed. Without a runner there
-        // is nobody to ask and every interface counts as physical.
+        // Asks which interfaces are hardware-backed and which other ones are
+        // present. Without a runner there is nobody to ask: every interface
+        // counts as physical and none as system virtual.
         function queryDevices() {
             const runner = internals.deviceRunner();
             if (runner !== null) {
@@ -109,10 +113,13 @@ Item {
         function applyDeviceList(exitCode, stdout, stderr) {
             if (exitCode !== 0) {
                 internals.physical = null;
+                internals.virtualNames = null;
                 console.warn("netspeeder: device query failed (exit " + exitCode + "): " + stderr);
                 return;
             }
-            internals.physical = Procnetdev.parseDeviceList(stdout);
+            const kinds = Procnetdev.parseDeviceKinds(stdout);
+            internals.physical = kinds.physical;
+            internals.virtualNames = kinds.virtual;
         }
 
         // Appends the sensor IDs of all rows below `parent` that are at most
@@ -176,7 +183,7 @@ Item {
                 }
             }
             // Sent even without interfaces, so that vanished ones leave the display.
-            root.sampleReady(SensorCode.buildSensorSample(now, values, internals.physical));
+            root.sampleReady(SensorCode.buildSensorSample(now, values, internals.physical, internals.virtualNames));
         }
     }
 
@@ -210,11 +217,22 @@ Item {
 
     Component.onCompleted: rescanTimer.start()
 
-    // Tells which interfaces are hardware-backed (kind "physical"). It is
-    // loaded from its file instead of being declared here: CommandRunner
-    // imports plasma5support, and where that module is missing this source
-    // must still deliver the readings. internals.physical then stays null and
-    // every interface counts as physical.
+    // Repeats the device query: a VPN tunnel or a container bridge can appear
+    // without a change in the interfaces the sensors offer, and the usage
+    // totals must still see it as virtual.
+    Timer {
+        interval: 60000
+        repeat: true
+        running: true
+        onTriggered: internals.queryDevices()
+    }
+
+    // Tells which interfaces are hardware-backed (kind "physical") and which
+    // other ones are present (systemVirtual). It is loaded from its file
+    // instead of being declared here: CommandRunner imports plasma5support,
+    // and where that module is missing this source must still deliver the
+    // readings. internals.physical and internals.virtualNames then stay null:
+    // every interface counts as physical and none as system virtual.
     Loader {
         id: devicesLoader
 

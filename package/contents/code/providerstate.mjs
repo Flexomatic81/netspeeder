@@ -8,7 +8,7 @@
 // Conservative syntax on purpose (no object spread): the QML engine imports
 // this module too.
 
-import { summarize, interfaceList } from "./selection.mjs";
+import { summarize, interfaceList, toList } from "./selection.mjs";
 
 // How many sample intervals without a sample make the data stale.
 const STALE_INTERVALS = 3;
@@ -95,6 +95,9 @@ export function derive(state, settings) {
     stale: false,
     activeSource: "",
     interfaces: [],
+    // Present interfaces without hardware that the sample lists besides its
+    // interfaces (sensor source only), for the usage totals.
+    systemVirtual: [],
     includedCount: 0,
     primaryLabel: "",
     primaryIp: "",
@@ -112,6 +115,7 @@ export function derive(state, settings) {
   view.stale = settings.now - state.lastSampleAt > STALE_INTERVALS * settings.intervalMs;
   view.activeSource = state.sample.source;
   view.interfaces = interfaceList(interfaces, summary.included);
+  view.systemVirtual = toList(state.sample.systemVirtual);
   view.includedCount = summary.included.length;
   if (summary.primary !== null) {
     const primary = interfaces[summary.primary];

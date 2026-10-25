@@ -248,6 +248,19 @@ function liveVirtual(live) {
     .map((row) => row.name);
 }
 
+// The live rows plus a virtual, not included row for each name in
+// `systemVirtual` the provider does not report itself: interfaces that exist
+// on the system without hardware but are missing from the system sensors.
+// usageNames and nextKnownVirtual then treat them like reported virtual ones.
+export function withSystemVirtual(live, systemVirtual) {
+  const rows = liveRows(live);
+  const names = rows.map((row) => row.name);
+  const extra = toList(systemVirtual)
+    .filter((name) => typeof name === "string" && name !== "" && names.indexOf(name) < 0)
+    .map((name) => ({ name: name, kind: "virtual", included: false }));
+  return rows.concat(extra);
+}
+
 // The interfaces whose usage counts. "manual": the configured names, present
 // or not. "auto": every name vnStat knows except those the provider currently
 // reports as virtual and those once seen as virtual (`knownVirtual`, see

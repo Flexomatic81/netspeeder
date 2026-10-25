@@ -22,6 +22,7 @@ import {
   namesFromKey,
   nextKnownVirtual,
   todayUsage,
+  withSystemVirtual,
 } from "../package/contents/code/usage.mjs";
 
 const fixture = parseVnstat(readFileSync(new URL("./fixtures/vnstat-v2.json", import.meta.url), "utf8"));
@@ -285,6 +286,28 @@ test("auto mode leaves out interfaces the provider reports as virtual", () => {
     { name: "docker0", kind: "virtual", included: false },
   ];
   assert.deepEqual(usageNames("auto", [], live, ["eth0", "docker0", "lo"]), ["eth0"]);
+});
+
+test("auto mode leaves out virtual interfaces the sensors do not report", () => {
+  // ksystemstats reports only the wired device; the VPN tunnel and the
+  // Docker bridge exist on the system and vnStat counts them.
+  const live = withSystemVirtual([{ name: "enp7s0", kind: "physical", included: true }], ["WorkVPN", "docker0", "lo"]);
+  assert.deepEqual(usageNames("auto", [], live, ["WorkVPN", "docker0", "enp7s0"]), ["enp7s0"]);
+  assert.deepEqual(nextKnownVirtual([], live, ["WorkVPN", "docker0", "enp7s0"]), ["docker0", "WorkVPN"]);
+});
+
+test("withSystemVirtual adds only names the provider does not report", () => {
+  const live = [
+    { name: "eth0", kind: "physical", included: true },
+    { name: "tun0", kind: "virtual", included: false },
+  ];
+  assert.deepEqual(withSystemVirtual(live, ["tun0", "docker0"]), [
+    { name: "eth0", kind: "physical", included: true },
+    { name: "tun0", kind: "virtual", included: false },
+    { name: "docker0", kind: "virtual", included: false },
+  ]);
+  assert.deepEqual(withSystemVirtual(live, null), live);
+  assert.deepEqual(withSystemVirtual(null, ["tun0", "", 7]), [{ name: "tun0", kind: "virtual", included: false }]);
 });
 
 test("auto mode keeps absent interfaces vnstat knows", () => {

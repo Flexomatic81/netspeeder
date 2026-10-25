@@ -36,6 +36,25 @@ test("sample populates the view", () => {
     [true, 5, 6, "proc", 1, "eth0", "10.0.0.2", false],
   );
 });
+test("the view passes on the system virtual interfaces of a sensor sample", () => {
+  const s = feed(
+    initialState(),
+    { ...sample("sensors", { enp7s0: iface({ down: 5 }) }), systemVirtual: ["WorkVPN", "docker0"] },
+    0,
+  );
+  assert.deepEqual(derive(s, at(0)).systemVirtual, ["WorkVPN", "docker0"]);
+});
+test("the view copies a system virtual list that arrives as a sequence object", () => {
+  // A sample crosses a QML signal; its arrays then arrive array-like, not as Array.
+  const sequence = { length: 2, 0: "WorkVPN", 1: "docker0" };
+  const s = feed(initialState(), { ...sample("sensors", { enp7s0: iface({ down: 5 }) }), systemVirtual: sequence }, 0);
+  assert.deepEqual(derive(s, at(0)).systemVirtual, ["WorkVPN", "docker0"]);
+});
+test("without a list in the sample the view knows no system virtual interfaces", () => {
+  assert.deepEqual(derive(initialState(), at(0)).systemVirtual, []);
+  const s = feed(initialState(), sample("proc", { eth0: iface({ down: 5 }) }), 0);
+  assert.deepEqual(derive(s, at(0)).systemVirtual, []);
+});
 test("source change clears retained data and errors", () => {
   let s = feed(initialState(), sample("proc", { eth0: iface({ down: 5 }) }), 0);
   s = reduce(s, { type: "failed", message: "x" });

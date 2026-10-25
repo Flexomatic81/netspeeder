@@ -4,6 +4,8 @@
 // Helpers for the ksystemstats source. Pure functions without Qt or
 // Plasma dependencies, so the module runs inside QML as well as under Node.
 
+import { toList } from "./selection.mjs";
+
 // Per-interface sensors read for every interface, by the last part of the
 // sensor ID "network/<interface>/<field>".
 export const SENSOR_FIELDS = [
@@ -135,8 +137,10 @@ function toSignal(value) {
 // Builds a sample (the common source contract) from raw sensor values.
 // `values` is { [name]: { <SENSOR_FIELDS>: any } }. `physical` lists the
 // interfaces backed by hardware; null means that list is unknown, which makes
-// every interface count as physical.
-export function buildSensorSample(timestamp, values, physical) {
+// every interface count as physical. `virtual` lists the other present
+// interfaces, also those the sensors do not report; the sample carries it as
+// `systemVirtual` for the usage totals.
+export function buildSensorSample(timestamp, values, physical, virtual) {
   const interfaces = {};
   for (const name of Object.keys(values)) {
     const raw = values[name] || {};
@@ -157,5 +161,10 @@ export function buildSensorSample(timestamp, values, physical) {
       signal: toSignal(raw.signal),
     };
   }
-  return { timestamp: timestamp, source: "sensors", interfaces: interfaces };
+  return {
+    timestamp: timestamp,
+    source: "sensors",
+    interfaces: interfaces,
+    systemVirtual: toList(virtual),
+  };
 }
