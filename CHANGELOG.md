@@ -149,8 +149,7 @@ is published (`## 1.0.0 – 2026-11-15`).
 ### Known limitations and open checks
 
 - CI is set up but has never run.
-- Not checked by hand: suspend/resume, USB tethering, going offline, the VPN
-  cases and a missing or stopped vnStat; [docs/testing.md](docs/testing.md)
+- Not checked by hand: USB tethering; [docs/testing.md](docs/testing.md)
   marks every skipped check.
 - The x axis of the graph is per sample, not a wall-clock scale.
 - A virtual interface that is absent in automatic mode and that the widget has

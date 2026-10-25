@@ -63,17 +63,17 @@ because the checker compares it against the German interface.
 | Panel sizes: horizontal 20 px, 44 px and 96 px and vertical about 32 px wide: display readable, no overlap, nothing cut off | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK at 20, 44, 96 px horizontal and 32 px vertical |
 | Desktop placement (planar, widget directly on the desktop): shows something sensible in 0.1; the popup view for the desktop belongs to 0.2 (see below) | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK; the desktop shows the full view |
 | Light and dark theme: text easy to read in both | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK in Breeze Light and a dark theme (Gruvbox) |
-| Font scaling 150 %: panel view and settings pages stay readable and are not cut off | 0.1 | 2026-10-25, Plasma 6.8, scripted: panel OK (switches to one row); Display page OK; the popup elided labels because the grid unit is fixed in Plasma 6, fixed: a new popup grows with the font; settings pages at a large font skipped by decision |
+| Font scaling 150 %: panel view and settings pages stay readable and are not cut off | 0.1 | 2026-10-25, Plasma 6.8, scripted: panel OK (switches to one row); Display page OK; the popup elided labels because the grid unit is fixed in Plasma 6, fixed: a new popup grows with the font; settings pages at a large font by hand: OK |
 | Tooltip in a real panel: connection name, download line, upload line and IP address appear | 0.1 | 2026-10-25, Plasma 6.8, by hand: OK |
 
 ## Network situations
 
 | Check | Stage | Result |
 |---|---|---|
-| VPN active: the traffic inside the tunnel is not counted twice in the automatic total | 0.1 | 2026-10-25: not checked, skipped by decision |
+| VPN active: the traffic inside the tunnel is not counted twice in the automatic total | 0.1 | 2026-10-25, Plasma 6.8, by hand: OK |
 | Docker active (docker0, veth, bridges): container traffic is not in the automatic total | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK; 18 MiB/s shown = enp7s0, docker0 16 MiB/s not added |
 | Data source "Kernel counters" (`proc`) forced (German: “Kernel-Zähler”): values plausible, VPN and Docker marked as virtual and not in the total; switching back to "Automatic" (German: “Automatisch”) works | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK; source shown, docker0 marked virtual and not counted; switching back by hand: OK |
-| Suspend/resume: no speed spike after waking up, no stale old values | 0.1 | 2026-10-25: not checked, skipped by decision |
+| Suspend/resume: no speed spike after waking up, no stale old values | 0.1 | 2026-10-25, Plasma 6.8, by hand: OK |
 | Plug and unplug USB tethering, also as the last interface: the display goes to 0 or "Offline" and returns without a spike | 0.1 | 2026-10-25: not checked, skipped by decision |
 | Special case device kind: an interface without `/sys/class/net/<name>/device` (e.g. a ppp modem) counts as virtual and is missing from the automatic total; the manual selection can include it | 0.1 | 2026-10-25: not checked, no such setup available |
 
@@ -118,11 +118,11 @@ because the checker compares it against the German interface.
 | Real color dialog for the download and upload color: accepting sets the color, cancelling keeps the old one, "Use theme color" (German: “Designfarbe verwenden”) resets it | 0.3 | 2026-10-25, Plasma 6.8, by hand: OK |
 | Threshold editor: add, change and remove levels (up to six); Apply/OK saves them; after a plasmashell restart the levels are unchanged | 0.3 | 2026-10-25, Plasma 6.8, by hand: OK |
 | Sparkline "Behind the values" and "Beside the values": both draw, the values stay readable; in a vertical panel "beside" looks like "behind" | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK in a horizontal panel |
-| Auto-hide "When offline": disconnect the network (e.g. `nmcli networking off`): the widget disappears from the panel; reconnecting brings it back | 0.3 | 2026-10-25: not checked, skipped by decision |
+| Auto-hide "When offline": disconnect the network (e.g. `nmcli networking off`): the widget disappears from the panel; reconnecting brings it back | 0.3 | 2026-10-25, Plasma 6.8, by hand: OK |
 | Auto-hide "When offline or idle": with traffic below the threshold for the set time the widget disappears; traffic above it brings it back | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK; hides when idle, returns under load |
 | A hidden widget leaves no gap in the panel | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK |
 | In panel edit mode a hidden widget shows the dimmed network icon placeholder and can be selected | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK |
-| A hidden widget never hides on the desktop, while its popup is open, before the first data has arrived, or while the data is stale | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK while the popup is open; the other cases skipped by decision |
+| A hidden widget never hides on the desktop, while its popup is open, before the first data has arrived, or while the data is stale | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK while the popup is open; the other cases by hand: OK |
 | German system language: all texts of the pages "Appearance" and "Behavior" are German and nothing is cut off | 0.3 | 2026-10-25, Plasma 6.8, by hand: OK |
 | Restart with the symbol style "Icons" after at least 30 minutes of uptime, using the restart command that detects a hang: `bash -c 'systemctl --user stop --no-block plasma-plasmashell; sleep 5; p=$(pgrep -x plasmashell) && { kill -ABRT $p; sleep 5; }; systemctl --user start plasma-plasmashell'` | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK; plain restart (the hang-detecting command was not run), plasmashell answered after 1 s at 39 h uptime |
 
@@ -135,20 +135,20 @@ For these checks vnstat 2.0 or newer is installed and its service enabled
 | Check | Stage | Result |
 |---|---|---|
 | vnstat present: the popup section "Usage" (German: “Verbrauch”) shows today, yesterday, this period and last period with download, upload and total, and "vnstat last updated" (German: “vnstat zuletzt aktualisiert”); the page "Usage" says "vnstat found" | 0.4 | 2026-10-25, Plasma 6.8, scripted: shown OK; the totals in sensor mode included a WireGuard tunnel and docker0 that the sensors do not list, fixed in f0aaa72 (today 6.4 GiB = wired interface only) |
-| vnstat missing (uninstall it or hide it from `PATH` for the session): the popup shows a hint and a "vnstat website" button instead of an error, and the rest of the popup works; the page "Usage" says "vnstat is not installed" | 0.4 | 2026-10-25: not checked, skipped by decision |
-| vnstat service stopped (`systemctl stop vnstat`): after an hour the popup shows that the data is not current (German: “nicht aktuell”); starting the service removes the hint after the next update | 0.4 | 2026-10-25: not checked, skipped by decision |
+| vnstat missing (uninstall it or hide it from `PATH` for the session): the popup shows a hint and a "vnstat website" button instead of an error, and the rest of the popup works; the page "Usage" says "vnstat is not installed" | 0.4 | 2026-10-25, Plasma 6.8, by hand: OK |
+| vnstat service stopped (`systemctl stop vnstat`): after an hour the popup shows that the data is not current (German: “nicht aktuell”); starting the service removes the hint after the next update | 0.4 | 2026-10-25, Plasma 6.8, by hand: OK |
 | Billing day: change it on the page "Usage"; "This period" and "Last period" change accordingly and the totals follow the new start day | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK with billing days 1, 20 and 25 |
 | Incomplete period right after installing vnstat: "This period" carries an asterisk and the footnote "incomplete" is shown; a period fully covered has none | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK |
 | An interface that counts but is not tracked by vnstat: the popup names it in a hint | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK; hint names the veth interface |
-| Data cap with a small value (e.g. 1 GiB) and the warning level at a low value: the bar appears; at the warning level it takes the neutral color, at 100 % the negative color | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK; bar and red panel dot; colors at the warning level skipped by decision |
+| Data cap with a small value (e.g. 1 GiB) and the warning level at a low value: the bar appears; at the warning level it takes the neutral color, at 100 % the negative color | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK; bar and red panel dot; colors at the warning level by hand: OK |
 | Notification delivery in a real session: the warning level and 100 % each produce one desktop notification with the expected text, not two | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK; one notification at 50 % (82 %) and one at 100 % |
 | Restart (use the restart command that detects a hang, see above) with the cap still exceeded: no notification is reported again; the configuration keeps `capNotifiedCycle` and `capNotifiedLevel` across the restart | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK with plain restarts; no repeated notification |
 | Notifications switched off, level reached, notifications switched on again: the earlier level is not reported | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK; nothing reported after switching on |
 | Cap set so that usage is already past 100 %: only the 100 % notification appears, not the warning too | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK; only the 100 % notification |
 | Panel dot: appears from the warning level on, not before; a screen reader (or the accessibility inspector) reads the cap sentence in the widget's name | 0.4 | 2026-10-25, Plasma 6.8, by hand: OK (screen reader) |
 | Tooltip in a real panel: a "Today" line (German: “Heute”) with download and upload | 0.4 | 2026-10-25, Plasma 6.8, by hand: OK |
-| Manual interface selection with an absent interface in the list: its recorded traffic stays in the totals; automatic mode counts the interfaces vnstat knows, without `lo` and without those seen as virtual; after a VPN disconnect the tunnel stays out of the totals, and the configuration lists it in `knownVirtual` | 0.4 | 2026-10-25: not checked, skipped by decision |
-| Login with a VPN that connects automatically and a data cap the tunnel would push past a level: no notification at login | 0.4 | 2026-10-25: not checked, skipped by decision |
+| Manual interface selection with an absent interface in the list: its recorded traffic stays in the totals; automatic mode counts the interfaces vnstat knows, without `lo` and without those seen as virtual; after a VPN disconnect the tunnel stays out of the totals, and the configuration lists it in `knownVirtual` | 0.4 | 2026-10-25, Plasma 6.8, by hand: OK |
+| Login with a VPN that connects automatically and a data cap the tunnel would push past a level: no notification at login | 0.4 | 2026-10-25, Plasma 6.8, by hand: OK |
 | Popup that has been resized before (a stored small size): after the update the "Usage" section may not fit; enlarging the popup once is enough and the size is kept | 0.4 | 2026-10-25, Plasma 6.8, by hand: OK |
 | German system language: all texts of the section "Usage" and the settings page are German and nothing is cut off | 0.4 | 2026-10-25, Plasma 6.8, scripted: popup section OK; settings page by hand: OK |
 
