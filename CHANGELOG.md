@@ -82,13 +82,12 @@ is published (`## 1.0.0 – 2026-11-15`).
   and the manual test list in [docs/testing.md](docs/testing.md).
 - Tooling: a screenshot tool (`scripts/screenshots.sh`) that renders demo data,
   and an actionlint step for the workflow files.
-- Build and release tooling: CMake installation for distribution packages,
-  `scripts/build-plasmoid.sh` for the `.plasmoid` file, a continuous
-  integration workflow (tests on Node 22.13 and 24, QML lint, shellcheck,
-  actionlint, `.plasmoid` as release asset for version tags) and
-  `scripts/release-check.sh`, which stops a release tag while the changelog,
-  the screenshots or the release record are not final. The changelog heading
-  of a release carries its date as YYYY-MM-DD, for example
+- Build and release tooling: `scripts/build-plasmoid.sh` for the `.plasmoid`
+  file, a continuous integration workflow (tests on Node 22.13 and 24, QML
+  lint, shellcheck, actionlint, `.plasmoid` as release asset for version tags)
+  and `scripts/release-check.sh`, which stops a release tag while the
+  changelog, the screenshots or the release record are not final. The
+  changelog heading of a release carries its date as YYYY-MM-DD, for example
   `## 1.0.0 – 2026-11-15`.
 - Development checks: ESLint, Prettier, coverage floor (branch coverage of the
   logic modules is 100 %, the floor is 98 %), strict qmllint, shellcheck, one
@@ -128,8 +127,8 @@ is published (`## 1.0.0 – 2026-11-15`).
 - DataSource error (upstream #46), mitigated: the default path reads
   `ksystemstats` instead of a DataSource engine; Plasma5Support is still used
   for device classification and the `/proc` fallback.
-- Build failure with CMake 4 (upstream #48): the new `CMakeLists.txt` requires
-  CMake 3.16 and extra-cmake-modules 6.
+- Build failure with CMake 4 (upstream #48): Netspeeder has no CMake build;
+  it is installed from the KDE Store or as a `.plasmoid` file.
 - Overlapping text and wrong margins (upstream #11 and #27): the panel view is
   built from Qt layouts with fixed-width slots instead of manual aspect ratio
   calculations. The smoke scenes cover the sizes, not a real panel; to be
@@ -146,8 +145,6 @@ is published (`## 1.0.0 – 2026-11-15`).
 - CI is set up but has never run.
 - Suspend/resume (no speed spike and no stale values after waking up) is still
   to be verified by hand before release.
-- The CMake files were verified against a stub of extra-cmake-modules only;
-  the real configure, build and install is still to be done before release.
 - The x axis of the graph is per sample, not a wall-clock scale.
 - A virtual interface that is absent in automatic mode and that the widget has
   never seen cannot be recognized; it counts until it appears once.

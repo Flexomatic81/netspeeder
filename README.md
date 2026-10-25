@@ -301,18 +301,7 @@ If the widget does not show up in the list, restart the panel:
 You can build the file yourself: `scripts/build-plasmoid.sh 1.0.0` writes
 `dist/netspeeder-1.0.0.plasmoid` (needs `gettext` and `libarchive`).
 
-### Arch Linux (AUR)
-
-The package `plasma6-applets-netspeeder` is planned but does not exist yet.
-Once it is published, install it with your AUR helper, for example:
-
-```sh
-yay -S plasma6-applets-netspeeder
-```
-
 ### From source
-
-For a user installation:
 
 ```sh
 git clone https://github.com/Flexomatic81/netspeeder.git
@@ -324,20 +313,6 @@ The script compiles the translations and installs the widget into
 `~/.local/share/plasma/plasmoids`. A running panel keeps the old version until
 plasmashell restarts. `scripts/run.sh` opens the installed widget in its own
 window instead.
-
-For a system-wide installation (and distribution packages) use CMake. It needs
-CMake, `extra-cmake-modules`, the Plasma and KDE Frameworks 6 development
-files (`libplasma`, `ki18n`) and `gettext`.
-
-```sh
-cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr
-cmake --build build
-sudo cmake --install build
-# for a package: DESTDIR="$pkgdir" cmake --install build
-```
-
-This installs the widget to `<prefix>/share/plasma/plasmoids/` and the
-translations to `<prefix>/share/locale/`.
 
 ### Installing vnStat (optional)
 
