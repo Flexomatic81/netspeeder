@@ -22,7 +22,7 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 </p>
 
 <p align="center">
-  <img src="docs/images/popup.png" width="396" alt="The popup with the traffic graph, peaks, totals, the interface list and the data usage">
+  <img src="docs/store/store-1-overview.png" width="860" alt="Netspeeder in a Plasma panel with its popup open: traffic graph, peaks, totals, data usage, the data cap bar and the interface list">
   <br>
   <sub>All screenshots show sample data.</sub>
 </p>
@@ -55,10 +55,18 @@ Daniel Faust, see [Origin](#origin). If you used that widget, read
 
 ## Screenshots
 
-The images are made from fixed demo data in the stock Breeze Dark color
-scheme with `scripts/screenshots.sh` and live in [`docs/images/`](docs/images/);
-`scripts/screenshots.sh --light` renders the same images in Breeze Light into
-`docs/images/light/`.
+| | |
+|---|---|
+| ![The popup with its parts labeled](docs/store/store-2-popup.png) | ![The panel views side by side](docs/store/store-3-panel-views.png) |
+| ![The settings page Appearance in the settings dialog](docs/store/store-4-settings.png) | ![Data usage, the data cap bar and the cap notification](docs/store/store-5-usage.png) |
+
+These are the images of the KDE Store page, in [`docs/store/`](docs/store/);
+how they are put together is described in [`docs/store.md`](docs/store.md#images).
+
+The views at their real size are made from fixed demo data in the stock Breeze
+Dark color scheme with `scripts/screenshots.sh` and live in
+[`docs/images/`](docs/images/); `scripts/screenshots.sh --light` renders the
+same images in Breeze Light into `docs/images/light/`.
 
 | | |
 |---|---|
