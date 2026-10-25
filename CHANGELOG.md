@@ -5,10 +5,9 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 
 # Changelog
 
-## 1.0.0 – unreleased
+## 1.0.0 – 2026-10-25
 
-First stable release. The date is set in this heading as YYYY-MM-DD when it
-is published (`## 1.0.0 – 2026-11-15`).
+First stable release.
 
 ### Added
 
@@ -148,7 +147,6 @@ is published (`## 1.0.0 – 2026-11-15`).
 
 ### Known limitations and open checks
 
-- CI is set up but has never run.
 - Not checked by hand: USB tethering; [docs/testing.md](docs/testing.md)
   marks every skipped check.
 - The x axis of the graph is per sample, not a wall-clock scale.
