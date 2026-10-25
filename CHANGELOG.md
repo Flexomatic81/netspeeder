@@ -136,6 +136,10 @@ is published (`## 1.0.0 – 2026-11-15`).
 - Empty window when scrolling over the widget (upstream #24) and crash when
   deselecting an option (upstream #47) are addressed by the design; to be
   verified by hand before release.
+- The popup grows with a larger system font instead of eliding its labels,
+  and at its default size the interface list shows up to three rows instead
+  of one. A popup size Plasma has already stored is kept; enlarging the popup
+  once is enough.
 - With the system sensors, VPN tunnels and container bridges that the sensors
   do not list no longer enter the usage totals and the data cap: every present
   interface without hardware counts as virtual.

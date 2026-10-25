@@ -225,6 +225,11 @@ Item {
         if (list.contentHeight <= list.viewportHeight) {
             return "interfaces: the list does not scroll (content " + list.contentHeight + ", view " + list.viewportHeight + ")";
         }
+        // At the preferred size the list shows three whole rows, not just one.
+        const threeRows = list.oneRowHeight * 3 + list.rowSpacing * 2;
+        if (list.viewportHeight < threeRows) {
+            return "interfaces: the list shows " + list.viewportHeight + " px, less than three rows (" + threeRows + " px)";
+        }
         const size = scene.sizeProblem();
         if (size !== "") {
             return size;
@@ -240,7 +245,7 @@ Item {
     // grid units, shows the row of `name` completely (second line included)
     // at the top of the list, and every label of the speed axis is round.
     function roomProblem(where: string, name: string): string {
-        const unit = Kirigami.Units.gridUnit;
+        const unit = view.unit;
         const graph = view.graphItem;
         if (graph === null) {
             return where + ": the graph is not loaded";
@@ -531,7 +536,7 @@ Item {
                 stub.primaryIp = "fe80::" + "abcd:".repeat(6) + "1";
             },
             check: () => {
-                const unit = Kirigami.Units.gridUnit;
+                const unit = view.unit;
                 if (view.Layout.minimumWidth !== unit * 18) {
                     return "long name: the minimum width is " + view.Layout.minimumWidth + ", expected " + unit * 18;
                 }
@@ -833,7 +838,7 @@ Item {
             name: "preferred size with the usage section",
             apply: () => {},
             check: () => {
-                const room = Kirigami.Units.gridUnit * 30 + view.usagePanel.implicitHeight;
+                const room = view.unit * 30 + view.usagePanel.implicitHeight;
                 if (view.Layout.preferredHeight < room) {
                     return "preferred with usage: the preferred height " + view.Layout.preferredHeight + " leaves the section no room of its own (" + room + ")";
                 }
@@ -930,7 +935,7 @@ Item {
     // "" when the view, sized to its own minimum, keeps the graph and the list
     // at their minimum and the footer completely inside, nothing overlapping.
     function minimumProblem(where: string): string {
-        const unit = Kirigami.Units.gridUnit;
+        const unit = view.unit;
         const graph = view.graphItem;
         if (graph === null || view.Layout.minimumHeight < unit * 24 || view.Layout.minimumWidth < unit * 18) {
             return where + ": no graph or the minimum is " + view.Layout.minimumWidth + "x" + view.Layout.minimumHeight;
@@ -941,7 +946,7 @@ Item {
     }
 
     function layoutProblem(where: string): string {
-        const unit = Kirigami.Units.gridUnit;
+        const unit = view.unit;
         const graph = view.graphItem;
         const list = view.interfaceList;
         const footer = view.footer;
@@ -981,11 +986,17 @@ Item {
     }
 
     function sizeProblem(): string {
-        const unit = Kirigami.Units.gridUnit;
+        const unit = view.unit;
         if (view.Layout.minimumWidth < unit * 18 || view.Layout.minimumHeight < unit * 24) {
             return "size: minimum is " + view.Layout.minimumWidth + "x" + view.Layout.minimumHeight + ", expected at least " + unit * 18 + "x" + unit * 24;
         }
-        if (view.Layout.preferredWidth !== unit * 22 || view.Layout.preferredHeight !== unit * 30) {
+        if (unit < Kirigami.Units.gridUnit) {
+            return "size: the unit " + unit + " is below the grid unit " + Kirigami.Units.gridUnit;
+        }
+        // Without the usage section the preferred height is 30 units or what
+        // the content prefers, never more.
+        const preferred = Math.max(unit * 30, view.contentPreferred(), view.Layout.minimumHeight);
+        if (view.Layout.preferredWidth !== unit * 22 || (!view.usagePanel.visible && view.Layout.preferredHeight !== preferred) || view.Layout.preferredHeight < unit * 30) {
             return "size: preferred is " + view.Layout.preferredWidth + "x" + view.Layout.preferredHeight;
         }
         if (view.width < view.Layout.minimumWidth || view.height < view.Layout.minimumHeight) {

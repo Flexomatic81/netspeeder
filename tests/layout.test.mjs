@@ -3,7 +3,14 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { fontPixelSize, resolveLayout, fitPixelSize, fitVertical } from "../package/contents/code/layout.mjs";
+import {
+  fontPixelSize,
+  resolveLayout,
+  fitPixelSize,
+  fitVertical,
+  popupUnit,
+  listRoom,
+} from "../package/contents/code/layout.mjs";
 
 const base = { mode: "auto", vertical: false, combined: false, thickness: 44, fontScale: 100, minReadablePx: 10 };
 
@@ -100,4 +107,37 @@ test("values that have not loaded yet fall back to safe defaults", () => {
   assert.deepEqual(fitVertical(64, [400], 14, undefined), { index: 0, pixelSize: 14 });
   assert.deepEqual(fitVertical(64, [400], 14, 1, undefined), { index: 0, pixelSize: 14 });
   assert.deepEqual(fitVertical(64, [400], 14, 1, [Number.NaN]), { index: 0, pixelSize: 14 });
+});
+
+test("popupUnit keeps the grid unit at the default font", () => {
+  // Noto Sans 10 pt: a line is 17.7 px high, the grid unit 18 px.
+  assert.equal(popupUnit(18, 17.6875), 18);
+});
+
+test("popupUnit grows with a larger font", () => {
+  // Noto Sans 15 pt: the grid unit stays 18 px, a line is 27.2 px high.
+  assert.equal(popupUnit(18, 27.234375), 27);
+});
+
+test("popupUnit falls back to the grid unit without a usable line height", () => {
+  assert.equal(popupUnit(18, NaN), 18);
+  assert.equal(popupUnit(18, undefined), 18);
+  assert.equal(popupUnit(18, -5), 18);
+});
+
+test("listRoom asks for up to the given number of rows and the gaps between them", () => {
+  assert.equal(listRoom(900, 60, 3, 4), 188);
+  assert.equal(listRoom(124, 60, 3, 4), 124);
+});
+
+test("listRoom fits exactly three rows without scrolling", () => {
+  // Three rows of 60 px with two gaps of 4 px.
+  assert.equal(listRoom(188, 60, 3, 4), 188);
+});
+
+test("listRoom asks for at least one row and nothing without rows", () => {
+  assert.equal(listRoom(30, 60, 3, 4), 60);
+  assert.equal(listRoom(0, 0, 3, 4), 0);
+  assert.equal(listRoom(NaN, 60, 3, 4), 60);
+  assert.equal(listRoom(900, 60, 3, NaN), 180);
 });

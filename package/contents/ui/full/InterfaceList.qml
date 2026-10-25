@@ -51,6 +51,8 @@ Item {
     // The height of the tallest row, so the list never shows less than one
     // full row; it scrolls for the rest. Kept current by measure().
     property real oneRowHeight: 0
+    // The gap between two rows.
+    readonly property real rowSpacing: column.spacing
 
     // Recomputes oneRowHeight from the rows that exist.
     function measure() {

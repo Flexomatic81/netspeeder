@@ -95,3 +95,22 @@ export function fitVertical(available, candidates, maxPx, minReadablePx, rounded
   }
   return result;
 }
+
+// The length unit of the popup: the grid unit, or the line height of the
+// default font when that is larger. Kirigami's grid unit is fixed in Plasma 6,
+// so without the line height a larger font would not widen the popup and its
+// texts would elide.
+export function popupUnit(gridUnit, lineHeight) {
+  const line = finiteOr(lineHeight, 0);
+  return Math.max(gridUnit, Math.floor(line));
+}
+
+// The height the interface list asks for: its content, but at most `rows`
+// rows with the `spacing` between them, and at least one row (0 while there
+// is none).
+export function listRoom(contentHeight, rowHeight, rows, spacing) {
+  const row = Math.max(0, finiteOr(rowHeight, 0));
+  const content = Math.max(0, finiteOr(contentHeight, 0));
+  const gap = Math.max(0, finiteOr(spacing, 0));
+  return Math.max(row, Math.min(content, row * rows + gap * (rows - 1)));
+}

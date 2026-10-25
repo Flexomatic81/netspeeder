@@ -16,6 +16,7 @@ import QtQuick.Layouts
 import QtQuick.Controls as QQC2
 import org.kde.kirigami as Kirigami
 import "../../code/format.mjs" as Format
+import "../../code/layout.mjs" as LayoutLogic
 import "../../code/text.mjs" as TextTools
 import "../../code/tooltip.mjs" as Tooltip
 import "../../code/usage.mjs" as Usage
@@ -73,24 +74,42 @@ Item {
     // The usage section (for the smoke scene).
     readonly property Item usagePanel: usageSection
 
-    Layout.preferredWidth: Kirigami.Units.gridUnit * 22
-    // The usage section gets room of its own; never below the minimum.
-    Layout.preferredHeight: Math.max(Kirigami.Units.gridUnit * 30 + (usageSection.visible ? usageSection.implicitHeight + column.spacing : 0), root.Layout.minimumHeight)
-    // The width minimum is fixed: long names, addresses and texts elide
-    // instead of widening the popup. The height minimum follows the content:
-    // everything that is shown at its own minimum (or, without one, its
-    // implicit size) plus the gaps and margins, so the footer never overflows,
-    // with or without the hint.
-    Layout.minimumWidth: Kirigami.Units.gridUnit * 18
-    Layout.minimumHeight: Math.max(Kirigami.Units.gridUnit * 24, root.contentMinimum())
+    // The length unit of all sizes below (see popupUnit() in layout.mjs).
+    readonly property real unit: LayoutLogic.popupUnit(Kirigami.Units.gridUnit, fontMetrics.height)
 
-    // The least height the shown children of the column need.
+    Layout.preferredWidth: root.unit * 22
+    // The usage section gets room of its own, the content its preferred
+    // heights (three rows of the interface list); never below the minimum.
+    Layout.preferredHeight: Math.max(root.unit * 30 + (usageSection.visible ? usageSection.implicitHeight + column.spacing : 0), root.contentPreferred(), root.Layout.minimumHeight)
+    // The width minimum does not follow the content: long names, addresses
+    // and texts elide instead of widening the popup. The height minimum
+    // follows the content: everything that is shown at its own minimum (or,
+    // without one, its implicit size) plus the gaps and margins, so the footer
+    // never overflows, with or without the hint.
+    Layout.minimumWidth: root.unit * 18
+    Layout.minimumHeight: Math.max(root.unit * 24, root.contentMinimum())
+
+    // The height the shown children of the column prefer: their preferred
+    // height where they set one, else their implicit height.
+    function contentPreferred(): real {
+        return root.contentSum(child => child.Layout.preferredHeight);
+    }
+
+    // The least height the shown children of the column need: their minimum
+    // height where they set one, else their implicit height.
     function contentMinimum(): real {
+        return root.contentSum(child => child.Layout.minimumHeight);
+    }
+
+    // The shown children of the column, each at `pick(child)` when that is
+    // positive and else at its implicit height, plus the gaps and margins.
+    function contentSum(pick: var): real {
         let total = 0;
         let shownCount = 0;
         for (const child of column.children) {
             if (child.visible) {
-                total += child.Layout.minimumHeight > 0 ? child.Layout.minimumHeight : child.implicitHeight;
+                const height = pick(child);
+                total += height > 0 ? height : child.implicitHeight;
                 shownCount++;
             }
         }
@@ -359,7 +378,8 @@ Item {
 
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight: Kirigami.Units.gridUnit * 7
+            Layout.minimumHeight: root.unit * 7
+            Layout.preferredHeight: root.unit * 12
             source: root.graphSource
 
             QQC2.Label {
@@ -465,6 +485,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.minimumHeight: list.oneRowHeight
+            Layout.preferredHeight: LayoutLogic.listRoom(list.contentHeight, list.oneRowHeight, 3, list.rowSpacing)
             interfaces: root.shown.interfaces
             formatOptions: root.formatOptions
         }
@@ -488,5 +509,11 @@ Item {
                 elide: Text.ElideRight
             }
         }
+    }
+
+    FontMetrics {
+        id: fontMetrics
+
+        font: Kirigami.Theme.defaultFont
     }
 }
