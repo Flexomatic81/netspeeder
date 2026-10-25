@@ -4,9 +4,10 @@
 
 # Checks that the screenshot scene runs, without opening a window: renders it
 # on the offscreen platform into the directory in NETSPEEDER_SCREENSHOT_DIR
-# (created if missing). It passes when qml6 exits with 0, the scene reports
-# "SCREENSHOTS OK", prints no warning, and all six files are readable PNG files
-# without metadata. This is no review of the images: offscreen, Qt Quick
+# (created if missing), with the stock Breeze Light color scheme as
+# scripts/screenshots.sh uses it. It passes when qml6 exits with 0, the scene
+# reports "SCREENSHOTS OK" and the background color of that scheme, prints no
+# warning, and all six files are readable PNG files without metadata. This is no review of the images: offscreen, Qt Quick
 # Charts draws nothing, so the graph and the mini chart stay empty and the
 # chart check of check-images.mjs is skipped. The real images come from
 # scripts/screenshots.sh.
@@ -27,12 +28,15 @@ mkdir -p "$dir" || exit 1
 dir="$(cd "$dir" && pwd)"
 
 log="$(mktemp)"
-trap 'rm -f "$log"' EXIT
+config="$(mktemp -d)"
+trap 'rm -rf "$log" "$config"' EXIT
+setup_theme Light "$config" || exit 1
 
-QT_QPA_PLATFORM=offscreen LANGUAGE=en LC_ALL=C.UTF-8 LANG=C.UTF-8 QT_SCALE_FACTOR=1 run_scene "$dir" "$log"
+QT_QPA_PLATFORM=offscreen LANGUAGE=en LC_ALL=C.UTF-8 LANG=C.UTF-8 QT_SCALE_FACTOR=1 run_scene "$dir" "$log" "$config"
 rc=$?
 output="$(cat "$log")"
 unexpected="$(other_lines "$output")$(qml_problems "$output")"
+theme="$(theme_problem "$output" "$(window_background "$(breeze_colors Light)")")"
 
 status=0
 if [ "$rc" -ne 0 ] || ! grep -q '^qml: SCREENSHOTS OK$' <<<"$output"; then
@@ -42,6 +46,10 @@ fi
 if [ -n "$unexpected" ]; then
   echo "offscreen-check: unexpected output:" >&2
   echo "$unexpected" >&2
+  status=1
+fi
+if [ -n "$theme" ]; then
+  echo "offscreen-check: $theme" >&2
   status=1
 fi
 node "$here/check-images.mjs" "$dir" --offscreen || status=1

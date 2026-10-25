@@ -26,6 +26,7 @@ import {
   parseChartLine,
   readPng,
 } from "../tools/screenshots/check-images.mjs";
+import { DEFAULT_FORMAT, formatSpeed, widestValue } from "../package/contents/code/format.mjs";
 
 // Every string inside a value, also in nested arrays and objects.
 function strings(value, found = []) {
@@ -98,10 +99,24 @@ test("the demo history covers five minutes and ends at the shown speeds", () => 
   assert.ok(history.peakUp > 0);
   assert.ok(history.sessionDown > 512 * 1024 ** 2);
   assert.ok(history.sessionUp > 0);
-  // The thresholds of the color mode: download orange (10 MiB/s), upload blue (1 MiB/s).
-  assert.ok(provider.down >= 10 * 1024 ** 2 && provider.down < 100 * 1024 ** 2);
-  assert.ok(provider.up >= 1024 ** 2 && provider.up < 10 * 1024 ** 2);
+  // The thresholds of the color mode: download red (100 MiB/s), upload orange (10 MiB/s).
+  assert.ok(provider.down >= 100 * 1024 ** 2 && provider.down < 1000 * 1024 ** 2);
+  assert.ok(provider.up >= 10 * 1024 ** 2 && provider.up < 100 * 1024 ** 2);
+  // The peaks are at least the current speeds.
+  assert.ok(history.peakDown >= provider.down && history.peakUp >= provider.up);
   assert.deepEqual(demoHistory(), history, "the data is the same on every run");
+});
+
+test("the shown speeds are about equally wide, so the panel shows no gap between them", () => {
+  const provider = demoProvider();
+  const down = formatSpeed(provider.down, DEFAULT_FORMAT);
+  const up = formatSpeed(provider.up, DEFAULT_FORMAT);
+  assert.equal(down.unit, up.unit);
+  // Both fill the slot of the widest value ("88.8") up to a decimal point.
+  for (const speed of [down, up]) {
+    assert.ok(speed.value.replace(".", "").length >= 3, speed.value);
+    assert.ok(speed.value.length <= widestValue(DEFAULT_FORMAT).length, speed.value);
+  }
 });
 
 test("the demo usage is current and at 85 % of the data cap", () => {

@@ -10,9 +10,11 @@
 // a vertical panel 48 px wide, the colors by speed ("thresholds") and the
 // mini chart behind the text, each on the background color of the theme.
 // The popup has its preferred size. The text uses the first available of the
-// fonts in demo.mjs; the colors come from the current color scheme.
+// fonts in demo.mjs; the colors come from the color scheme the calling script
+// sets up (a stock Breeze scheme).
 //
-// Output: "SCREENSHOT saved <file> <width>x<height>" per image, the chart area
+// Output: "SCREENSHOT theme <#rrggbb>" with the background color of the
+// theme, "SCREENSHOT saved <file> <width>x<height>" per image, the chart area
 // of the popup as "SCREENSHOT chart popup.png <x> <y> <width> <height> of
 // <width> <height>" (for check-images.mjs), and "SCREENSHOTS OK" or
 // "SCREENSHOTS FAIL <reason>" at the end.
@@ -81,6 +83,13 @@ QQC2.ApplicationWindow {
         return null;
     }
 
+    // The background color of the theme, so the scripts can check that the
+    // stock color scheme they set up is the one in use.
+    function reportTheme(): bool {
+        console.log("SCREENSHOT theme " + Kirigami.Theme.backgroundColor);
+        return true;
+    }
+
     function reportChart(): bool {
         const chart = popup.graphItem === null ? null : scene.findChart(popup.graphItem);
         if (chart === null) {
@@ -119,7 +128,7 @@ QQC2.ApplicationWindow {
             scene.finish(false, "no output directory: pass it after --");
         } else if (scene.family === "") {
             scene.finish(false, "none of the fonts " + Demo.DEMO_FONTS.join(", ") + " is installed");
-        } else if (!scene.reportChart()) {
+        } else if (!scene.reportTheme() || !scene.reportChart()) {
             scene.finish(false, "the popup has no chart");
         } else {
             scene.grabNext();

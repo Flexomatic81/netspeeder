@@ -56,16 +56,18 @@ function noise(count, seed) {
   return out;
 }
 
+// Download and upload end at speeds with as many digits (about 123 and 12.3 MiB/s), so the panel shows no gap
+// between them, and in different bands of the color thresholds.
 function downRate(i, jitter) {
-  const base = 1.6 + 0.8 * Math.sin(i / 23) + 0.5 * Math.sin(i / 7.3) + 0.3 * jitter;
-  const spikes = 22 * bump(i, 95, 9) + 9 * bump(i, 190, 14) + 11 * bump(i, SECONDS - 1, 18);
-  return Math.round(Math.max(0.05, base + spikes) * MIB);
+  const base = 14 + 7 * Math.sin(i / 23) + 4.5 * Math.sin(i / 7.3) + 2.5 * jitter;
+  const spikes = 176 * bump(i, 95, 9) + 80 * bump(i, 190, 14) + 106 * bump(i, SECONDS - 1, 18);
+  return Math.round(Math.max(0.5, base + spikes) * MIB);
 }
 
 function upRate(i, jitter) {
-  const base = 0.25 + 0.1 * Math.sin(i / 17) + 0.05 * jitter;
-  const spikes = 2.6 * bump(i, 140, 10) + 1.4 * bump(i, SECONDS - 1, 20);
-  return Math.round(Math.max(0.01, base + spikes) * MIB);
+  const base = 1.9 + 0.8 * Math.sin(i / 17) + 0.4 * jitter;
+  const spikes = 20 * bump(i, 140, 10) + 10.9 * bump(i, SECONDS - 1, 20);
+  return Math.round(Math.max(0.1, base + spikes) * MIB);
 }
 
 // Five minutes at one sample a second, with the counters of eth0 for the session totals.

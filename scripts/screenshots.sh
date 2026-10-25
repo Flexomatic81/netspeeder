@@ -6,9 +6,14 @@
 # (tools/screenshots/Screenshots.qml) and saves them to docs/images/, or to
 # NETSPEEDER_SCREENSHOT_DIR when that is set. Opens a window for a few seconds:
 # the scene runs on the real display, because Qt Quick Charts draws nothing on
-# the offscreen platform. Needs a Plasma session (the colors come from the
-# current color scheme, which the script names), qml6 and the locale
-# en_US.UTF-8. Language, locale, scale factor, window size and font are fixed.
+# the offscreen platform. Needs a Plasma session, qml6, the locale en_US.UTF-8
+# and the stock Breeze color schemes (/usr/share/color-schemes). Language,
+# locale, scale factor, window size, font and colors are fixed: the scene runs
+# with a temporary configuration that holds only the stock Breeze Light scheme,
+# so it neither reads nor changes the settings of the desktop.
+#
+#   scripts/screenshots.sh          Breeze Light, into docs/images/
+#   scripts/screenshots.sh --dark   Breeze Dark, the same six files into docs/images/dark/
 #
 # Afterwards check-images.mjs checks the files: all six are there, carry no
 # metadata, and the chart area of the popup is not one plain color. Look at
@@ -20,6 +25,16 @@ set -uo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=tools/screenshots/scene.sh
 . "$root/tools/screenshots/scene.sh"
+
+variant="Light"
+case "${1:-}" in
+  "") ;;
+  --dark) variant="Dark" ;;
+  *)
+    echo "usage: scripts/screenshots.sh [--dark]" >&2
+    exit 2
+    ;;
+esac
 
 if [ "${QT_QPA_PLATFORM:-}" = "offscreen" ]; then
   echo "screenshots: QT_QPA_PLATFORM=offscreen draws no charts; unset it and run on the real display" >&2
@@ -41,23 +56,26 @@ for tool in qml6 node; do
 done
 
 dir="${NETSPEEDER_SCREENSHOT_DIR:-$root/docs/images}"
+if [ "$variant" = "Dark" ]; then
+  dir="$dir/dark"
+fi
 mkdir -p "$dir" || exit 1
 dir="$(cd "$dir" && pwd)"
 # The directory as shown: relative to the repository when it is inside it, so
 # pasted output carries no home path.
 shown="${dir#"$root"/}"
 
-scheme=""
-if command -v kreadconfig6 >/dev/null; then
-  scheme="$(kreadconfig6 --file kdeglobals --group General --key ColorScheme)"
+log="$(mktemp)"
+config="$(mktemp -d)"
+trap 'rm -rf "$log" "$config"' EXIT
+if ! setup_theme "$variant" "$config"; then
+  echo "screenshots: no stock color scheme, nothing rendered" >&2
+  exit 1
 fi
-echo "screenshots: color scheme: ${scheme:-not set (the Plasma default)}"
+echo "screenshots: theme: Breeze $variant (the stock color scheme, not the one of this desktop)"
 echo "screenshots: writing to $shown"
 
-log="$(mktemp)"
-trap 'rm -f "$log"' EXIT
-
-LANGUAGE=en LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 QT_SCALE_FACTOR=1 run_scene "$dir" "$log"
+LANGUAGE=en LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 QT_SCALE_FACTOR=1 run_scene "$dir" "$log" "$config"
 rc=$?
 output="$(cat "$log")"
 problems="$(qml_problems "$output")"
@@ -71,6 +89,11 @@ fi
 if [ -n "$problems" ]; then
   echo "screenshots: QML problems:" >&2
   echo "$problems" >&2
+  status=1
+fi
+theme="$(theme_problem "$output" "$(window_background "$(breeze_colors "$variant")")")"
+if [ -n "$theme" ]; then
+  echo "screenshots: $theme" >&2
   status=1
 fi
 if [ -n "$others" ]; then
