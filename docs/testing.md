@@ -58,12 +58,12 @@ because the checker compares it against the German interface.
 
 | Check | Stage | Result |
 |---|---|---|
-| Horizontal panel at default height: download and upload readable, the values change without the panel jumping or text overlapping (upstream #11, #27) | 0.1 | |
-| Vertical panel: directions stacked, value and unit readable, no overlap | 0.1 | |
-| Panel sizes: horizontal 20 px, 44 px and 96 px and vertical about 32 px wide: display readable, no overlap, nothing cut off | 0.1 | |
-| Desktop placement (planar, widget directly on the desktop): shows something sensible in 0.1; the popup view for the desktop belongs to 0.2 (see below) | 0.1 | |
-| Light and dark theme: text easy to read in both | 0.1 | |
-| Font scaling 150 %: panel view and settings pages stay readable and are not cut off | 0.1 | |
+| Horizontal panel at default height: download and upload readable, the values change without the panel jumping or text overlapping (upstream #11, #27) | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK; width fixed at 85/99 px across KiB/s↔MiB/s changes, no overlap |
+| Vertical panel: directions stacked, value and unit readable, no overlap | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK at 32 px; value above arrow and short unit |
+| Panel sizes: horizontal 20 px, 44 px and 96 px and vertical about 32 px wide: display readable, no overlap, nothing cut off | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK at 20, 44, 96 px horizontal and 32 px vertical |
+| Desktop placement (planar, widget directly on the desktop): shows something sensible in 0.1; the popup view for the desktop belongs to 0.2 (see below) | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK; the desktop shows the full view |
+| Light and dark theme: text easy to read in both | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK in Breeze Light and a dark theme (Gruvbox) |
+| Font scaling 150 %: panel view and settings pages stay readable and are not cut off | 0.1 | 2026-10-25, Plasma 6.8, scripted: panel OK (switches to one row); Display page OK; popup at default size elides labels; other settings pages not checked |
 | Tooltip in a real panel: connection name, download line, upload line and IP address appear | 0.1 | |
 
 ## Network situations
@@ -71,8 +71,8 @@ because the checker compares it against the German interface.
 | Check | Stage | Result |
 |---|---|---|
 | VPN active: the traffic inside the tunnel is not counted twice in the automatic total | 0.1 | |
-| Docker active (docker0, veth, bridges): container traffic is not in the automatic total | 0.1 | |
-| Data source "Kernel counters" (`proc`) forced (German: “Kernel-Zähler”): values plausible, VPN and Docker marked as virtual and not in the total; switching back to "Automatic" (German: “Automatisch”) works | 0.1 | |
+| Docker active (docker0, veth, bridges): container traffic is not in the automatic total | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK; 18 MiB/s shown = enp7s0, docker0 16 MiB/s not added |
+| Data source "Kernel counters" (`proc`) forced (German: “Kernel-Zähler”): values plausible, VPN and Docker marked as virtual and not in the total; switching back to "Automatic" (German: “Automatisch”) works | 0.1 | 2026-10-25, Plasma 6.8, scripted: OK; source shown, docker0 marked virtual and not counted; switching back not clicked |
 | Suspend/resume: no speed spike after waking up, no stale old values | 0.1 | |
 | Plug and unplug USB tethering, also as the last interface: the display goes to 0 or "Offline" and returns without a spike | 0.1 | |
 | Special case device kind: an interface without `/sys/class/net/<name>/device` (e.g. a ppp modem) counts as virtual and is missing from the automatic total; the manual selection can include it | 0.1 | |
@@ -93,38 +93,38 @@ because the checker compares it against the German interface.
 |---|---|---|
 | Left click on the widget opens the popup; another click on the widget while the popup is open closes it and does not reopen it right away; a click outside closes it as well | 0.2 | |
 | Set the middle click to "Open the popup" (German: “Popup öffnen”) on the page "Behavior" (German: “Verhalten”): it opens and closes the popup, and with the popup open it closes it without reopening | 0.2 | |
-| The popup shows the header with live values, the status and, on a data source problem, an error hint | 0.2 | |
+| The popup shows the header with live values, the status and, on a data source problem, an error hint | 0.2 | 2026-10-25, Plasma 6.8, scripted: OK |
 | Switch the graph window between 1, 5 and 15 minutes; after a plasmashell restart the chosen window is kept | 0.2 | |
-| Peaks and session totals appear and rise under load (e.g. a download) | 0.2 | |
-| Restart ksystemstats while the popup is open: the session totals do not jump | 0.2 | |
+| Peaks and session totals appear and rise under load (e.g. a download) | 0.2 | 2026-10-25, Plasma 6.8, scripted: OK |
+| Restart ksystemstats while the popup is open: the session totals do not jump | 0.2 | 2026-10-25, Plasma 6.8, scripted: OK; session totals unchanged |
 | Copy an IP address in the interface list: "Copied" (German: “Kopiert”) appears and the address is on the clipboard | 0.2 | |
 | "Open System Monitor" (German: “Systemmonitor öffnen”) starts the system monitor | 0.2 | |
-| Popup with 12 or more interfaces in a real session (e.g. with Docker, VPN, virtual bridges): the list scrolls, nothing is cut off, the popup stays usable | 0.2 | |
+| Popup with 12 or more interfaces in a real session (e.g. with Docker, VPN, virtual bridges): the list scrolls, nothing is cut off, the popup stays usable | 0.2 | 2026-10-25, Plasma 6.8, scripted: FINDING: with 15 interfaces the list is one row high at the default popup size |
 | Page "Behavior", launch target "Application" (chosen through the file dialog) and click action "Start the application or command" (German: “Anwendung oder Befehl starten”): the application really starts | 0.2 | |
 | Launch target "Command" (e.g. `konsole`): the command really starts | 0.2 | |
 | Unknown desktop ID or missing command (e.g. `doesnotexist`): a notification instead of a silent failure | 0.2 | |
 | Neither left nor middle click set to "Open the popup": the page "Behavior" shows the warning | 0.2 | |
-| Desktop view: the widget on the desktop shows the same view directly, without a popup | 0.2 | |
-| Popup with a German system language: all texts German, nothing cut off (also on the page "Behavior") | 0.2 | |
+| Desktop view: the widget on the desktop shows the same view directly, without a popup | 0.2 | 2026-10-25, Plasma 6.8, scripted: OK |
+| Popup with a German system language: all texts German, nothing cut off (also on the page "Behavior") | 0.2 | 2026-10-25, Plasma 6.8, scripted: popup OK; page "Behavior" not checked |
 | Without Qt Quick Charts (if it can be arranged): only the graph is missing, with a note, the rest of the popup works | 0.2 | |
 
 ## Appearance and auto-hide
 
 | Check | Stage | Result |
 |---|---|---|
-| Every option on the page "Appearance" (German: “Darstellung”) shows in the panel after Apply: font, bold, text size, symbol style (arrows, triangles, icons, none, custom), color mode, coloring of units, sparkline | 0.3 | |
-| Fixed width: the panel does not jump when the values change, also with bold text and with a different font | 0.3 | |
-| Color mode "Theme color", "By direction" and "By speed": the values take the expected colors under load and at rest | 0.3 | |
+| Every option on the page "Appearance" (German: “Darstellung”) shows in the panel after Apply: font, bold, text size, symbol style (arrows, triangles, icons, none, custom), color mode, coloring of units, sparkline | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK for font, bold, scale, all symbol styles, colors, sparkline (set in the configuration, not through the page) |
+| Fixed width: the panel does not jump when the values change, also with bold text and with a different font | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK; 99 px constant with bold serif text |
+| Color mode "Theme color", "By direction" and "By speed": the values take the expected colors under load and at rest | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK; in the Gruvbox theme "By direction" gives two similar oranges (theme colors) |
 | Real color dialog for the download and upload color: accepting sets the color, cancelling keeps the old one, "Use theme color" (German: “Designfarbe verwenden”) resets it | 0.3 | |
 | Threshold editor: add, change and remove levels (up to six); Apply/OK saves them; after a plasmashell restart the levels are unchanged | 0.3 | |
-| Sparkline "Behind the values" and "Beside the values": both draw, the values stay readable; in a vertical panel "beside" looks like "behind" | 0.3 | |
+| Sparkline "Behind the values" and "Beside the values": both draw, the values stay readable; in a vertical panel "beside" looks like "behind" | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK in a horizontal panel |
 | Auto-hide "When offline": disconnect the network (e.g. `nmcli networking off`): the widget disappears from the panel; reconnecting brings it back | 0.3 | |
-| Auto-hide "When offline or idle": with traffic below the threshold for the set time the widget disappears; traffic above it brings it back | 0.3 | |
-| A hidden widget leaves no gap in the panel | 0.3 | |
-| In panel edit mode a hidden widget shows the dimmed network icon placeholder and can be selected | 0.3 | |
-| A hidden widget never hides on the desktop, while its popup is open, before the first data has arrived, or while the data is stale | 0.3 | |
+| Auto-hide "When offline or idle": with traffic below the threshold for the set time the widget disappears; traffic above it brings it back | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK; hides when idle, returns under load |
+| A hidden widget leaves no gap in the panel | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK |
+| In panel edit mode a hidden widget shows the dimmed network icon placeholder and can be selected | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK |
+| A hidden widget never hides on the desktop, while its popup is open, before the first data has arrived, or while the data is stale | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK while the popup is open; other cases not checked |
 | German system language: all texts of the pages "Appearance" and "Behavior" are German and nothing is cut off | 0.3 | |
-| Restart with the symbol style "Icons" after at least 30 minutes of uptime, using the restart command that detects a hang: `bash -c 'systemctl --user stop --no-block plasma-plasmashell; sleep 5; p=$(pgrep -x plasmashell) && { kill -ABRT $p; sleep 5; }; systemctl --user start plasma-plasmashell'` | 0.3 | |
+| Restart with the symbol style "Icons" after at least 30 minutes of uptime, using the restart command that detects a hang: `bash -c 'systemctl --user stop --no-block plasma-plasmashell; sleep 5; p=$(pgrep -x plasmashell) && { kill -ABRT $p; sleep 5; }; systemctl --user start plasma-plasmashell'` | 0.3 | 2026-10-25, Plasma 6.8, scripted: OK; plain restart (the hang-detecting command was not run), plasmashell answered after 1 s at 39 h uptime |
 
 ## Usage and data cap
 
@@ -134,23 +134,23 @@ For these checks vnstat 2.0 or newer is installed and its service enabled
 
 | Check | Stage | Result |
 |---|---|---|
-| vnstat present: the popup section "Usage" (German: “Verbrauch”) shows today, yesterday, this period and last period with download, upload and total, and "vnstat last updated" (German: “vnstat zuletzt aktualisiert”); the page "Usage" says "vnstat found" | 0.4 | |
+| vnstat present: the popup section "Usage" (German: “Verbrauch”) shows today, yesterday, this period and last period with download, upload and total, and "vnstat last updated" (German: “vnstat zuletzt aktualisiert”); the page "Usage" says "vnstat found" | 0.4 | 2026-10-25, Plasma 6.8, scripted: shown OK; FINDING: in sensor mode the totals include the WireGuard tunnel and docker0 |
 | vnstat missing (uninstall it or hide it from `PATH` for the session): the popup shows a hint and a "vnstat website" button instead of an error, and the rest of the popup works; the page "Usage" says "vnstat is not installed" | 0.4 | |
 | vnstat service stopped (`systemctl stop vnstat`): after an hour the popup shows that the data is not current (German: “nicht aktuell”); starting the service removes the hint after the next update | 0.4 | |
-| Billing day: change it on the page "Usage"; "This period" and "Last period" change accordingly and the totals follow the new start day | 0.4 | |
-| Incomplete period right after installing vnstat: "This period" carries an asterisk and the footnote "incomplete" is shown; a period fully covered has none | 0.4 | |
-| An interface that counts but is not tracked by vnstat: the popup names it in a hint | 0.4 | |
-| Data cap with a small value (e.g. 1 GiB) and the warning level at a low value: the bar appears; at the warning level it takes the neutral color, at 100 % the negative color | 0.4 | |
-| Notification delivery in a real session: the warning level and 100 % each produce one desktop notification with the expected text, not two | 0.4 | |
-| Restart (use the restart command that detects a hang, see above) with the cap still exceeded: no notification is reported again; the configuration keeps `capNotifiedCycle` and `capNotifiedLevel` across the restart | 0.4 | |
-| Notifications switched off, level reached, notifications switched on again: the earlier level is not reported | 0.4 | |
-| Cap set so that usage is already past 100 %: only the 100 % notification appears, not the warning too | 0.4 | |
+| Billing day: change it on the page "Usage"; "This period" and "Last period" change accordingly and the totals follow the new start day | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK with billing days 1, 20 and 25 |
+| Incomplete period right after installing vnstat: "This period" carries an asterisk and the footnote "incomplete" is shown; a period fully covered has none | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK |
+| An interface that counts but is not tracked by vnstat: the popup names it in a hint | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK; hint names the veth interface |
+| Data cap with a small value (e.g. 1 GiB) and the warning level at a low value: the bar appears; at the warning level it takes the neutral color, at 100 % the negative color | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK; bar and red panel dot; colors at the warning level not checked |
+| Notification delivery in a real session: the warning level and 100 % each produce one desktop notification with the expected text, not two | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK; one notification at 50 % (82 %) and one at 100 % |
+| Restart (use the restart command that detects a hang, see above) with the cap still exceeded: no notification is reported again; the configuration keeps `capNotifiedCycle` and `capNotifiedLevel` across the restart | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK with plain restarts; no repeated notification |
+| Notifications switched off, level reached, notifications switched on again: the earlier level is not reported | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK; nothing reported after switching on |
+| Cap set so that usage is already past 100 %: only the 100 % notification appears, not the warning too | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK; only the 100 % notification |
 | Panel dot: appears from the warning level on, not before; a screen reader (or the accessibility inspector) reads the cap sentence in the widget's name | 0.4 | |
 | Tooltip in a real panel: a "Today" line (German: “Heute”) with download and upload | 0.4 | |
 | Manual interface selection with an absent interface in the list: its recorded traffic stays in the totals; automatic mode counts the interfaces vnstat knows, without `lo` and without those seen as virtual; after a VPN disconnect the tunnel stays out of the totals, and the configuration lists it in `knownVirtual` | 0.4 | |
 | Login with a VPN that connects automatically and a data cap the tunnel would push past a level: no notification at login | 0.4 | |
 | Popup that has been resized before (a stored small size): after the update the "Usage" section may not fit; enlarging the popup once is enough and the size is kept | 0.4 | |
-| German system language: all texts of the section "Usage" and the settings page are German and nothing is cut off | 0.4 | |
+| German system language: all texts of the section "Usage" and the settings page are German and nothing is cut off | 0.4 | 2026-10-25, Plasma 6.8, scripted: popup section OK; settings page not checked |
 
 ## Later stages and release candidates
 
