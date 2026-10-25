@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" height="512" viewBox="0 0 512 512">
+  <title>Netspeeder logo</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path id="Background" d="M124 16 L388 16 C447.647 16 496 64.353 496 124 L496 388 C496 447.647 447.647 496 388 496 L124 496 C64.353 496 16 447.647 16 388 L16 124 C16 64.353 64.353 16 124 16 Z" fill="#232629"/>
+    <path id="Down_bar" data-name="Down bar" d="M97.9 132 L222.3 132" fill="none" stroke="#3daee9" stroke-width="23.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="Down_stem" data-name="Down stem" d="M221.2 146 L178.7 269.6" fill="none" stroke="#3daee9" stroke-width="52.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="Down_head" data-name="Down head" d="M95.5 274.5 L253.6 274.5 L171.7 371.6 Z" fill="#3daee9" stroke="#3daee9" stroke-width="12.8" stroke-linejoin="round"/>
+    <path id="Down_line_1" data-name="Down line 1" d="M65 176.5 L152.5 176.5" fill="none" stroke="#3daee9" stroke-width="20.9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="Down_line_2" data-name="Down line 2" d="M83.4 218.7 L130 218.7" fill="none" stroke="#3daee9" stroke-width="20.9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="Up_head" data-name="Up head" d="M337.1 121.2 L413.3 208.6 L256.8 208.6 Z" fill="#27ae60" stroke="#27ae60" stroke-width="12.8" stroke-linejoin="round"/>
+    <path id="Up_stem" data-name="Up stem" d="M336.3 199 L285.7 359.5" fill="none" stroke="#27ae60" stroke-width="52.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="Up_foot" data-name="Up foot" d="M285.7 374 L414.9 374" fill="none" stroke="#27ae60" stroke-width="22.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="Up_line_1" data-name="Up line 1" d="M367.6 290.1 L422.2 290.1" fill="none" stroke="#27ae60" stroke-width="20.9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="Up_line_2" data-name="Up line 2" d="M354.7 330.6 L448.6 330.6" fill="none" stroke="#27ae60" stroke-width="20.9" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

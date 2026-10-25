@@ -3,7 +3,37 @@ SPDX-License-Identifier: GPL-2.0-or-later
 SPDX-FileCopyrightText: 2026 Flexomatic81
 -->
 
-# Netspeeder
+<p align="center">
+  <img src="docs/images/logo.png" width="112" alt="Netspeeder logo">
+</p>
+
+<h1 align="center">Netspeeder</h1>
+
+<p align="center">
+  Network speed monitor for the KDE Plasma 6 panel, with traffic graph, data usage and data cap.
+</p>
+
+<p align="center">
+  <a href="https://github.com/Flexomatic81/netspeeder/actions/workflows/ci.yml"><img src="https://github.com/Flexomatic81/netspeeder/actions/workflows/ci.yml/badge.svg?branch=main" alt="Tests"></a>
+  <a href="https://github.com/Flexomatic81/netspeeder/releases/latest"><img src="https://img.shields.io/github/v/release/Flexomatic81/netspeeder" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/Plasma-6.3%2B-1d99f3" alt="Plasma 6.3 or newer">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--2.0--or--later-blue" alt="GPL-2.0-or-later license"></a>
+</p>
+
+<p align="center">
+  <img src="docs/images/popup.png" width="396" alt="The popup with the traffic graph, peaks, totals, the interface list and the data usage">
+  <br>
+  <sub>All screenshots show sample data.</sub>
+</p>
+
+## Quick start
+
+Requires KDE Plasma 6.3 or newer. Right-click the panel → "Add Widgets…" →
+"Get New Widgets…" → "Download New Plasma Widgets", search for **Netspeeder**
+and drag it onto a panel or the desktop. Other ways to install: see
+[Installation](#installation).
+
+## About
 
 A network speed monitor for the KDE Plasma 6 panel. Netspeeder shows the
 current download and upload speed: it counts the traffic of your real network

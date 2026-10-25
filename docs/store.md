@@ -110,6 +110,10 @@ Upload in this order; the files are in [`images/`](images/) and are made with
 5. `panel-sparkline.png`: the sparkline behind the values
 6. `popup.png`: the popup with graph, interfaces and usage
 
+The project logo for the store page is `logo.png` (512 × 512), rendered from
+`logo.svg` with `rsvg-convert -w 512 -h 512 logo.svg -o logo.png`. The widget
+itself keeps the theme icon `network-connect`.
+
 ## Changelog 1.0.0
 
 First stable release.
