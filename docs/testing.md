@@ -175,7 +175,7 @@ early fails there.
 | (a) The full manual checklist in this file, all tables | 2026-10-25 | Done: every table worked through, scripted or by hand, without a failure; the rows marked "not checked" were skipped by decision |
 | (b) Minimum version honest: run on Plasma 6.3, or documented as checked against the source code only (README, [compatibility.md](compatibility.md), store text, CHANGELOG) | 2026-10-25 | Done: documented as source-audited, tested on Plasma 6.8 only; no VM run |
 | (c) Screenshots generated with `scripts/screenshots.sh`, reviewed and committed | 2026-10-25 | Done: Breeze Dark, six images in commit b8be157 |
-| (d) A green CI run on the remote for the commit to be tagged, before the tag is pushed | | |
+| (d) A green CI run on the remote for the commit to be tagged, before the tag is pushed | 2026-10-25 | Done: run 40212145641 on main for 567795b green; the tagged commit adds only this entry and is tagged only after its own push run is green as well |
 | (e) CHANGELOG and the changelog in [store.md](store.md) finalized: release date set in the heading as YYYY-MM-DD (`## 1.0.0 – 2026-11-15`), "unreleased" and every "still to be done" note removed or resolved | 2026-10-25 | Done: heading `## 1.0.0 – 2026-10-25`, no open notes in CHANGELOG.md or store.md |
 
 ## Automatic acceptance 0.1
