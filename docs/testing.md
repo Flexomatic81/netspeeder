@@ -134,7 +134,7 @@ For these checks vnstat 2.0 or newer is installed and its service enabled
 
 | Check | Stage | Result |
 |---|---|---|
-| vnstat present: the popup section "Usage" (German: “Verbrauch”) shows today, yesterday, this period and last period with download, upload and total, and "vnstat last updated" (German: “vnstat zuletzt aktualisiert”); the page "Usage" says "vnstat found" | 0.4 | 2026-10-25, Plasma 6.8, scripted: shown OK; FINDING: in sensor mode the totals include the WireGuard tunnel and docker0 |
+| vnstat present: the popup section "Usage" (German: “Verbrauch”) shows today, yesterday, this period and last period with download, upload and total, and "vnstat last updated" (German: “vnstat zuletzt aktualisiert”); the page "Usage" says "vnstat found" | 0.4 | 2026-10-25, Plasma 6.8, scripted: shown OK; the totals in sensor mode included a WireGuard tunnel and docker0 that the sensors do not list, fixed in f0aaa72 (today 6.4 GiB = wired interface only) |
 | vnstat missing (uninstall it or hide it from `PATH` for the session): the popup shows a hint and a "vnstat website" button instead of an error, and the rest of the popup works; the page "Usage" says "vnstat is not installed" | 0.4 | |
 | vnstat service stopped (`systemctl stop vnstat`): after an hour the popup shows that the data is not current (German: “nicht aktuell”); starting the service removes the hint after the next update | 0.4 | |
 | Billing day: change it on the page "Usage"; "This period" and "Last period" change accordingly and the totals follow the new start day | 0.4 | 2026-10-25, Plasma 6.8, scripted: OK with billing days 1, 20 and 25 |
