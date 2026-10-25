@@ -1,0 +1,66 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# SPDX-FileCopyrightText: 2026 Flexomatic81
+
+name: Bug report
+description: Something does not work as described.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please check the [open issues](https://github.com/Flexomatic81/netspeeder/issues) first, someone may have reported it already.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you see, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Add Netspeeder to a vertical panel
+        2. Open the settings, page Appearance
+        3. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Netspeeder version
+      description: Shown in the widget's settings under "About".
+      placeholder: "1.0.0"
+    validations:
+      required: true
+  - type: textarea
+    id: system
+    attributes:
+      label: System
+      description: The output of `kinfo` (or Plasma, KDE Frameworks and Qt version and the distribution).
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Data source
+      description: 'Shown at the bottom of the popup ("Source: …").'
+      options:
+        - System sensors
+        - Kernel counters
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log output
+      description: Messages of the widget since the last login, from `journalctl --user -b | grep netspeeder`.
+      render: text
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else?
+      description: Screenshots, your network setup (VPN, containers, several interfaces), whether vnStat is installed.

@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# SPDX-FileCopyrightText: 2026 Flexomatic81
+
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security problem
+    url: https://github.com/Flexomatic81/netspeeder/security/advisories/new
+    about: Please report security problems privately, not as a public issue.

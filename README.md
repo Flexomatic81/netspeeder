@@ -393,6 +393,15 @@ msginit --no-translator --locale=fr --input=po/plasma_applet_io.github.flexomati
 `scripts/build-mo.sh` compiles the translations into the package
 (`scripts/dev-install.sh` and `scripts/build-plasmoid.sh` call it for you).
 
+## Contributing
+
+Bug reports, ideas, translations and pull requests are welcome. Please use the
+[issue forms](https://github.com/Flexomatic81/netspeeder/issues/new/choose) and
+open pull requests against the `dev` branch; [CONTRIBUTING.md](CONTRIBUTING.md)
+explains the setup, the checks and the ground rules. Security problems are
+reported privately, see [SECURITY.md](SECURITY.md). Everyone taking part
+follows the [code of conduct](CODE_OF_CONDUCT.md).
+
 ## Development
 
 `node tools/check.mjs` is the one entry point; CI runs the same steps.
@@ -407,7 +416,7 @@ msginit --no-translator --locale=fr --input=po/plasma_applet_io.github.flexomati
 | `scripts/smoke.sh` | QML smoke scenes with `qml6`; local only, needs `ksystemstats`, a connected network interface and a desktop session (`NETSPEEDER_SMOKE_SKIP_LIVE=1` skips the scenes that read the real network) |
 | `scripts/load-check.sh` | Starts the installed widget offscreen and checks that it loads; needs a desktop session |
 | `scripts/build-plasmoid.sh <version>` | Builds `dist/netspeeder-<version>.plasmoid` |
-| `scripts/screenshots.sh` | Renders the screenshots in `docs/images/` from demo data in Breeze Dark (`--light`: Breeze Light, into `docs/images/light/`); opens windows on the desktop |
+| `scripts/screenshots.sh` | Renders the screenshots in `docs/images/` from demo data in Breeze Dark (`--light`: Breeze Light, into `docs/images/light/`; `--store`: three times the size, into `docs/store/shots/`); opens windows on the desktop |
 
 Run `pnpm install --frozen-lockfile` once for the Node tools. `qmllint` needs
 the Qt 6 tool (`/usr/lib/qt6/bin/qmllint`); locally, steps that need Qt or a

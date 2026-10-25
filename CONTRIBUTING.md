@@ -8,7 +8,9 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 Thanks for wanting to help! Bug reports, translations and pull requests are all welcome.
 
 For anything bigger than a small fix, please open an issue first, so that we can agree on the
-approach before you spend time on it.
+approach before you spend time on it. The [issue forms](https://github.com/Flexomatic81/netspeeder/issues/new/choose)
+ask for what is needed to look into a bug. Security problems are reported privately, see
+[SECURITY.md](SECURITY.md), and everyone follows the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Branches
 
@@ -75,12 +77,10 @@ formatted with Prettier (`pnpm run format`, which is `prettier --write "**/*.mjs
 
 ## Translations
 
-User-facing texts go through the `tr`, `trc` and `trp` wrappers. After changing texts, run
-`scripts/Messages.sh` and translate the new entries in every `po/<language>/*.po`. How to add a new
+User-facing texts go through the `tr`, `trc` and `trp` wrappers. After adding or changing texts,
+run `scripts/Messages.sh`, translate the new entries in every `po/<language>/*.po` and update
+`tests/fixtures/catalog-keys.txt` (the test pins the message keys on purpose). How to add a new
 language is described in the [README](README.md#translating).
-
-When visible texts are added or changed, run `scripts/Messages.sh`, translate the entries in
-`po/*/…po` and update `tests/fixtures/catalog-keys.txt` (the test pins the message keys on purpose).
 
 ## Commit messages
 
