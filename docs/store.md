@@ -101,7 +101,7 @@ Quellcode, Fehlermeldungen und Übersetzungen: https://github.com/Flexomatic81/n
 ## Images
 
 Upload in this order; the files are in [`images/`](images/) and are made with
-`scripts/screenshots.sh`.
+`scripts/screenshots.sh` in the stock Breeze Dark color scheme.
 
 1. `panel-rows.png`: download and upload in two rows
 2. `panel-single.png`: both values side by side in one row

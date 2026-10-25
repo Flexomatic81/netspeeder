@@ -4,7 +4,7 @@
 
 # Checks that the screenshot scene runs, without opening a window: renders it
 # on the offscreen platform into the directory in NETSPEEDER_SCREENSHOT_DIR
-# (created if missing), with the stock Breeze Light color scheme as
+# (created if missing), with the stock Breeze Dark color scheme as
 # scripts/screenshots.sh uses it. It passes when qml6 exits with 0, the scene
 # reports "SCREENSHOTS OK" and the background color of that scheme, prints no
 # warning, all six files are readable PNG files without metadata, and the data
@@ -31,13 +31,13 @@ log="$(mktemp)" || exit 1
 trap 'rm -f "$log"' EXIT
 config="$(mktemp -d)" || exit 1
 trap 'rm -rf "$log" "$config"' EXIT
-setup_theme Light "$config" || exit 1
+setup_theme Dark "$config" || exit 1
 
 QT_QPA_PLATFORM=offscreen LANGUAGE=en LC_ALL=C.UTF-8 LANG=C.UTF-8 QT_SCALE_FACTOR=1 run_scene "$dir" "$log" "$config"
 rc=$?
 output="$(cat "$log")"
 unexpected="$(other_lines "$output")$(qml_problems "$output")"
-theme="$(theme_problem "$output" "$(window_background "$(breeze_colors Light)")")"
+theme="$(theme_problem "$output" "$(window_background "$(breeze_colors Dark)")")"
 
 status=0
 if [ "$rc" -ne 0 ] || ! grep -q '^qml: SCREENSHOTS OK$' <<<"$output"; then

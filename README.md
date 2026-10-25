@@ -23,10 +23,10 @@ Daniel Faust, see [Origin](#origin). If you used that widget, read
 
 ## Screenshots
 
-The images are made from fixed demo data in the stock Breeze Light color
+The images are made from fixed demo data in the stock Breeze Dark color
 scheme with `scripts/screenshots.sh` and live in [`docs/images/`](docs/images/);
-`scripts/screenshots.sh --dark` renders the same images in Breeze Dark into
-`docs/images/dark/`.
+`scripts/screenshots.sh --light` renders the same images in Breeze Light into
+`docs/images/light/`.
 
 | | |
 |---|---|
@@ -384,7 +384,7 @@ msginit --no-translator --locale=fr --input=po/plasma_applet_io.github.flexomati
 | `scripts/smoke.sh` | QML smoke scenes with `qml6`; local only, needs `ksystemstats`, a connected network interface and a desktop session (`NETSPEEDER_SMOKE_SKIP_LIVE=1` skips the scenes that read the real network) |
 | `scripts/load-check.sh` | Starts the installed widget offscreen and checks that it loads; needs a desktop session |
 | `scripts/build-plasmoid.sh <version>` | Builds `dist/netspeeder-<version>.plasmoid` |
-| `scripts/screenshots.sh` | Renders the screenshots in `docs/images/` from demo data in Breeze Light (`--dark`: Breeze Dark, into `docs/images/dark/`); opens windows on the desktop |
+| `scripts/screenshots.sh` | Renders the screenshots in `docs/images/` from demo data in Breeze Dark (`--light`: Breeze Light, into `docs/images/light/`); opens windows on the desktop |
 
 Run `pnpm install --frozen-lockfile` once for the Node tools. `qmllint` needs
 the Qt 6 tool (`/usr/lib/qt6/bin/qmllint`); locally, steps that need Qt or a

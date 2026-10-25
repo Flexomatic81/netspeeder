@@ -9,11 +9,11 @@
 # the offscreen platform. Needs a Plasma session, qml6, the locale en_US.UTF-8
 # and the stock Breeze color schemes (/usr/share/color-schemes). Language,
 # locale, scale factor, window size, font and colors are fixed: the scene runs
-# with a temporary configuration that holds only the stock Breeze Light scheme,
+# with a temporary configuration that holds only the stock Breeze Dark scheme,
 # so it neither reads nor changes the settings of the desktop.
 #
-#   scripts/screenshots.sh          Breeze Light, into docs/images/
-#   scripts/screenshots.sh --dark   Breeze Dark, the same six files into docs/images/dark/
+#   scripts/screenshots.sh           Breeze Dark, into docs/images/ (the published images)
+#   scripts/screenshots.sh --light   Breeze Light, the same six files into docs/images/light/
 #
 # Afterwards check-images.mjs checks the files: all six are there, carry no
 # metadata, and the chart area of the popup is not one plain color. Look at
@@ -26,12 +26,12 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=tools/screenshots/scene.sh
 . "$root/tools/screenshots/scene.sh"
 
-variant="Light"
+variant="Dark"
 case "${1:-}" in
   "") ;;
-  --dark) variant="Dark" ;;
+  --light) variant="Light" ;;
   *)
-    echo "usage: scripts/screenshots.sh [--dark]" >&2
+    echo "usage: scripts/screenshots.sh [--light]" >&2
     exit 2
     ;;
 esac
@@ -56,8 +56,8 @@ for tool in qml6 node; do
 done
 
 dir="${NETSPEEDER_SCREENSHOT_DIR:-$root/docs/images}"
-if [ "$variant" = "Dark" ]; then
-  dir="$dir/dark"
+if [ "$variant" = "Light" ]; then
+  dir="$dir/light"
 fi
 mkdir -p "$dir" || exit 1
 dir="$(cd "$dir" && pwd)"
