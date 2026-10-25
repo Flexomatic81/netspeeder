@@ -16,6 +16,7 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 <p align="center">
   <a href="https://github.com/Flexomatic81/netspeeder/actions/workflows/ci.yml"><img src="https://github.com/Flexomatic81/netspeeder/actions/workflows/ci.yml/badge.svg?branch=main" alt="Tests"></a>
   <a href="https://github.com/Flexomatic81/netspeeder/releases/latest"><img src="https://img.shields.io/github/v/release/Flexomatic81/netspeeder" alt="Latest release"></a>
+  <a href="https://store.kde.org/p/2380311/"><img src="https://img.shields.io/badge/KDE_Store-Netspeeder-1d99f3?logo=kde&logoColor=white" alt="KDE Store"></a>
   <img src="https://img.shields.io/badge/Plasma-6.3%2B-1d99f3" alt="Plasma 6.3 or newer">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--2.0--or--later-blue" alt="GPL-2.0-or-later license"></a>
 </p>
@@ -30,7 +31,8 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 
 Requires KDE Plasma 6.3 or newer. Right-click the panel → "Add Widgets…" →
 "Get New Widgets…" → "Download New Plasma Widgets", search for **Netspeeder**
-and drag it onto a panel or the desktop. Other ways to install: see
+and drag it onto a panel or the desktop, or get it from the
+[KDE Store](https://store.kde.org/p/2380311/). Other ways to install: see
 [Installation](#installation).
 
 ## About
@@ -286,7 +288,7 @@ and where to find it in Netspeeder (settings page › option).
 
 Right-click the panel or the desktop, choose "Add Widgets…", then
 "Get New Widgets…" › "Download New Plasma Widgets", and search for
-"Netspeeder".
+"Netspeeder". The entry in the store: <https://store.kde.org/p/2380311/>.
 
 ### Package file (`.plasmoid`)
 
