@@ -23,6 +23,8 @@ import {
   checkImages,
   chartProblem,
   metadataProblems,
+  main,
+  parseArea,
   parseChartLine,
   readPng,
 } from "../tools/screenshots/check-images.mjs";
@@ -264,6 +266,15 @@ test("the chart line of the scene is parsed", () => {
     sceneHeight: 720,
   });
   assert.equal(parseChartLine("qml: something else"), null);
+  assert.deepEqual(parseArea("qml: SCREENSHOT bar popup.png 8 500 380 6 of 396 692", "bar"), {
+    x: 8,
+    y: 500,
+    width: 380,
+    height: 6,
+    sceneWidth: 396,
+    sceneHeight: 692,
+  });
+  assert.equal(parseArea("qml: SCREENSHOT chart popup.png 8 500 380 6 of 396 692", "bar"), null);
 });
 
 test("checkImages reports missing files and checks the chart only when asked", () => {
@@ -280,7 +291,36 @@ test("checkImages reports missing files and checks the chart only when asked", (
     assert.deepEqual(skipped.problems, []);
     assert.match(skipped.notes.join("\n"), /chart area check skipped/);
     assert.match(checkImages(dir, { chart: area }).problems.join("\n"), /popup\.png: the chart area is one color/);
+    assert.match(
+      checkImages(dir, { chart: null, bar: area }).problems.join("\n"),
+      /popup\.png: the usage bar area is one color/,
+    );
   } finally {
+    fs.rmSync(dir, { recursive: true });
+  }
+});
+
+test("the usage bar is checked offscreen too, and its line is required", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "shots-"));
+  const log = path.join(dir, "scene.log");
+  const quiet = { error: console.error, log: console.log };
+  console.error = () => {};
+  console.log = () => {};
+  try {
+    const flat = Array.from({ length: 4 }, () => Array.from({ length: 4 }, () => RED));
+    const drawn = flat.map((row, y) => row.map((p, x) => (x === y ? BLUE : p)));
+    for (const name of SHOTS) fs.writeFileSync(path.join(dir, name), makePng(drawn));
+    fs.writeFileSync(log, "qml: SCREENSHOTS OK\n");
+    assert.equal(main([dir, "--offscreen", log]), 1, "no bar line");
+    fs.writeFileSync(log, "qml: SCREENSHOT bar popup.png 0 0 4 4 of 4 4\n");
+    assert.equal(main([dir, "--offscreen", log]), 0);
+    assert.equal(main([dir, "--log", log]), 1, "no chart line");
+    fs.writeFileSync(path.join(dir, "popup.png"), makePng(flat));
+    assert.equal(main([dir, "--offscreen", log]), 1, "a bar of one color");
+    assert.equal(main([dir, "--offscreen"]), 2);
+  } finally {
+    console.error = quiet.error;
+    console.log = quiet.log;
     fs.rmSync(dir, { recursive: true });
   }
 });

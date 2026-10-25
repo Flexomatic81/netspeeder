@@ -7,10 +7,10 @@
 # (created if missing), with the stock Breeze Light color scheme as
 # scripts/screenshots.sh uses it. It passes when qml6 exits with 0, the scene
 # reports "SCREENSHOTS OK" and the background color of that scheme, prints no
-# warning, and all six files are readable PNG files without metadata. This is
-# no review of the images: offscreen, Qt Quick Charts draws nothing, so the
-# graph and the mini chart stay empty and the chart check of check-images.mjs
-# is skipped. The real images come from scripts/screenshots.sh.
+# warning, all six files are readable PNG files without metadata, and the data
+# cap bar of the popup is drawn. This is no review of the images: offscreen,
+# Qt Quick Charts draws nothing, so the graph and the mini chart stay empty and
+# the chart check of check-images.mjs is skipped. The real images come from scripts/screenshots.sh.
 #
 #   NETSPEEDER_SCREENSHOT_DIR=$(mktemp -d) tools/screenshots/offscreen-check.sh
 set -uo pipefail
@@ -53,5 +53,5 @@ if [ -n "$theme" ]; then
   echo "offscreen-check: $theme" >&2
   status=1
 fi
-node "$here/check-images.mjs" "$dir" --offscreen || status=1
+node "$here/check-images.mjs" "$dir" --offscreen "$log" || status=1
 exit "$status"

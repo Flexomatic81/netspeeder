@@ -42,9 +42,13 @@ run_scene() {
   # console.log output reaches the log. The user's own configuration, the
   # defaults of the desktop theme and the system-wide ones (XDG_CONFIG_DIRS,
   # here a directory that does not exist) are left out; the Plasma style
-  # reads the colors from kdeglobals in XDG_CONFIG_HOME.
+  # reads the colors from kdeglobals in XDG_CONFIG_HOME. That style draws
+  # through the widget style of the KDE platform theme, as in Plasma: without
+  # a widget application (--apptype widget) and that platform theme, the
+  # progress bar stays empty and mnemonics are underlined all the time.
   XDG_CONFIG_HOME="$config" XDG_CONFIG_DIRS="$config/none" QT_QUICK_CONTROLS_STYLE=org.kde.desktop \
-    QT_FORCE_STDERR_LOGGING=1 timeout 60 qml6 "$root/tools/screenshots/Screenshots.qml" -- "$dir" >"$log" 2>&1
+    QT_QPA_PLATFORMTHEME=kde QT_FORCE_STDERR_LOGGING=1 \
+    timeout 60 qml6 --apptype widget "$root/tools/screenshots/Screenshots.qml" -- "$dir" >"$log" 2>&1
   rc=$?
   cat "$log"
   return "$rc"

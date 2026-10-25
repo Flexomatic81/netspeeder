@@ -2,12 +2,13 @@
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
 // Checks the images of the screenshot scene: all six exist and are readable 8-bit PNG files, none carries
-// metadata (text, time stamps, Exif), and the chart area of the popup is not one plain color. Only the Node
-// standard library is used.
+// metadata (text, time stamps, Exif), and neither the chart area nor the data cap bar of the popup is one
+// plain color. Only the Node standard library is used.
 //
-//   node tools/screenshots/check-images.mjs <dir> --log <scene output>   after a run on a real display
-//   node tools/screenshots/check-images.mjs <dir> --offscreen            without the chart check: offscreen,
-//                                                                        Qt Quick Charts draws nothing
+//   node tools/screenshots/check-images.mjs <dir> --log <scene output>         after a run on a real display
+//   node tools/screenshots/check-images.mjs <dir> --offscreen <scene output>   without the chart check:
+//                                                                              offscreen, Qt Quick Charts
+//                                                                              draws nothing
 
 import fs from "node:fs";
 import path from "node:path";
@@ -21,8 +22,7 @@ const CHANNELS = { 0: 1, 2: 3, 4: 2, 6: 4 };
 const METADATA = ["tEXt", "zTXt", "iTXt", "tIME", "eXIf"];
 // Less than this share of pixels apart from the most common color counts as one color.
 const MIN_DRAWN_SHARE = 0.005;
-const CHART_PATTERN =
-  /SCREENSHOT chart popup\.png (-?[\d.]+) (-?[\d.]+) (-?[\d.]+) (-?[\d.]+) of (-?[\d.]+) (-?[\d.]+)/;
+const NUMBER = "(-?[\\d.]+)";
 
 function chunksOf(buffer) {
   const chunks = [];
@@ -116,12 +116,18 @@ export function metadataProblems(png) {
   return png.chunks.filter((c) => METADATA.includes(c.type)).map((c) => `metadata chunk ${c.type}`);
 }
 
-/** The chart area the scene reports in its output, or null. */
-export function parseChartLine(text) {
-  const m = CHART_PATTERN.exec(text);
+/** The area of `kind` ("chart" or "bar") in popup.png that the scene reports in its output, or null. */
+export function parseArea(text, kind) {
+  const n = NUMBER;
+  const m = new RegExp(`SCREENSHOT ${kind} popup\\.png ${n} ${n} ${n} ${n} of ${n} ${n}`).exec(text);
   if (m === null) return null;
   const [x, y, width, height, sceneWidth, sceneHeight] = m.slice(1).map(Number);
   return { x, y, width, height, sceneWidth, sceneHeight };
+}
+
+/** The chart area the scene reports in its output, or null. */
+export function parseChartLine(text) {
+  return parseArea(text, "chart");
 }
 
 // The area in image pixels: the image may be a multiple of the scene size (a scaled display).
@@ -134,10 +140,10 @@ function pixelRect(png, area) {
   return { x0, y0, x1, y1 };
 }
 
-/** "" when the chart area of the popup shows more than one color, else the reason. */
-export function chartProblem(png, area) {
+/** "" when the area (by default the chart area) of the popup shows more than one color, else the reason. */
+export function chartProblem(png, area, what = "the chart area") {
   const r = pixelRect(png, area);
-  if (r.x1 <= r.x0 || r.y1 <= r.y0) return "the chart area is empty";
+  if (r.x1 <= r.x0 || r.y1 <= r.y0) return `${what} is empty`;
   const counts = new Map();
   for (let y = r.y0; y < r.y1; y++) {
     for (let x = r.x0; x < r.x1; x++) {
@@ -147,10 +153,18 @@ export function chartProblem(png, area) {
   }
   const total = (r.x1 - r.x0) * (r.y1 - r.y0);
   const drawn = (total - Math.max(...counts.values())) / total;
-  return drawn < MIN_DRAWN_SHARE ? `the chart area is one color (${(drawn * 100).toFixed(2)} % drawn)` : "";
+  return drawn < MIN_DRAWN_SHARE ? `${what} is one color (${(drawn * 100).toFixed(2)} % drawn)` : "";
 }
 
-function checkOne(dir, name, chart, result) {
+// Checks one area of popup.png; null skips it.
+function checkArea(png, area, what, result) {
+  if (area === null || area === undefined) return;
+  const problem = chartProblem(png, area, what);
+  if (problem !== "") result.problems.push(`popup.png: ${problem}`);
+  else result.notes.push(`popup.png: ${what} shows a drawing`);
+}
+
+function checkOne(dir, name, areas, result) {
   const file = path.join(dir, name);
   if (!fs.existsSync(file)) {
     result.problems.push(`${name}: missing`);
@@ -165,17 +179,17 @@ function checkOne(dir, name, chart, result) {
   }
   result.notes.push(`${name}: ${png.width}x${png.height}`);
   result.problems.push(...metadataProblems(png).map((p) => `${name}: ${p}`));
-  if (name === "popup.png" && chart !== null) {
-    const problem = chartProblem(png, chart);
-    if (problem !== "") result.problems.push(`${name}: ${problem}`);
-    else result.notes.push(`${name}: the chart area shows a drawing`);
+  if (name === "popup.png") {
+    checkArea(png, areas.chart, "the chart area", result);
+    checkArea(png, areas.bar, "the usage bar area", result);
   }
 }
 
-/** Checks the six images in `dir`; `chart` is the chart area of the popup, null skips that check. */
-export function checkImages(dir, { chart }) {
+/** Checks the six images in `dir`; `chart` and `bar` are the chart area and the data cap bar of the popup,
+ *  null (or a missing `bar`) skips that check. */
+export function checkImages(dir, { chart, bar = null }) {
   const result = { problems: [], notes: [] };
-  for (const name of SHOTS) checkOne(dir, name, chart, result);
+  for (const name of SHOTS) checkOne(dir, name, { chart, bar }, result);
   if (chart === null) {
     result.notes.push("chart area check skipped: offscreen, Qt Quick Charts draws nothing");
   }
@@ -183,22 +197,29 @@ export function checkImages(dir, { chart }) {
 }
 
 function usage() {
-  console.error("usage: check-images.mjs <dir> (--log <scene output> | --offscreen)");
+  console.error("usage: check-images.mjs <dir> (--log | --offscreen) <scene output>");
   return 2;
+}
+
+// The areas of popup.png in the scene output: the usage bar always, the chart only with `withChart`. A string
+// names the missing line.
+function areasOf(text, withChart) {
+  const bar = parseArea(text, "bar");
+  if (bar === null) return "usage bar";
+  const chart = withChart ? parseArea(text, "chart") : null;
+  if (withChart && chart === null) return "chart area";
+  return { bar, chart };
 }
 
 export function main(argv) {
   const [dir, mode, logFile] = argv;
-  if (!dir || (mode !== "--offscreen" && !(mode === "--log" && logFile))) return usage();
-  let chart = null;
-  if (mode === "--log") {
-    chart = parseChartLine(fs.readFileSync(logFile, "utf8"));
-    if (chart === null) {
-      console.error("check-images: the scene output has no chart area line");
-      return 1;
-    }
+  if (!dir || !logFile || (mode !== "--offscreen" && mode !== "--log")) return usage();
+  const areas = areasOf(fs.readFileSync(logFile, "utf8"), mode === "--log");
+  if (typeof areas === "string") {
+    console.error(`check-images: the scene output has no ${areas} line`);
+    return 1;
   }
-  const { problems, notes } = checkImages(dir, { chart });
+  const { problems, notes } = checkImages(dir, areas);
   notes.forEach((n) => console.log(`  ${n}`));
   problems.forEach((p) => console.error(`  PROBLEM ${p}`));
   console.log(problems.length === 0 ? "IMAGES OK" : "IMAGES FAIL");

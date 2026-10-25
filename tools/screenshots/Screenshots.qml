@@ -16,7 +16,8 @@
 // Output: "SCREENSHOT theme <#rrggbb>" with the background color of the
 // theme, "SCREENSHOT saved <file> <width>x<height>" per image, the chart area
 // of the popup as "SCREENSHOT chart popup.png <x> <y> <width> <height> of
-// <width> <height>" (for check-images.mjs), and "SCREENSHOTS OK" or
+// <width> <height>" and the data cap bar the same way as "SCREENSHOT bar …"
+// (both for check-images.mjs), and "SCREENSHOTS OK" or
 // "SCREENSHOTS FAIL <reason>" at the end.
 
 import QtQuick
@@ -68,19 +69,36 @@ QQC2.ApplicationWindow {
         Qt.exit(ok ? 0 : 1);
     }
 
-    // The LineChart below `item`; null if there is none.
-    function findChart(item: Item): Item {
+    // The first item below `item` for which `match` is true; null if none.
+    function findItem(item: Item, match: var): Item {
         for (let i = 0; i < item.children.length; i++) {
             const child = item.children[i];
-            if (child instanceof Charts.LineChart) {
+            if (match(child)) {
                 return child;
             }
-            const inner = scene.findChart(child);
+            const inner = scene.findItem(child, match);
             if (inner !== null) {
                 return inner;
             }
         }
         return null;
+    }
+
+    // Logs the area of `item` in popup.png as "SCREENSHOT <kind> popup.png …".
+    function reportArea(kind: string, item: Item) {
+        const pos = item.mapToItem(popupShot, 0, 0);
+        console.log("SCREENSHOT " + kind + " popup.png " + pos.x.toFixed(1) + " " + pos.y.toFixed(1) + " " + item.width.toFixed(1) + " " + item.height.toFixed(1) + " of " + popupShot.width + " " + popupShot.height);
+    }
+
+    // The data cap bar of the usage section, with its area; false when it
+    // is missing or has no size.
+    function reportBar(): bool {
+        const bar = scene.findItem(popup, child => child instanceof QQC2.ProgressBar);
+        if (bar === null || !bar.visible || bar.width <= 0 || bar.height <= 0) {
+            return false;
+        }
+        scene.reportArea("bar", bar);
+        return true;
     }
 
     // The background color of the theme, so the scripts can check that the
@@ -91,12 +109,11 @@ QQC2.ApplicationWindow {
     }
 
     function reportChart(): bool {
-        const chart = popup.graphItem === null ? null : scene.findChart(popup.graphItem);
+        const chart = popup.graphItem === null ? null : scene.findItem(popup.graphItem, child => child instanceof Charts.LineChart);
         if (chart === null) {
             return false;
         }
-        const pos = chart.mapToItem(popupShot, 0, 0);
-        console.log("SCREENSHOT chart popup.png " + pos.x.toFixed(1) + " " + pos.y.toFixed(1) + " " + chart.width.toFixed(1) + " " + chart.height.toFixed(1) + " of " + popupShot.width + " " + popupShot.height);
+        scene.reportArea("chart", chart);
         return true;
     }
 
@@ -130,6 +147,8 @@ QQC2.ApplicationWindow {
             scene.finish(false, "none of the fonts " + Demo.DEMO_FONTS.join(", ") + " is installed");
         } else if (!scene.reportTheme() || !scene.reportChart()) {
             scene.finish(false, "the popup has no chart");
+        } else if (!scene.reportBar()) {
+            scene.finish(false, "the popup has no data cap bar");
         } else {
             scene.grabNext();
         }
