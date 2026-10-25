@@ -13,7 +13,11 @@ const DEFAULT_MINUTES = 5;
 const MINUTE_CHOICES = [1, 5, 15];
 const GRID_STEPS = 4;
 const LABEL_ROOM = 1.6;
-const MIN_DISTANCE = 0.3;
+// Two colors are distinct when their hues are this many degrees apart (both
+// saturated at least this much) or their lightness differs this much.
+const MIN_HUE_DEGREES = 45;
+const MIN_SATURATION = 0.25;
+const MIN_LIGHTNESS = 0.3;
 const SPARKLINE_FLOOR = 1024;
 
 // How many of the newest samples the panel sparkline shows.
@@ -120,10 +124,47 @@ export function axisLabelIndices(steps, availableHeight, labelHeight) {
   return [0, steps];
 }
 
+// Hue (degrees), saturation and lightness of `{ r, g, b }` (each 0..1).
+function toHsl(color) {
+  const max = Math.max(color.r, color.g, color.b);
+  const min = Math.min(color.r, color.g, color.b);
+  const lightness = (max + min) / 2;
+  const range = max - min;
+  if (range === 0) {
+    return { hue: 0, saturation: 0, lightness: lightness };
+  }
+  let sector = (color.r - color.g) / range + 4;
+  if (max === color.r) {
+    sector = (color.g - color.b) / range;
+  } else if (max === color.g) {
+    sector = (color.b - color.r) / range + 2;
+  }
+  return {
+    hue: (sector * 60 + 360) % 360,
+    saturation: range / (1 - Math.abs(2 * lightness - 1)),
+    lightness: lightness,
+  };
+}
+
+// Whether two colors are told apart at a glance: hues far apart on the color
+// circle (both clearly colored), or one much lighter than the other.
+function isDistinct(a, b) {
+  const first = toHsl(a);
+  const second = toHsl(b);
+  if (Math.abs(first.lightness - second.lightness) >= MIN_LIGHTNESS) {
+    return true;
+  }
+  if (first.saturation < MIN_SATURATION || second.saturation < MIN_SATURATION) {
+    return false;
+  }
+  const apart = Math.abs(first.hue - second.hue);
+  return Math.min(apart, 360 - apart) >= MIN_HUE_DEGREES;
+}
+
 // The index of the first of `candidates` (`{ r, g, b }`, each 0..1) that is
-// clearly distinct from `base` by RGB distance; the last index when none is,
+// clearly distinct from `base` (see isDistinct); the last index when none is,
 // -1 for no candidates.
 export function pickDistinct(base, candidates) {
-  const distinct = candidates.findIndex((c) => Math.hypot(c.r - base.r, c.g - base.g, c.b - base.b) >= MIN_DISTANCE);
+  const distinct = candidates.findIndex((c) => isDistinct(base, c));
   return distinct >= 0 ? distinct : candidates.length - 1;
 }

@@ -121,16 +121,56 @@ test("every grid label is a round value that covers 0 to the limit", () => {
   }
 });
 
+// "#rrggbb" to { r, g, b } with each channel in 0..1, as the colors of the theme reach pickDistinct.
+const rgb = (hex) => ({
+  r: parseInt(hex.slice(1, 3), 16) / 255,
+  g: parseInt(hex.slice(3, 5), 16) / 255,
+  b: parseInt(hex.slice(5, 7), 16) / 255,
+});
+
 test("pickDistinct returns the first candidate that is clearly away from the base", () => {
   const orange = { r: 1, g: 0.5, b: 0.1 };
   const nearOrange = { r: 0.95, g: 0.55, b: 0.1 };
   const green = { r: 0.4, g: 0.6, b: 0.4 };
   const teal = { r: 0, g: 0.67, b: 0.5 };
-  assert.equal(pickDistinct(orange, [green, teal]), 0);
+  // The muted green is barely saturated and about as light as the orange: not distinct.
+  assert.equal(pickDistinct(orange, [green, teal]), 1);
+  assert.equal(pickDistinct(orange, [teal, green]), 0);
   assert.equal(pickDistinct(orange, [nearOrange, teal, green]), 1);
   assert.equal(pickDistinct(orange, [nearOrange, orange, orange]), 2);
   assert.equal(pickDistinct(orange, [nearOrange]), 0);
   assert.equal(pickDistinct(orange, []), -1);
+});
+
+test("pickDistinct does not count two greens or teals of similar lightness as distinct", () => {
+  assert.equal(pickDistinct(rgb("#16a085"), [rgb("#27ae60"), rgb("#3daee9")]), 1);
+  assert.equal(pickDistinct(rgb("#1abc9c"), [rgb("#2ecc71"), rgb("#3daee9")]), 1);
+  // A darker and a lighter green: far enough apart in RGB for the old rule, but the same hue and too close in
+  // lightness.
+  assert.equal(pickDistinct(rgb("#2e7d32"), [rgb("#66bb6a"), rgb("#3daee9")]), 1);
+  assert.equal(pickDistinct(rgb("#1b5e20"), [rgb("#43a047"), rgb("#3daee9")]), 1);
+  // A very dark and a very light green are distinct by lightness alone.
+  assert.equal(pickDistinct(rgb("#0b3d0b"), [rgb("#9be89b")]), 0);
+});
+
+test("pickDistinct counts the stock blue and green as distinct", () => {
+  assert.equal(pickDistinct(rgb("#3daee9"), [rgb("#27ae60"), rgb("#fcfcfc")]), 0);
+  assert.equal(pickDistinct(rgb("#27ae60"), [rgb("#3daee9")]), 0);
+});
+
+test("pickDistinct measures the hue around the circle", () => {
+  // 345 degrees and 15 degrees are 30 degrees apart, 345 and 50 are 65 apart.
+  const hue350 = rgb("#e6194b");
+  assert.equal(pickDistinct(hue350, [rgb("#e64d19"), rgb("#e6c419")]), 1);
+});
+
+test("pickDistinct tells grays apart only by lightness", () => {
+  const mid = rgb("#808080");
+  assert.equal(pickDistinct(mid, [rgb("#909090"), rgb("#303030")]), 1);
+  assert.equal(pickDistinct(mid, [rgb("#d8d8d8")]), 0);
+  // A gray has no hue to compare: a color of about the same lightness is not distinct from it.
+  assert.equal(pickDistinct(mid, [rgb("#a05f5f"), rgb("#fcfcfc")]), 1);
+  assert.equal(pickDistinct(rgb("#3daee9"), [rgb("#8a8a8a"), rgb("#232629")]), 1);
 });
 
 test("axisLabelIndices keeps every label when there is room", () => {
