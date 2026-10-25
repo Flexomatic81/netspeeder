@@ -13,12 +13,12 @@ const DEFAULT_MINUTES = 5;
 const MINUTE_CHOICES = [1, 5, 15];
 const GRID_STEPS = 4;
 const LABEL_ROOM = 1.6;
-// Two colors are distinct when their lightness differs this much, when one is
-// colored (saturated at least this much) and the other gray, or when both are
-// colored and their hues are this many degrees apart.
-const MIN_HUE_DEGREES = 40;
-const MIN_SATURATION = 0.25;
-const MIN_LIGHTNESS = 0.3;
+// Two colors are distinct when their perceived distance (the CIE76 color
+// difference in CIELAB) is at least this.
+const MIN_DELTA_E = 40;
+// The D65 white point of sRGB in XYZ.
+const WHITE_X = 0.95047;
+const WHITE_Z = 1.08883;
 const SPARKLINE_FLOOR = 1024;
 
 // How many of the newest samples the panel sparkline shows.
@@ -125,46 +125,34 @@ export function axisLabelIndices(steps, availableHeight, labelHeight) {
   return [0, steps];
 }
 
-// Hue (degrees), saturation and lightness of `{ r, g, b }` (each 0..1).
-function toHsl(color) {
-  const max = Math.max(color.r, color.g, color.b);
-  const min = Math.min(color.r, color.g, color.b);
-  const lightness = (max + min) / 2;
-  const range = max - min;
-  if (range === 0) {
-    return { hue: 0, saturation: 0, lightness: lightness };
-  }
-  let sector = (color.r - color.g) / range + 4;
-  if (max === color.r) {
-    sector = (color.g - color.b) / range;
-  } else if (max === color.g) {
-    sector = (color.b - color.r) / range + 2;
-  }
-  return {
-    hue: (sector * 60 + 360) % 360,
-    saturation: range / (1 - Math.abs(2 * lightness - 1)),
-    lightness: lightness,
-  };
+// An sRGB channel (0..1) without the gamma curve.
+function linear(channel) {
+  return channel <= 0.04045 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
 }
 
-// Whether two colors are told apart at a glance: one much lighter than the
-// other, a colored against a gray tone, or two colors far apart on the color
-// circle.
-function isDistinct(a, b) {
-  const first = toHsl(a);
-  const second = toHsl(b);
-  if (Math.abs(first.lightness - second.lightness) >= MIN_LIGHTNESS) {
-    return true;
-  }
-  const firstColored = first.saturation >= MIN_SATURATION;
-  if (firstColored !== second.saturation >= MIN_SATURATION) {
-    return true;
-  }
-  if (!firstColored) {
-    return false;
-  }
-  const apart = Math.abs(first.hue - second.hue);
-  return Math.min(apart, 360 - apart) >= MIN_HUE_DEGREES;
+// The cube-root curve of CIELAB, linear near black.
+function labCurve(t) {
+  const edge = 6 / 29;
+  return t > edge * edge * edge ? Math.cbrt(t) : t / (3 * edge * edge) + 4 / 29;
+}
+
+// `{ r, g, b }` (sRGB, each 0..1) in CIELAB, as [L, a, b].
+function toLab(color) {
+  const r = linear(color.r);
+  const g = linear(color.g);
+  const b = linear(color.b);
+  const x = labCurve((0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / WHITE_X);
+  const y = labCurve(0.2126729 * r + 0.7151522 * g + 0.072175 * b);
+  const z = labCurve((0.0193339 * r + 0.119192 * g + 0.9503041 * b) / WHITE_Z);
+  return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
+}
+
+// Whether two colors are told apart at a glance: their perceived distance
+// (CIE76) reaches MIN_DELTA_E.
+function isDistinct(first, second) {
+  const a = toLab(first);
+  const b = toLab(second);
+  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) >= MIN_DELTA_E;
 }
 
 // The index of the first of `candidates` (`{ r, g, b }`, each 0..1) that is

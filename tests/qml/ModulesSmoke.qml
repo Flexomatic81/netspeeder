@@ -41,6 +41,7 @@ Item {
             Command.shellQuote("a") === "'a'",
             Format.formatTotal(0, Format.DEFAULT_FORMAT).value === "0",
             Graph.validMinutes(5) === 5,
+            Graph.pickDistinct({ r: 0.04, g: 0.51, b: 0.39 }, [{ r: 0.41, g: 0.62, b: 0.42 }, { r: 0, g: 0, b: 0 }]) === 1,
             History.capacityFor(1000) > 0,
             LaunchText.launchFailureText(127, "x", "command", { tr: function (s) { return s; }, trc: function (c, s) { return s; } }).length > 0,
             Layout.REFERENCE_PX > 0,

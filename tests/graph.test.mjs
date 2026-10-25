@@ -133,7 +133,6 @@ test("pickDistinct returns the first candidate that is clearly away from the bas
   const nearOrange = { r: 0.95, g: 0.55, b: 0.1 };
   const green = { r: 0.4, g: 0.6, b: 0.4 };
   const teal = { r: 0, g: 0.67, b: 0.5 };
-  // The muted green counts as gray, the orange as colored: distinct.
   assert.equal(pickDistinct(orange, [green, teal]), 0);
   assert.equal(pickDistinct(orange, [teal, green]), 0);
   assert.equal(pickDistinct(orange, [nearOrange, teal, green]), 1);
@@ -142,50 +141,44 @@ test("pickDistinct returns the first candidate that is clearly away from the bas
   assert.equal(pickDistinct(orange, []), -1);
 });
 
-test("pickDistinct does not count two greens or teals of similar lightness as distinct", () => {
-  assert.equal(pickDistinct(rgb("#16a085"), [rgb("#27ae60"), rgb("#3daee9")]), 1);
-  assert.equal(pickDistinct(rgb("#1abc9c"), [rgb("#2ecc71"), rgb("#3daee9")]), 1);
-  // A darker and a lighter green: far enough apart in RGB for the old rule, but the same hue and too close in
-  // lightness.
-  assert.equal(pickDistinct(rgb("#2e7d32"), [rgb("#66bb6a"), rgb("#3daee9")]), 1);
-  assert.equal(pickDistinct(rgb("#1b5e20"), [rgb("#43a047"), rgb("#3daee9")]), 1);
-  // A very dark and a very light green are distinct by lightness alone.
-  assert.equal(pickDistinct(rgb("#0b3d0b"), [rgb("#9be89b")]), 0);
-});
+// Whether pickDistinct counts `other` as distinct from `base`: with the base itself as the last candidate, the
+// first index means distinct and the last one (the fallback) means not.
+const distinct = (base, other) => pickDistinct(rgb(base), [rgb(other), rgb(base)]) === 0;
 
-test("pickDistinct counts the stock blue and green as distinct", () => {
+// Pairs with their perceived distance (CIE76 color difference) and the verdict at the limit of 40.
+const PAIRS = [
+  ["a dark teal and a muted green", "#0b8364", "#689d6a", 19.7, false],
+  ["a dark teal and a pale beige", "#0b8364", "#ebdbb2", 55.7, true],
+  ["a teal and a green of similar lightness", "#16a085", "#27ae60", 28.7, false],
+  ["a light teal and a light green", "#1abc9c", "#2ecc71", 32.2, false],
+  ["a darker and a lighter green", "#2e7d32", "#66bb6a", 22.9, false],
+  ["a dark and a medium green", "#1b5e20", "#43a047", 28.1, false],
+  ["a sky blue and a green", "#3daee9", "#27ae60", 79.9, true],
+  ["a cyan and a dark green", "#00bcd4", "#006e28", 63.1, true],
+  ["a light gray and a light green", "#c3c3c3", "#80ff80", 78.7, true],
+  ["a dark gray and a dark green", "#646464", "#006e28", 53.1, true],
+  ["a light blue and a bright blue", "#47add6", "#00a8ff", 26.3, false],
+  ["a light blue and a lighter blue", "#47add6", "#66c2f2", 9.0, false],
+  ["two close blues", "#3daee9", "#2fa3e0", 4.3, false],
+  ["a mid gray and a dark gray", "#808080", "#303030", 33.7, false],
+  ["a sky blue and a gray", "#3daee9", "#8a8a8a", 41.8, true],
+  ["black and a near-black gray", "#000000", "#0a0a0a", 2.7, false],
+  ["black and white", "#000000", "#ffffff", 100, true],
+];
+
+for (const [name, base, other, delta, verdict] of PAIRS) {
+  test(`pickDistinct: ${name} (${base} / ${other}, about ${delta}) ${verdict ? "are" : "are not"} distinct`, () => {
+    assert.equal(distinct(base, other), verdict);
+    assert.equal(distinct(other, base), verdict, "the same both ways");
+  });
+}
+
+test("pickDistinct skips a candidate that is too close and takes the next one", () => {
+  // A dark teal highlight: the muted green is too close, the beige text is not.
+  assert.equal(pickDistinct(rgb("#0b8364"), [rgb("#689d6a"), rgb("#ebdbb2")]), 1);
+  // A light blue highlight with only blues: none is distinct, the last one is the fallback.
+  assert.equal(pickDistinct(rgb("#47add6"), [rgb("#00a8ff"), rgb("#66c2f2")]), 1);
   assert.equal(pickDistinct(rgb("#3daee9"), [rgb("#27ae60"), rgb("#fcfcfc")]), 0);
-  assert.equal(pickDistinct(rgb("#27ae60"), [rgb("#3daee9")]), 0);
-});
-
-test("pickDistinct measures the hue around the circle", () => {
-  // 345 degrees and 15 degrees are 30 degrees apart, 345 and 50 are 65 apart.
-  const hue345 = rgb("#e6194b");
-  assert.equal(pickDistinct(hue345, [rgb("#e64d19"), rgb("#e6c419")]), 1);
-});
-
-test("pickDistinct tells grays apart only by lightness", () => {
-  const mid = rgb("#808080");
-  assert.equal(pickDistinct(mid, [rgb("#909090"), rgb("#303030")]), 1);
-  assert.equal(pickDistinct(mid, [rgb("#d8d8d8")]), 0);
-  // Two grays of about the same lightness are not distinct.
-  assert.equal(pickDistinct(rgb("#c3c3c3"), [rgb("#ffffff"), rgb("#808080")]), 1);
-});
-
-test("pickDistinct counts a colored and a gray tone as distinct", () => {
-  const mid = rgb("#808080");
-  assert.equal(pickDistinct(mid, [rgb("#909090"), rgb("#a05f5f")]), 1);
-  assert.equal(pickDistinct(rgb("#3daee9"), [rgb("#8a8a8a"), rgb("#232629")]), 0);
-  // A light gray highlight against a green, a blue and white.
-  assert.equal(pickDistinct(rgb("#c3c3c3"), [rgb("#80ff80"), rgb("#2eb8e6"), rgb("#ffffff")]), 0);
-  assert.equal(pickDistinct(rgb("#646464"), [rgb("#006e28"), rgb("#ffffff")]), 0);
-});
-
-test("pickDistinct counts hues 40 degrees apart or more as distinct", () => {
-  // Cyan and green, just under 45 degrees apart and of similar lightness.
-  assert.equal(pickDistinct(rgb("#00bcd4"), [rgb("#006e28"), rgb("#31363b")]), 0);
-  // 23 degrees apart is still too close.
-  assert.equal(pickDistinct(rgb("#e6194b"), [rgb("#e63519"), rgb("#31363b")]), 1);
 });
 
 test("axisLabelIndices keeps every label when there is room", () => {
