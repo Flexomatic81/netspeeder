@@ -31,8 +31,7 @@ is published (`## 1.0.0 – 2026-11-15`).
   interface that is gone shows 0 and a note in the tooltip.
 - Robust rates: interfaces that disappear and return and counter resets cause
   no spikes and no stale values. Suspend/resume is guarded against in the
-  `/proc` source; on the sensor path the rates come from `ksystemstats`. To be
-  verified by hand before release.
+  `/proc` source; on the sensor path the rates come from `ksystemstats`.
 - Tooltip with connection name, download, upload, today's usage and IP address,
   and a note about the data source if there is a problem.
 - Popup (also used as the desktop view) with a header showing the live speeds,
@@ -122,8 +121,8 @@ is published (`## 1.0.0 – 2026-11-15`).
 - Settings jumping back to their old values (upstream #36): selection lists
   share one component that sets the index only on creation and on a change of
   the bound value, and writes back only on a user action. List settings are
-  replaced as a whole, never changed in place. Smoke-tested; to be verified in
-  the real settings dialog before release.
+  replaced as a whole, never changed in place. Checked in the real settings
+  dialog.
 - DataSource error (upstream #46), mitigated: the default path reads
   `ksystemstats` instead of a DataSource engine; Plasma5Support is still used
   for device classification and the `/proc` fallback.
@@ -131,11 +130,11 @@ is published (`## 1.0.0 – 2026-11-15`).
   it is installed from the KDE Store or as a `.plasmoid` file.
 - Overlapping text and wrong margins (upstream #11 and #27): the panel view is
   built from Qt layouts with fixed-width slots instead of manual aspect ratio
-  calculations. The smoke scenes cover the sizes, not a real panel; to be
-  verified in a real panel before release.
+  calculations. Checked in a real panel at 20, 44 and 96 px and in a vertical
+  panel.
 - Empty window when scrolling over the widget (upstream #24) and crash when
-  deselecting an option (upstream #47) are addressed by the design; to be
-  verified by hand before release.
+  deselecting an option (upstream #47) are addressed by the design and
+  checked by hand.
 - The popup grows with a larger system font instead of eliding its labels,
   and at its default size the interface list shows up to three rows instead
   of one. A popup size Plasma has already stored is kept; enlarging the popup
@@ -150,8 +149,9 @@ is published (`## 1.0.0 – 2026-11-15`).
 ### Known limitations and open checks
 
 - CI is set up but has never run.
-- Suspend/resume (no speed spike and no stale values after waking up) is still
-  to be verified by hand before release.
+- Not checked by hand: suspend/resume, USB tethering, going offline, the VPN
+  cases and a missing or stopped vnStat; [docs/testing.md](docs/testing.md)
+  marks every skipped check.
 - The x axis of the graph is per sample, not a wall-clock scale.
 - A virtual interface that is absent in automatic mode and that the widget has
   never seen cannot be recognized; it counts until it appears once.
@@ -161,5 +161,5 @@ is published (`## 1.0.0 – 2026-11-15`).
 - A program that crashes after it started is not detected.
 - Tested on Plasma 6.8 only. Plasma 6.3 to 6.7 are checked against their
   source code, not run; see [docs/compatibility.md](docs/compatibility.md).
-- The manual checks are listed in [docs/testing.md](docs/testing.md) and are
-  still to be done before release.
+- The manual checks in [docs/testing.md](docs/testing.md) ran on Plasma 6.8,
+  scripted or by hand, without a failure.
