@@ -13,9 +13,11 @@
 # so it neither reads nor changes the settings of the desktop.
 #
 #   scripts/screenshots.sh           Breeze Dark, into docs/images/ (the published images)
-#   scripts/screenshots.sh --light   Breeze Light, the same six files into docs/images/light/
+#   scripts/screenshots.sh --light   Breeze Light, the same files into docs/images/light/
+#   scripts/screenshots.sh --store   at twice the size, into docs/store/shots/ (the parts of
+#                                    the store images, see docs/store.md); combines with --light
 #
-# Afterwards check-images.mjs checks the files: all six are there, carry no
+# Afterwards check-images.mjs checks the files: all are there, carry no
 # metadata, and the chart area of the popup is not one plain color. Look at
 # every image before committing it: an image can show text no search finds.
 # To only check that the scene runs, without a window, use
@@ -27,14 +29,17 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 . "$root/tools/screenshots/scene.sh"
 
 variant="Dark"
-case "${1:-}" in
-  "") ;;
-  --light) variant="Light" ;;
-  *)
-    echo "usage: scripts/screenshots.sh [--light]" >&2
-    exit 2
-    ;;
-esac
+scale=1
+for arg in "$@"; do
+  case "$arg" in
+    --light) variant="Light" ;;
+    --store) scale=2 ;;
+    *)
+      echo "usage: scripts/screenshots.sh [--light] [--store]" >&2
+      exit 2
+      ;;
+  esac
+done
 
 if [ "${QT_QPA_PLATFORM:-}" = "offscreen" ]; then
   echo "screenshots: QT_QPA_PLATFORM=offscreen draws no charts; unset it and run on the real display" >&2
@@ -55,7 +60,11 @@ for tool in qml6 node; do
   fi
 done
 
-dir="${NETSPEEDER_SCREENSHOT_DIR:-$root/docs/images}"
+default_dir="$root/docs/images"
+if [ "$scale" -ne 1 ]; then
+  default_dir="$root/docs/store/shots"
+fi
+dir="${NETSPEEDER_SCREENSHOT_DIR:-$default_dir}"
 if [ "$variant" = "Light" ]; then
   dir="$dir/light"
 fi
@@ -73,10 +82,10 @@ if ! setup_theme "$variant" "$config"; then
   echo "screenshots: no stock color scheme, nothing rendered" >&2
   exit 1
 fi
-echo "screenshots: theme: Breeze $variant (the stock color scheme, not the one of this desktop)"
+echo "screenshots: theme: Breeze $variant (the stock color scheme, not the one of this desktop), scale $scale"
 echo "screenshots: writing to $shown"
 
-LANGUAGE=en LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 QT_SCALE_FACTOR=1 run_scene "$dir" "$log" "$config"
+LANGUAGE=en LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 QT_SCALE_FACTOR="$scale" run_scene "$dir" "$log" "$config"
 rc=$?
 output="$(cat "$log")"
 problems="$(qml_problems "$output")"

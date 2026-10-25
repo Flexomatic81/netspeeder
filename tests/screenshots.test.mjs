@@ -150,6 +150,7 @@ test("the shots have fixed file names", () => {
     "panel-colors.png",
     "panel-sparkline.png",
     "popup.png",
+    "settings-appearance.png",
   ]);
 });
 

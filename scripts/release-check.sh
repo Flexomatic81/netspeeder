@@ -25,7 +25,7 @@ if [ "$#" -ne 1 ] || [ -z "$1" ]; then
 fi
 version="$1"
 
-SCREENSHOTS="panel-rows panel-single panel-vertical panel-colors panel-sparkline popup"
+SCREENSHOTS="panel-rows panel-single panel-vertical panel-colors panel-sparkline popup settings-appearance"
 PNG_SIGNATURE="89504e470d0a1a0a"
 problems=0
 

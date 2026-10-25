@@ -9,7 +9,8 @@
 // The panel views: two rows at 44 px, both values side by side on one line,
 // a vertical panel 48 px wide, the colors by speed ("thresholds") and the
 // mini chart behind the text, each on the background color of the theme.
-// The popup has its preferred size. The text uses the first available of the
+// The popup has its preferred size, the settings page "Appearance" a fixed
+// width, with the colors by speed chosen so the level editor is active. The text uses the first available of the
 // fonts in demo.mjs; the colors come from the color scheme the calling script
 // sets up (a stock Breeze scheme).
 //
@@ -27,7 +28,9 @@ import org.kde.kirigami as Kirigami
 import org.kde.quickcharts as Charts
 import "../../package/contents/ui/compact"
 import "../../package/contents/ui/full"
+import "../../package/contents/ui/config"
 import "../../package/contents/code/format.mjs" as Format
+import "../../package/contents/code/appearance.mjs" as Appearance
 import "demo.mjs" as Demo
 
 QQC2.ApplicationWindow {
@@ -51,10 +54,10 @@ QQC2.ApplicationWindow {
     }
     property int next: 0
     property bool done: false
-    readonly property var shots: [rowsShot, singleShot, verticalShot, colorsShot, sparklineShot, popupShot]
+    readonly property var shots: [rowsShot, singleShot, verticalShot, colorsShot, sparklineShot, popupShot, settingsShot]
 
-    width: 1000
-    height: 860
+    width: 1680
+    height: 900
     visible: true
     title: "Netspeeder screenshots"
     color: Kirigami.Theme.backgroundColor
@@ -265,6 +268,37 @@ QQC2.ApplicationWindow {
             graphMinutes: 5
             width: Layout.preferredWidth
             height: Layout.preferredHeight
+        }
+    }
+
+    // The settings page with the defaults of main.xml, except the colors by
+    // speed; Plasma fills the cfg_ properties the same way.
+    Rectangle {
+        id: settingsShot
+
+        x: 860
+        y: 20
+        width: 640
+        height: settingsPage.implicitHeight
+        color: Kirigami.Theme.backgroundColor
+
+        ConfigAppearance {
+            id: settingsPage
+
+            anchors.fill: parent
+            cfg_fontFamily: ""
+            cfg_fontBold: false
+            cfg_fontScale: 100
+            cfg_iconStyle: "arrows"
+            cfg_customDownIcon: "↓"
+            cfg_customUpIcon: "↑"
+            cfg_colorMode: "thresholds"
+            cfg_downloadColor: ""
+            cfg_uploadColor: ""
+            cfg_colorThresholds: Appearance.serializeThresholds(Appearance.DEFAULT_THRESHOLDS)
+            cfg_colorUnits: false
+            cfg_fixedWidth: true
+            cfg_sparkline: "off"
         }
     }
 

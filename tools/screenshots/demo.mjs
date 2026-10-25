@@ -31,6 +31,7 @@ export const SHOTS = [
   "panel-colors.png",
   "panel-sparkline.png",
   "popup.png",
+  "settings-appearance.png",
 ];
 
 // The first of DEMO_FONTS that is in `families`; "" when none is.

@@ -15,7 +15,15 @@ import { SHOTS as SCREENSHOT_FILES } from "../tools/screenshots/demo.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SCRIPT = path.join(ROOT, "scripts", "release-check.sh");
-const SHOTS = ["panel-rows", "panel-single", "panel-vertical", "panel-colors", "panel-sparkline", "popup"];
+const SHOTS = [
+  "panel-rows",
+  "panel-single",
+  "panel-vertical",
+  "panel-colors",
+  "panel-sparkline",
+  "popup",
+  "settings-appearance",
+];
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13]);
 
 const METADATA = (version) =>
@@ -230,5 +238,6 @@ test("every failing gate is reported in one run", () => {
   assert.match(result.stderr, /unreleased/);
   assert.equal(result.stderr.match(/is missing or empty/g)?.length, SHOTS.length);
   assert.match(result.stderr, /gate \(a\)/);
-  assert.match(result.stderr, /\(8 problems\)/);
+  // The changelog, each screenshot and the release record.
+  assert.match(result.stderr, new RegExp(`\\(${SHOTS.length + 2} problems\\)`));
 });

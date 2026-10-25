@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // SPDX-FileCopyrightText: 2026 Flexomatic81
 
-// Checks the images of the screenshot scene: all six exist and are readable 8-bit PNG files, none carries
+// Checks the images of the screenshot scene: all of SHOTS exist and are readable 8-bit PNG files, none carries
 // metadata (text, time stamps, Exif), and neither the chart area nor the data cap bar of the popup is one
 // plain color. Only the Node standard library is used.
 //
@@ -185,7 +185,7 @@ function checkOne(dir, name, areas, result) {
   }
 }
 
-/** Checks the six images in `dir`; `chart` and `bar` are the chart area and the data cap bar of the popup,
+/** Checks the images of SHOTS in `dir`; `chart` and `bar` are the chart area and the data cap bar of the popup,
  *  null (or a missing `bar`) skips that check. */
 export function checkImages(dir, { chart, bar = null }) {
   const result = { problems: [], notes: [] };

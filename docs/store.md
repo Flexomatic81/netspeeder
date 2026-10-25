@@ -136,7 +136,8 @@ Breeze Dark color scheme.
 4. `panel-colors.png`: colors by speed
 5. `popup.png`: the popup with graph, interfaces and usage
 
-`panel-sparkline.png` (the sparkline behind the values) is used in the README
+`panel-sparkline.png` (the sparkline behind the values) and
+`settings-appearance.png` (the settings page Appearance) are used in the README
 only.
 
 The project logo for the store page is `logo.png` (512 × 512), rendered from

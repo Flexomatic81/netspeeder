@@ -68,6 +68,7 @@ scheme with `scripts/screenshots.sh` and live in [`docs/images/`](docs/images/);
 | ![Values colored by speed](docs/images/panel-colors.png) | `panel-colors.png`: colors by speed |
 | ![Sparkline behind the values](docs/images/panel-sparkline.png) | `panel-sparkline.png`: the sparkline behind the values |
 | ![The popup](docs/images/popup.png) | `popup.png`: the popup with graph, interfaces and usage |
+| ![The settings page Appearance](docs/images/settings-appearance.png) | `settings-appearance.png`: the settings page Appearance with colors by speed |
 
 ## Features
 
