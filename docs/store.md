@@ -126,15 +126,18 @@ Quellcode, Fehlermeldungen und Übersetzungen: https://github.com/Flexomatic81/n
 
 ## Images
 
-Upload in this order; the files are in [`images/`](images/) and are made with
-`scripts/screenshots.sh` in the stock Breeze Dark color scheme.
+The store takes at most five images. Upload in this order; the files are in
+[`images/`](images/) and are made with `scripts/screenshots.sh` in the stock
+Breeze Dark color scheme.
 
 1. `panel-rows.png`: download and upload in two rows
 2. `panel-single.png`: both values side by side in one row
 3. `panel-vertical.png`: a vertical panel
 4. `panel-colors.png`: colors by speed
-5. `panel-sparkline.png`: the sparkline behind the values
-6. `popup.png`: the popup with graph, interfaces and usage
+5. `popup.png`: the popup with graph, interfaces and usage
+
+`panel-sparkline.png` (the sparkline behind the values) is used in the README
+only.
 
 The project logo for the store page is `logo.png` (512 × 512), rendered from
 `logo.svg` with `rsvg-convert -w 512 -h 512 logo.svg -o logo.png`. The widget
