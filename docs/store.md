@@ -16,6 +16,30 @@ Netspeeder
 
 Plasma 6 Monitoring
 
+## Version
+
+The version in `package/metadata.json`, for example `1.0.0`.
+
+## License
+
+GPLv2 or later (GPL-2.0-or-later). Not an original product: Netspeeder builds
+on the Netspeed Widget by Daniel Faust. The entry uses no CC-BY material, so
+the credits field stays empty.
+
+## Tags
+
+```
+netspeed, network-speed, network, bandwidth, traffic, monitor, vnstat, data-usage, data-cap, panel, plasmoid, widget, plasma6, kde, linux
+```
+
+The store adds `plasma##majorversion=6` and the license tag (`gplv2-later`)
+itself.
+
+## Links
+
+- Source code: https://github.com/Flexomatic81/netspeeder
+- File: `netspeeder-<version>.plasmoid` from the GitHub release of that version
+
 ## Short description
 
 **English**
