@@ -134,19 +134,30 @@ function toSignal(value) {
   return isFinite(number) && number > 0 ? number : null;
 }
 
+// Whether interface `name` counts as physical. Without the `physical` list
+// every interface does. With the `virtual` list, only the names in it are
+// virtual: a name in neither list does not exist on the system under that
+// name, typically a USB adapter that the kernel renamed after the sensors had
+// picked up its first name (eth0), so it is not known to lack hardware.
+function isPhysicalName(name, physical, virtual) {
+  if (!Array.isArray(physical) || physical.indexOf(name) >= 0) return true;
+  if (virtual === null || virtual === undefined) return false;
+  return toList(virtual).indexOf(name) < 0;
+}
+
 // Builds a sample (the common source contract) from raw sensor values.
 // `values` is { [name]: { <SENSOR_FIELDS>: any } }. `physical` lists the
-// interfaces backed by hardware; null means that list is unknown, which makes
-// every interface count as physical. `virtual` lists the other present
-// interfaces, also those the sensors do not report; the sample carries it as
-// `systemVirtual` for the usage totals.
+// interfaces backed by hardware and `virtual` the other present interfaces,
+// also those the sensors do not report; see isPhysicalName() for how they
+// decide the kind. The sample carries `virtual` as `systemVirtual` for the
+// usage totals.
 export function buildSensorSample(timestamp, values, physical, virtual) {
   const interfaces = {};
   for (const name of Object.keys(values)) {
     const raw = values[name] || {};
     const ipv4 = toText(raw.ipv4address);
     const ipv6 = toText(raw.ipv6address);
-    const isPhysical = !Array.isArray(physical) || physical.indexOf(name) >= 0;
+    const isPhysical = isPhysicalName(name, physical, virtual);
     interfaces[name] = {
       down: toCount(raw.download),
       up: toCount(raw.upload),

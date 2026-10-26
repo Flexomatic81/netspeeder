@@ -364,7 +364,10 @@ You can also fix the source in the settings.
 
 **Which interfaces count:** a device is *physical* when
 `/sys/class/net/<name>/device` exists. Everything else (loopback, Docker
-bridges, `veth` pairs, tunnels, WireGuard, tun/tap) is *virtual*. In automatic
+bridges, `veth` pairs, tunnels, WireGuard, tun/tap) is *virtual*. A name the
+system sensors report but `/sys/class/net` does not list counts as physical:
+the sensors keep the first name of a USB network adapter (often `eth0`) even
+after the kernel has renamed it. In automatic
 mode the total is the sum over the physical devices. In manual mode it is the
 sum over the interfaces you selected, whatever their kind. The loopback
 interface is never counted. If a device is misclassified, for example a modem

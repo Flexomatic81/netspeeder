@@ -126,6 +126,13 @@ test("buildSensorSample carries the present interfaces without hardware", () => 
   assert.equal(s.interfaces.enp7s0.kind, "physical");
   assert.equal(s.interfaces.WorkVPN, undefined);
 });
+test("buildSensorSample counts a name the system does not list as physical", () => {
+  // A USB adapter appears as eth0 and is renamed a moment later; the sensors
+  // keep the first name, which then exists neither with nor without hardware.
+  const s = buildSensorSample(1, { eth0: {}, tun0: {} }, ["enx4467520e0481"], ["tun0"]);
+  assert.equal(s.interfaces.eth0.kind, "physical");
+  assert.equal(s.interfaces.tun0.kind, "virtual");
+});
 test("buildSensorSample copies a virtual list that arrives as a sequence object", () => {
   assert.deepEqual(buildSensorSample(1, {}, ["eth0"], { length: 1, 0: "WorkVPN" }).systemVirtual, ["WorkVPN"]);
 });
