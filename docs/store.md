@@ -161,6 +161,11 @@ The project logo for the store page is `logo.png` (512 × 512) in
 `rsvg-convert -w 512 -h 512 logo.svg -o logo.png`. The widget itself keeps the
 theme icon `network-connect`.
 
+## Changelog 1.0.1
+
+- Fix: the total stayed at 0 for a USB network adapter (docking station,
+  monitor) after it was plugged in.
+
 ## Changelog 1.0.0
 
 First stable release.

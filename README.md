@@ -301,21 +301,21 @@ Right-click the panel or the desktop, choose "Add Widgets…", then
 
 ### Package file (`.plasmoid`)
 
-Download `netspeeder-1.0.0.plasmoid` from the releases page of the project.
+Download `netspeeder-1.0.1.plasmoid` from the releases page of the project.
 In "Add Widgets…" choose "Get New Widgets…" › "Install Widget From Local
 File…" and pick the file, or install it in a terminal:
 
 ```sh
-kpackagetool6 -t Plasma/Applet -i netspeeder-1.0.0.plasmoid
+kpackagetool6 -t Plasma/Applet -i netspeeder-1.0.1.plasmoid
 # update an existing installation:
-kpackagetool6 -t Plasma/Applet -u netspeeder-1.0.0.plasmoid
+kpackagetool6 -t Plasma/Applet -u netspeeder-1.0.1.plasmoid
 ```
 
 If the widget does not show up in the list, restart the panel:
 `systemctl --user restart plasma-plasmashell`.
 
-You can build the file yourself: `scripts/build-plasmoid.sh 1.0.0` writes
-`dist/netspeeder-1.0.0.plasmoid` (needs `gettext` and `libarchive`).
+You can build the file yourself: `scripts/build-plasmoid.sh 1.0.1` writes
+`dist/netspeeder-1.0.1.plasmoid` (needs `gettext` and `libarchive`).
 
 ### From source
 

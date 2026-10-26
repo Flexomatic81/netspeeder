@@ -158,6 +158,22 @@ For these checks vnstat 2.0 or newer is installed and its service enabled
 |---|---|---|
 | Run through the checklist for an older Plasma version in [compatibility.md](compatibility.md) | not planned for 1.0 | Not run: the minimum is documented as checked against the source code only |
 
+## Release record 1.0.1
+
+Patch release with one change to the widget since 1.0.0: how an interface
+from the system sensors is classified (`package/contents/code/sensors.mjs`).
+The gates are those of 1.0.0, with the full manual checklist replaced by a
+check of the fix on hardware that shows the fault. The other changes since
+1.0.0 concern the screenshot tools and the documentation.
+
+| Gate | Date | Result |
+|---|---|---|
+| (a) The fix checked on a system that shows the fault | 2026-10-26 | Done: USB Ethernet adapter (r8152) behind a monitor, Plasma 6.6.6, renamed by the kernel from `eth0`, sensors under `network/eth0`. 1.0.0: panel at 0 under load in automatic mode; with the fix: the panel shows the rate |
+| (b) Automatic checks (`pnpm run check`, all smoke scenes) green | 2026-10-26 | Done: all steps passed on the development machine (Plasma 6.8) |
+| (c) Screenshots unchanged since 1.0.0 apart from the store images, present in `docs/images` | 2026-10-26 | Done: no change to the widget's appearance |
+| (d) A green CI run on the remote for the commit to be tagged, before the tag is pushed | | |
+| (e) CHANGELOG and the changelog in [store.md](store.md) finalized: release date in the heading as YYYY-MM-DD, no "unreleased" | 2026-10-26 | Done: heading `## 1.0.1 – 2026-10-26` |
+
 ## Release record 1.0.0
 
 Gates the project owner has to pass before anything is published. Fill in the

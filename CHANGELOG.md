@@ -5,6 +5,18 @@ SPDX-FileCopyrightText: 2026 Flexomatic81
 
 # Changelog
 
+## 1.0.1 – 2026-10-26
+
+### Fixed
+
+- The automatic total stayed at 0 for a USB network adapter, for example one
+  in a docking station or a monitor, after it was plugged in. The kernel
+  first names such an adapter `eth0` and renames it a moment later; the
+  system sensors keep the first name. Netspeeder did not find that name among
+  the system's interfaces and treated the adapter as virtual. A name the
+  system does not list now counts as physical
+  ([#1](https://github.com/Flexomatic81/netspeeder/issues/1)).
+
 ## 1.0.0 – 2026-10-25
 
 First stable release.
