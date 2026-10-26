@@ -171,7 +171,7 @@ check of the fix on hardware that shows the fault. The other changes since
 | (a) The fix checked on a system that shows the fault | 2026-10-26 | Done: USB Ethernet adapter (r8152) behind a monitor, Plasma 6.6.6, renamed by the kernel from `eth0`, sensors under `network/eth0`. 1.0.0: panel at 0 under load in automatic mode; with the fix: the panel shows the rate |
 | (b) Automatic checks (`pnpm run check`, all smoke scenes) green | 2026-10-26 | Done: all steps passed on the development machine (Plasma 6.8) |
 | (c) Screenshots unchanged since 1.0.0 apart from the store images, present in `docs/images` | 2026-10-26 | Done: no change to the widget's appearance |
-| (d) A green CI run on the remote for the commit to be tagged, before the tag is pushed | | |
+| (d) A green CI run on the remote for the commit to be tagged, before the tag is pushed | 2026-10-26 | Done: run 40372120414 on main for 1ad564b green; the tagged commit adds only this entry and is tagged only after its own push run is green as well |
 | (e) CHANGELOG and the changelog in [store.md](store.md) finalized: release date in the heading as YYYY-MM-DD, no "unreleased" | 2026-10-26 | Done: heading `## 1.0.1 – 2026-10-26` |
 
 ## Release record 1.0.0
